@@ -443,6 +443,13 @@ function doGet(e) {
     };
   }
 
+  // Support callback param for CORS bypass
+  var cb = e && e.parameter && e.parameter.cb ? e.parameter.cb : null;
+  if (cb) {
+    return ContentService
+      .createTextOutput(cb + '(' + JSON.stringify(result) + ')')
+      .setMimeType(ContentService.MimeType.JAVASCRIPT);
+  }
   return ContentService
     .createTextOutput(JSON.stringify(result))
     .setMimeType(ContentService.MimeType.JSON);
