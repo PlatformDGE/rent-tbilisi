@@ -131,48 +131,59 @@ function fetchPage(url) {
 // ════════════════════════════════════════════════════════════
 function extractPosts(html) {
   const posts = [];
-  
-  // Каждый пост в t.me/s/ имеет data-post="channel/ID"
-  const postRegex = /data-post="rent_tbilisi_ge\/(\d+)"[\s\S]*?class="tgme_widget_message_text[^"]*"[^>]*>([\s\S]*?)<\/div>/g;
-  
-  // Простой подход — разбиваем по блокам постов
-  const blocks = html.split('data-post="rent_tbilisi_ge/');
-  
+  const seen  = new Set();
+
+  // Разбиваем по tgme_widget_message — каждый такой блок = один пост
+  const blocks = html.split('class="tgme_widget_message ');
+
   for (let i = 1; i < blocks.length; i++) {
     const block = blocks[i];
-    
-    // ID поста
-    const idMatch = block.match(/^(\d+)"/);
+
+    // ID поста из data-post="rent_tbilisi_ge/12345"
+    const idMatch = block.match(/data-post="rent_tbilisi_ge\/(\d+)"/);
     if (!idMatch) continue;
     const id = idMatch[1];
-    
-    // Текст поста — между классом message_text и следующим закрывающим блоком
-    const textMatch = block.match(/class="tgme_widget_message_text[^"]*"[^>]*>([\s\S]*?)<\/div>\s*<\/div>/);
-    if (!textMatch) continue;
-    
-    // Очищаем HTML теги, оставляем текст и эмодзи
-    let text = textMatch[1]
-      .replace(/<br\/?>/gi, '\n')
-      .replace(/<a[^>]*href="[^"]*"[^>]*>(#[^<]+)<\/a>/g, '$1') // хештеги
-      .replace(/<a[^>]*>([\s\S]*?)<\/a>/g, '$1')
-      .replace(/<[^>]+>/g, '')
-      .replace(/&amp;/g, '&')
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>')
-      .replace(/&nbsp;/g, ' ')
-      .replace(/&#39;/g, "'")
-      .trim();
-    
-    // Фото — ищем background-image в стиле
+    if (seen.has(id)) continue;
+    seen.add(id);
+
+    // Текст — ищем tgme_widget_message_text
+    let text = '';
+    const textStart = block.indexOf('tgme_widget_message_text');
+    if (textStart !== -1) {
+      // Найдём открывающий тег и возьмём содержимое
+      const tagEnd = block.indexOf('>', textStart);
+      if (tagEnd !== -1) {
+        // Берём всё до закрывающего </div> с учётом вложенности
+        let depth = 1, pos = tagEnd + 1, raw = '';
+        while (pos < block.length && depth > 0) {
+          if (block.substr(pos, 4) === '<div') depth++;
+          else if (block.substr(pos, 6) === '</div>') { depth--; if (depth === 0) break; }
+          raw += block[pos];
+          pos++;
+        }
+        text = raw
+          .replace(/<br\s*\/?>/gi, '\n')
+          .replace(/<a[^>]*>([\s\S]*?)<\/a>/g, '$1')
+          .replace(/<[^>]+>/g, '')
+          .replace(/&amp;/g, '&')
+          .replace(/&lt;/g, '<')
+          .replace(/&gt;/g, '>')
+          .replace(/&nbsp;/g, ' ')
+          .replace(/&#39;/g, "'")
+          .trim();
+      }
+    }
+
+    // Фото
     let photoUrl = '';
-    const photoMatch = block.match(/tgme_widget_message_photo_wrap[^>]*style="[^"]*background-image:url\('([^']+)'\)/);
+    const photoMatch = block.match(/background-image:url\('([^']+)'\)/);
     if (photoMatch) photoUrl = photoMatch[1];
-    
-    if (text) {
+
+    if (text && text.length > 20) {
       posts.push({ id, text, photo: photoUrl });
     }
   }
-  
+
   return posts;
 }
 
