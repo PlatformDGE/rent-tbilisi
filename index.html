@@ -451,12 +451,21 @@ function loadJSONP(url) {
   return new Promise((resolve, reject) => {
     const cb = 'cb_' + Date.now();
     const script = document.createElement('script');
-    window[cb] = (data) => {
+    const timer = setTimeout(() => {
       delete window[cb];
-      document.head.removeChild(script);
+      try { document.head.removeChild(script); } catch(e){}
+      reject(new Error('JSONP timeout'));
+    }, 8000);
+    window[cb] = (data) => {
+      clearTimeout(timer);
+      delete window[cb];
+      try { document.head.removeChild(script); } catch(e){}
       resolve(data);
     };
-    script.onerror = () => reject(new Error('JSONP failed'));
+    script.onerror = () => {
+      clearTimeout(timer);
+      reject(new Error('JSONP failed'));
+    };
     script.src = url + (url.includes('?') ? '&' : '?') + 'callback=' + cb;
     document.head.appendChild(script);
   });
@@ -832,10 +841,13 @@ window.addEventListener('load', async ()=>{
   initMap();
   await loadSheets();
   run();
-  setTimeout(()=>{
-    document.getElementById('ld').classList.add('gone');
-    setTimeout(()=>document.getElementById('ld').remove(),600);
-  },500);
+  // Hide loading max after 3s regardless of data
+  const hideLd = () => {
+    const ld = document.getElementById('ld');
+    if (ld) { ld.classList.add('gone'); setTimeout(()=>{ if(ld.parentNode) ld.remove(); },600); }
+  };
+  setTimeout(hideLd, 500);
+  setTimeout(hideLd, 3000); // fallback
   setInterval(refresh, REFRESH_MS);
   document.addEventListener('keydown',e=>{if(e.key==='Escape')closeM();});
 });
