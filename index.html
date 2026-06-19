@@ -354,6 +354,23 @@ let lastCount = 0;
 // ══════════════════════════════════════
 //  LOAD FROM GOOGLE SHEETS
 // ══════════════════════════════════════
+
+// JSONP loader — обходит CORS без сервера
+function loadJSONP(url) {
+  return new Promise((resolve, reject) => {
+    const cb = 'cb_' + Date.now();
+    const script = document.createElement('script');
+    window[cb] = (data) => {
+      delete window[cb];
+      document.head.removeChild(script);
+      resolve(data);
+    };
+    script.onerror = () => reject(new Error('JSONP failed'));
+    script.src = url + (url.includes('?') ? '&' : '?') + 'callback=' + cb;
+    document.head.appendChild(script);
+  });
+}
+
 async function loadSheets() {
   if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL.includes('ВСТАВЬ')) {
     ALL = getDemoData();
@@ -361,8 +378,7 @@ async function loadSheets() {
     return true;
   }
   try {
-    const res  = await fetch(APPS_SCRIPT_URL);
-    const data = await res.json();
+    const data = await loadJSONP(APPS_SCRIPT_URL);
     const rows = data.listings || [];
     const bool = v => v === 'TRUE' || v === true;
 
