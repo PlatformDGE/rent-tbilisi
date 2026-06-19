@@ -200,6 +200,83 @@ nav{height:68px;background:var(--white);border-bottom:1px solid var(--g200);disp
 .gallery-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.5);border:none;cursor:pointer;padding:0;transition:background .15s}
 .gallery-dot.on{background:var(--white)}
 .gallery-count{position:absolute;top:12px;right:50px;background:rgba(0,0,0,.45);color:#fff;font-size:11px;font-weight:600;padding:3px 8px;border-radius:10px;z-index:5}
+@media(max-width:860px){
+  body{overflow:auto}
+  nav{height:56px;padding:0 12px;gap:8px;flex-wrap:nowrap}
+  .brand-text{display:none}
+  .brand-logo{width:34px;height:34px;font-size:10px}
+  .search-bar{height:38px;border-radius:30px}
+  .s-seg{padding:0 10px}
+  .s-seg label{font-size:9px}
+  .s-seg input,.s-seg select{font-size:12px}
+  .s-seg:nth-child(2),.s-seg:nth-child(3){display:none}
+  .s-btn{width:34px;height:34px;font-size:13px;margin:0 3px}
+  .nav-right{gap:6px}
+  .view-tabs{display:none}
+  .live-pill{font-size:10px;padding:4px 8px}
+  .filters{height:44px;padding:0 12px;gap:6px}
+  .fp{padding:5px 10px;font-size:11px}
+  .fcount{display:none}
+  .body{flex-direction:column;height:auto;overflow:visible}
+  .list-panel{width:100%;overflow:visible;padding:0}
+  .grid{grid-template-columns:1fr;gap:0}
+  .card-photo{padding-top:55%}
+  .map-panel{display:none}
+  
+  /* Mobile map button */
+  .mobile-map-btn{
+    display:flex;
+    position:fixed;bottom:20px;left:50%;
+    transform:translateX(-50%);
+    background:var(--navy);color:var(--white);
+    border:none;border-radius:24px;
+    padding:12px 24px;
+    font-size:14px;font-weight:700;
+    font-family:'Inter',sans-serif;
+    box-shadow:0 4px 20px rgba(30,58,110,.4);
+    cursor:pointer;z-index:900;
+    align-items:center;gap:8px;
+    white-space:nowrap;
+  }
+
+  /* Mobile map overlay */
+  .mobile-map-overlay{
+    display:none;
+    position:fixed;inset:0;
+    z-index:800;
+    flex-direction:column;
+    background:var(--white);
+  }
+  .mobile-map-overlay.open{display:flex}
+  .mobile-map-header{
+    height:52px;background:var(--white);
+    border-bottom:1px solid var(--g200);
+    display:flex;align-items:center;
+    padding:0 16px;gap:12px;flex-shrink:0;
+  }
+  .mobile-map-back{
+    background:none;border:none;
+    font-size:20px;cursor:pointer;color:var(--navy);
+    padding:4px;
+  }
+  .mobile-map-title{font-size:15px;font-weight:700;color:var(--navy)}
+  .mobile-map-body{flex:1;position:relative}
+  .mobile-map-body #map-mobile{width:100%;height:100%}
+
+  /* Modal mobile */
+  .modal{width:100%;max-width:100%;border-radius:20px 20px 0 0;
+    position:fixed;bottom:0;max-height:92vh}
+  .modal-bg{align-items:flex-end}
+  .gallery{height:200px}
+  .detail-grid{grid-template-columns:1fr 1fr}
+  .am-grid{grid-template-columns:1fr 1fr}
+  .modal-cta{flex-wrap:wrap}
+  .mc{min-width:calc(50% - 4px);padding:11px}
+}
+@media(min-width:861px){
+  .mobile-map-btn{display:none}
+  .mobile-map-overlay{display:none!important}
+}
 </style>
 </head>
 <body>
@@ -310,6 +387,20 @@ nav{height:68px;background:var(--white);border-bottom:1px solid var(--g200);disp
       </div>
     </div>
   </div>
+</div>
+
+
+<!-- MOBILE MAP BUTTON -->
+<button class="mobile-map-btn" id="mobileMapBtn" onclick="openMobileMap()">🗺 Карта</button>
+
+<!-- MOBILE MAP OVERLAY -->
+<div class="mobile-map-overlay" id="mobileMapOverlay">
+  <div class="mobile-map-header">
+    <button class="mobile-map-back" onclick="closeMobileMap()">← Назад</button>
+    <div class="mobile-map-title">Карта</div>
+    <div style="margin-left:auto;font-size:12px;color:var(--g400)" id="mobileMapCount"></div>
+  </div>
+  <div class="mobile-map-body"><div id="map-mobile" style="width:100%;height:100%"></div></div>
 </div>
 
 <div class="modal-wrap" id="mw" onclick="bgClose(event)">
@@ -778,6 +869,49 @@ function updateGallery() {
   if (cnt) cnt.textContent = (_gIdx+1) + ' / ' + _gTotal;
 }
 
+
+// ── MOBILE MAP ──
+var mobileMap = null;
+var mobileMarkers = {};
+
+function openMobileMap() {
+  document.getElementById('mobileMapOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  setTimeout(function() {
+    if (!mobileMap) {
+      mobileMap = L.map('map-mobile', {center:[41.714,44.800], zoom:13});
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+        {attribution:'© OpenStreetMap © CARTO', maxZoom:19}).addTo(mobileMap);
+    }
+    mobileMap.invalidateSize();
+    // Add markers
+    Object.values(mobileMarkers).forEach(function(m){ mobileMap.removeLayer(m); });
+    mobileMarkers = {};
+    shown.forEach(function(l) {
+      if (!l._lat || !l._lng) return;
+      var isNew = l._isNew || l.is_new === 'True';
+      var html2 = '<div class="pm' + (isNew?' new-pin':'') + '">' + fmtP(l) + '</div>';
+      var icon = L.divIcon({html:html2, className:'', iconAnchor:[28,14]});
+      var m = L.marker([l._lat, l._lng], {icon:icon}).addTo(mobileMap);
+      m.bindPopup(
+        '<div class="pu-photo"><div class="ep">' + (l._emoji||'🏠') + '</div></div>' +
+        '<div class="pu-body">' +
+        '<div class="pu-loc">' + (l.district||'') + '</div>' +
+        '<div class="pu-price">' + fmtP(l) + fmtU(l) + '</div>' +
+        '<div class="pu-btns">' +
+        '<button class="pu-btn pb-navy" onclick="closeMobileMap();openM('' + l.id + '')">Подробнее</button>' +
+        '<a class="pu-btn pb-tg" href="https://t.me/David_Tibelashvili" target="_blank">✈️ TG</a>' +
+        '</div></div>', {maxWidth:240});
+      mobileMarkers[l.id] = m;
+    });
+    document.getElementById('mobileMapCount').textContent = shown.length + ' объявлений';
+  }, 100);
+}
+
+function closeMobileMap() {
+  document.getElementById('mobileMapOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
 </script>
 </body>
 </html>
