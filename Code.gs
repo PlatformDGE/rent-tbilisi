@@ -434,32 +434,37 @@ function doGet(e) {
   var ss    = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName(SHEET_NAME);
   var props = PropertiesService.getScriptProperties();
+  var callback = e && e.parameter && e.parameter.callback ? e.parameter.callback : null;
 
+  var result;
   if (!sheet || sheet.getLastRow() < 2) {
-    return out({ listings:[], total:0, updated_at:'' });
+    result = { listings:[], total:0, updated_at:'' };
+  } else {
+    var data = sheet.getRange(2,1,sheet.getLastRow()-1,HEADERS.length).getValues();
+    var listings = data
+      .filter(function(r){ return r[0] && r[19]; })
+      .slice(0, 300)
+      .map(function(r){
+        var o = {};
+        HEADERS.forEach(function(h,i){ o[h]=r[i]; });
+        return o;
+      });
+    result = {
+      listings:   listings,
+      total:      listings.length,
+      updated_at: props.getProperty('LAST_RUN') || '',
+    };
   }
 
-  var data = sheet.getRange(2,1,sheet.getLastRow()-1,HEADERS.length).getValues();
+  // JSONP поддержка для обхода CORS
+  if (callback) {
+    return ContentService
+      .createTextOutput(callback + '(' + JSON.stringify(result) + ')')
+      .setMimeType(ContentService.MimeType.JAVASCRIPT);
+  }
 
-  var listings = data
-    .filter(function(r){ return r[0] && r[19]; })
-    .slice(0, 300)
-    .map(function(r){
-      var o = {};
-      HEADERS.forEach(function(h,i){ o[h]=r[i]; });
-      return o;
-    });
-
-  return out({
-    listings:   listings,
-    total:      listings.length,
-    updated_at: props.getProperty('LAST_RUN') || '',
-  });
-}
-
-function out(data) {
   return ContentService
-    .createTextOutput(JSON.stringify(data))
+    .createTextOutput(JSON.stringify(result))
     .setMimeType(ContentService.MimeType.JSON);
 }
 
