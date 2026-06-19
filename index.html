@@ -458,8 +458,12 @@ function render(){
   lastCount = shown.length;
 }
 
-function photoEl(l, cls) {
-  if (l.photo) return `<img src="${l.photo}" alt="" loading="lazy" onerror="this.parentNode.innerHTML='<div class=\\'emoji-placeholder\\'>${l._emoji||'🏠'}</div>'">`;
+function photoEl(l) {
+  if (l.photo && String(l.photo).startsWith('http')) {
+    return `<img src="${l.photo}" alt="" loading="lazy" referrerpolicy="no-referrer"
+      onerror="this.style.display='none';this.nextSibling.style.display='flex'">
+      <div class="emoji-placeholder" style="display:none">${l._emoji||'🏠'}</div>`;
+  }
   return `<div class="emoji-placeholder">${l._emoji||'🏠'}</div>`;
 }
 
@@ -520,8 +524,8 @@ function pins(){
     const html=`<div class="pm${isNew?' new-pin':''}">${fmtP(l)}</div>`;
     const icon=L.divIcon({html,className:'',iconAnchor:[28,14]});
     const m=L.marker([l._lat,l._lng],{icon}).addTo(map);
-    const photoHtml = l.photo
-      ? `<img src="${l.photo}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentNode.innerHTML='<div class=ep>🏠</div>'">`
+    const photoHtml = l.photo && String(l.photo).startsWith('http')
+      ? `<img src="${l.photo}" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'">`
       : `<div class="ep">${l._emoji||'🏠'}</div>`;
     m.bindPopup(`
       <div class="pu-photo">${photoHtml}</div>
@@ -585,7 +589,7 @@ function openM(id){
   ];
   const isNew=l._isNew||l.is_new==='True';
   const isExcl=l.is_exclusive==='True'||l.is_exclusive===true;
-  const photoHtml=l.photo?`<img src="${l.photo}" onerror="this.parentNode.innerHTML='<div class=ep>${l._emoji||'🏠'}</div>'">`:`<div class="ep">${l._emoji||'🏠'}</div>`;
+  const photoHtml=l.photo && String(l.photo).startsWith('http')?`<img src="${l.photo}" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'">`:`<div class="ep">${l._emoji||'🏠'}</div>`;
   document.getElementById('mi').innerHTML=`
   <div class="modal-photo">${photoHtml}</div>
   <div class="modal-body">
