@@ -227,7 +227,7 @@ function extractPosts(html) {
     while (searchPos < part.length) {
       var bgi = part.indexOf("background-image:url('https://cdn4.telesco.pe/file/", searchPos);
       if (bgi === -1) break;
-      var ps = bgi + 23; // после url('
+      var ps = bgi + 22; // после url('  (22 = length of "background-image:url('")
       var pe = part.indexOf("')", ps);
       if (pe === -1) break;
       var photoUrl = part.substring(ps, pe);
