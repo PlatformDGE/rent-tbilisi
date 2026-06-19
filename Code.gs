@@ -33,6 +33,41 @@ const COORDS = {
 };
 
 // ════════════════════════════════════════════════════════════
+//  GOOGLE DRIVE — для хранения фото
+// ════════════════════════════════════════════════════════════
+var DRIVE_FOLDER_NAME = 'RentTbilisi_Photos';
+var _folder = null;
+
+function getDriveFolder() {
+  if (_folder) return _folder;
+  var it = DriveApp.getFoldersByName(DRIVE_FOLDER_NAME);
+  _folder = it.hasNext() ? it.next() : DriveApp.createFolder(DRIVE_FOLDER_NAME);
+  _folder.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+  return _folder;
+}
+
+function savePhoto(url, msgId) {
+  if (!url || !url.startsWith('http')) return '';
+  try {
+    var folder = getDriveFolder();
+    var name   = 'p_' + msgId + '.jpg';
+    var ex     = folder.getFilesByName(name);
+    if (ex.hasNext()) {
+      return 'https://drive.google.com/uc?export=view&id=' + ex.next().getId();
+    }
+    var resp = UrlFetchApp.fetch(url, {muteHttpExceptions:true});
+    if (resp.getResponseCode() !== 200) return '';
+    var f = folder.createFile(resp.getBlob().setName(name));
+    f.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    return 'https://drive.google.com/uc?export=view&id=' + f.getId();
+  } catch(e) {
+    Logger.log('savePhoto error: ' + e);
+    return '';
+  }
+}
+
+
+// ════════════════════════════════════════════════════════════
 //  ГЛАВНАЯ ФУНКЦИЯ
 // ════════════════════════════════════════════════════════════
 function parseChannel() {
@@ -70,6 +105,10 @@ function parseChannel() {
 
       const listing = parsePost(post);
       if (listing) {
+        // Сохраняем фото в Google Drive (обходим CORS Telegram CDN)
+        if (listing.photo) {
+          listing.photo = savePhoto(listing.photo, post.id) || '';
+        }
         newRows.push(listing);
         Logger.log('✓ [' + post.id + '] ' + listing.district + ' ' + listing.type + ' $' + listing.price);
       } else {
