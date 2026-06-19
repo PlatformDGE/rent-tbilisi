@@ -281,12 +281,7 @@ nav{height:68px;background:var(--white);border-bottom:1px solid var(--g200);disp
 </head>
 <body>
 
-<div class="loading" id="ld">
-  <div class="ld-circle">🇬🇪</div>
-  <div class="ld-name">Rent in <em>Tbilisi</em></div>
-  <div class="ld-sub" id="ld-sub">Загружаем объявления с канала...</div>
-  <div class="ld-bar"><div class="ld-fill"></div></div>
-</div>
+
 
 <nav>
   <a class="brand" href="#">
@@ -478,7 +473,7 @@ async function loadSheets() {
     return true;
   }
   try {
-    const data = await loadJSONP(APPS_SCRIPT_URL);
+    const res = await fetch(APPS_SCRIPT_URL); const data = await res.json();
     const rows = data.listings || [];
     const bool = v => v === 'TRUE' || v === true;
 
@@ -841,13 +836,7 @@ window.addEventListener('load', async ()=>{
   initMap();
   await loadSheets();
   run();
-  // Hide loading max after 3s regardless of data
-  const hideLd = () => {
-    const ld = document.getElementById('ld');
-    if (ld) { ld.classList.add('gone'); setTimeout(()=>{ if(ld.parentNode) ld.remove(); },600); }
-  };
-  setTimeout(hideLd, 500);
-  setTimeout(hideLd, 3000); // fallback
+
   setInterval(refresh, REFRESH_MS);
   document.addEventListener('keydown',e=>{if(e.key==='Escape')closeM();});
 });
