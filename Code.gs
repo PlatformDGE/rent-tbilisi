@@ -212,13 +212,26 @@ function extractPosts(html) {
       }
     }
 
-    // Фото
+    // Фото — ищем photo_wrap с cdn4.telesco.pe
     var photo = '';
-    var pi = part.indexOf("background-image:url('");
-    if (pi !== -1) {
-      var ps = pi + 22;
-      var pe = part.indexOf("')", ps);
-      if (pe !== -1) photo = part.substring(ps, pe);
+    var pwi = part.indexOf('photo_wrap');
+    while (pwi !== -1 && !photo) {
+      var bgi = part.indexOf("background-image:url('https://cdn4.telesco.pe/", pwi);
+      if (bgi !== -1 && bgi < pwi + 2000) {
+        var ps = bgi + 24; // после url('
+        var pe = part.indexOf("')", ps);
+        if (pe !== -1) photo = part.substring(ps, pe);
+      }
+      pwi = part.indexOf('photo_wrap', pwi + 10);
+    }
+    // Fallback: любой cdn4 url в блоке
+    if (!photo) {
+      var ci = part.indexOf('https://cdn4.telesco.pe/file/');
+      if (ci !== -1) {
+        var ce = part.indexOf("'", ci);
+        if (ce === -1) ce = part.indexOf('"', ci);
+        if (ce !== -1) photo = part.substring(ci, ce);
+      }
     }
 
     if (text.length > 30) {
