@@ -105,8 +105,7 @@ function parseChannel() {
 
       const listing = parsePost(post);
       if (listing) {
-        // Фото хранятся как прямые cdn4.telesco.pe ссылки
-        // img src работает напрямую без CORS
+
         newRows.push(listing);
         Logger.log('✓ [' + post.id + '] ' + listing.district + ' ' + listing.type + ' $' + listing.price);
       } else {
@@ -494,4 +493,11 @@ function debugHtml() {
     Logger.log('--- ID:' + p.id + ' ---');
     Logger.log(p.text.substring(0,300));
   });
+}
+
+function parseAll() {
+  for (var i = 0; i < 3; i++) {
+    parseChannel();
+    Utilities.sleep(2000);
+  }
 }
