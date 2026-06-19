@@ -422,7 +422,6 @@ function doGet(e) {
   var ss    = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName(SHEET_NAME);
   var props = PropertiesService.getScriptProperties();
-  var callback = e && e.parameter && e.parameter.callback ? e.parameter.callback : null;
 
   var result;
   if (!sheet || sheet.getLastRow() < 2) {
@@ -442,13 +441,6 @@ function doGet(e) {
       total:      listings.length,
       updated_at: props.getProperty('LAST_RUN') || '',
     };
-  }
-
-  // JSONP поддержка для обхода CORS
-  if (callback) {
-    return ContentService
-      .createTextOutput(callback + '(' + JSON.stringify(result) + ')')
-      .setMimeType(ContentService.MimeType.JAVASCRIPT);
   }
 
   return ContentService
