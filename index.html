@@ -3,34 +3,29 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rent in Tbilisi — Find Your Home</title>
+<title>Rent in Tbilisi — Live Listings</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --navy:#1E3A6E;--navy-d:#152d55;--navy-l:#2a4f8f;
+  --navy:#1E3A6E;--navy-d:#152d55;
   --red:#E8192C;--red-d:#c0111f;
   --white:#fff;
   --g50:#f8f9fb;--g100:#f1f3f7;--g200:#e4e8ef;--g300:#cdd2db;
   --g400:#9aa3b0;--g500:#667085;--g700:#374151;--g900:#111827;
-  --sh1:0 1px 3px rgba(0,0,0,.07),0 1px 2px rgba(0,0,0,.05);
-  --sh2:0 4px 20px rgba(0,0,0,.09);
-  --sh3:0 12px 40px rgba(0,0,0,.13);
-  --r:12px;--r2:16px;
+  --sh1:0 1px 3px rgba(0,0,0,.07);--sh2:0 4px 20px rgba(0,0,0,.09);--sh3:0 12px 40px rgba(0,0,0,.13);
 }
 body{font-family:'Inter',sans-serif;background:var(--white);color:var(--g900);height:100vh;overflow:hidden;display:flex;flex-direction:column}
 
-/* ── NAV ── */
+/* NAV */
 nav{height:68px;background:var(--white);border-bottom:1px solid var(--g200);display:flex;align-items:center;padding:0 20px;gap:16px;flex-shrink:0;z-index:200;position:relative}
 .brand{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0}
-.brand-logo{width:38px;height:38px;background:var(--navy);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--white);font-size:11px;font-weight:700;line-height:1.2;text-align:center;flex-direction:column}
+.brand-logo{width:38px;height:38px;background:var(--navy);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--white);font-size:11px;font-weight:700;flex-direction:column;line-height:1.2;text-align:center}
 .brand-logo .fl{font-size:9px}
 .brand-text strong{display:block;font-size:15px;font-weight:700;color:var(--navy);letter-spacing:-.2px}
 .brand-text span{font-size:11px;color:var(--g400)}
-
-/* search */
 .search-bar{flex:1;max-width:640px;display:flex;align-items:center;height:46px;border:1.5px solid var(--g200);border-radius:40px;background:var(--white);box-shadow:var(--sh1);overflow:hidden;transition:border-color .2s,box-shadow .2s}
 .search-bar:focus-within{border-color:var(--navy);box-shadow:0 0 0 3px rgba(30,58,110,.1)}
 .s-seg{flex:1;padding:0 16px;border-right:1px solid var(--g200);height:100%;display:flex;flex-direction:column;justify-content:center;cursor:pointer}
@@ -40,8 +35,6 @@ nav{height:68px;background:var(--white);border-bottom:1px solid var(--g200);disp
 .s-seg input::placeholder{color:var(--g300)}
 .s-btn{width:40px;height:40px;border-radius:50%;background:var(--red);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin:0 4px;color:var(--white);font-size:15px;transition:background .15s}
 .s-btn:hover{background:var(--red-d)}
-
-/* nav right */
 .nav-right{display:flex;align-items:center;gap:8px;margin-left:auto;flex-shrink:0}
 .view-tabs{display:flex;background:var(--g100);border-radius:8px;padding:3px;gap:2px}
 .vt{padding:5px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--g500);transition:all .15s;font-family:'Inter',sans-serif}
@@ -50,7 +43,7 @@ nav{height:68px;background:var(--white);border-bottom:1px solid var(--g200);disp
 .live-dot{width:6px;height:6px;background:var(--red);border-radius:50%;animation:blink 1.3s infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
 
-/* ── FILTERS ── */
+/* FILTERS */
 .filters{height:52px;background:var(--white);border-bottom:1px solid var(--g200);display:flex;align-items:center;padding:0 20px;gap:8px;flex-shrink:0;overflow-x:auto}
 .filters::-webkit-scrollbar{display:none}
 .fp{display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border:1.5px solid var(--g200);border-radius:20px;font-size:12px;font-weight:600;color:var(--g700);background:var(--white);cursor:pointer;white-space:nowrap;transition:all .15s;font-family:'Inter',sans-serif;appearance:none}
@@ -61,22 +54,22 @@ nav{height:68px;background:var(--white);border-bottom:1px solid var(--g200);disp
 .fcount{margin-left:auto;font-size:12px;color:var(--g500);flex-shrink:0;white-space:nowrap}
 .fcount strong{color:var(--g900)}
 
-/* ── BODY ── */
+/* BODY */
 .body{display:flex;flex:1;overflow:hidden}
-
-/* ── LIST PANEL ── */
 .list-panel{width:52%;overflow-y:auto;background:var(--g50)}
 .list-panel::-webkit-scrollbar{width:5px}
 .list-panel::-webkit-scrollbar-thumb{background:var(--g200);border-radius:3px}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--g200)}
 
-/* ── CARD ── */
+/* CARD */
 .card{background:var(--white);cursor:pointer;transition:background .15s;position:relative}
 .card:hover{background:var(--g50)}
 .card.hl{background:var(--g50);box-shadow:inset 3px 0 0 var(--navy)}
 .card-photo{width:100%;padding-top:62%;position:relative;overflow:hidden;background:var(--g100)}
-.card-photo-inner{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:46px;background:linear-gradient(135deg,#e4edf8 0%,#c8d8ec 100%);transition:transform .3s}
-.card:hover .card-photo-inner{transform:scale(1.04)}
+.card-photo-inner{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;transition:transform .3s;overflow:hidden}
+.card-photo-inner img{width:100%;height:100%;object-fit:cover}
+.card-photo-inner .emoji-placeholder{font-size:44px;width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#e4edf8,#c8d8ec)}
+.card:hover .card-photo-inner{transform:scale(1.03)}
 .card-badges{position:absolute;top:8px;left:8px;display:flex;gap:5px;z-index:2}
 .badge{padding:3px 7px;border-radius:5px;font-size:10px;font-weight:700;letter-spacing:.3px}
 .b-new{background:var(--red);color:var(--white)}
@@ -87,11 +80,12 @@ nav{height:68px;background:var(--white);border-bottom:1px solid var(--g200);disp
 .card-fav:hover{transform:scale(1.2)}
 .card-body{padding:11px 12px 12px}
 .card-loc{font-size:13px;font-weight:600;color:var(--g900);margin-bottom:2px}
-.card-sub{font-size:11px;color:var(--g500);margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.card-specs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px}
+.card-sub{font-size:11px;color:var(--g500);margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-specs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:7px}
 .spec{font-size:10px;color:var(--g500);background:var(--g100);padding:2px 6px;border-radius:5px}
 .card-price{font-size:15px;font-weight:700;color:var(--g900)}
 .card-price span{font-size:11px;font-weight:400;color:var(--g400)}
+.no-comm{font-size:10px;color:#16a34a;font-weight:600;margin-top:3px}
 .card-bottom{display:flex;align-items:center;justify-content:space-between;margin-top:8px;padding-top:8px;border-top:1px solid var(--g100)}
 .agent-row{display:flex;align-items:center;gap:6px}
 .av{width:20px;height:20px;background:var(--navy);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:var(--white)}
@@ -101,28 +95,20 @@ nav{height:68px;background:var(--white);border-bottom:1px solid var(--g200);disp
 .cb:hover{opacity:.82}
 .cb-tg{background:#0088cc;color:var(--white)}
 .cb-call{background:var(--red);color:var(--white)}
-.no-comm{font-size:10px;color:#16a34a;font-weight:600;margin-top:3px}
 
-/* empty */
-.empty{grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--g400)}
-.empty-icon{font-size:44px;margin-bottom:10px}
-.empty h3{font-size:15px;font-weight:600;color:var(--g700);margin-bottom:5px}
-
-/* ── MAP PANEL ── */
+/* MAP */
 .map-panel{flex:1;position:relative;border-left:1px solid var(--g200)}
 #map{width:100%;height:100%}
-
-/* price markers */
 .pm{background:var(--white);border:2px solid var(--navy);border-radius:18px;padding:4px 9px;font-family:'Inter',sans-serif;font-size:11px;font-weight:700;color:var(--navy);white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.14);cursor:pointer;transition:all .15s}
 .pm:hover,.pm.on{background:var(--navy);color:var(--white)}
 .pm.new-pin{background:var(--red);border-color:var(--red);color:var(--white);animation:popIn .4s cubic-bezier(.34,1.56,.64,1)}
 @keyframes popIn{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
-
-/* popup */
 .leaflet-popup-content-wrapper{border-radius:14px!important;padding:0!important;overflow:hidden;box-shadow:var(--sh3)!important;border:1px solid var(--g200)!important}
-.leaflet-popup-content{margin:0!important;width:230px!important}
+.leaflet-popup-content{margin:0!important;width:240px!important}
 .leaflet-popup-tip-container{display:none}
-.pu-photo{height:100px;display:flex;align-items:center;justify-content:center;font-size:38px;background:linear-gradient(135deg,#e4edf8,#c8d8ec)}
+.pu-photo{height:110px;overflow:hidden;display:flex;align-items:center;justify-content:center;background:var(--g100)}
+.pu-photo img{width:100%;height:100%;object-fit:cover}
+.pu-photo .ep{font-size:38px;width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#e4edf8,#c8d8ec)}
 .pu-body{padding:10px 12px 12px}
 .pu-loc{font-size:12px;font-weight:700;color:var(--g900);margin-bottom:2px}
 .pu-sub{font-size:10px;color:var(--g500);margin-bottom:6px}
@@ -132,30 +118,29 @@ nav{height:68px;background:var(--white);border-bottom:1px solid var(--g200);disp
 .pu-btn:hover{opacity:.85}
 .pb-navy{background:var(--navy);color:var(--white)}
 .pb-tg{background:#0088cc;color:var(--white)}
-
-/* map overlay stats */
 .map-stats{position:absolute;bottom:20px;left:12px;background:var(--white);border-radius:12px;padding:12px 16px;box-shadow:var(--sh2);border:1px solid var(--g200);z-index:500;min-width:152px}
 .ms-row{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:3px 0}
 .ms-lbl{font-size:11px;color:var(--g500)}
 .ms-val{font-size:13px;font-weight:700;color:var(--navy)}
 .ms-val.red{color:var(--red)}
 
-/* ── MODAL ── */
+/* MODAL */
 .modal-wrap{display:none;position:fixed;inset:0;background:rgba(0,0,0,.48);z-index:2000;align-items:center;justify-content:center;backdrop-filter:blur(5px)}
 .modal-wrap.open{display:flex}
-.modal{background:var(--white);border-radius:20px;width:92%;max-width:660px;max-height:90vh;overflow-y:auto;position:relative;animation:mUp .28s cubic-bezier(.34,1.1,.64,1)}
+.modal{background:var(--white);border-radius:20px;width:92%;max-width:700px;max-height:92vh;overflow-y:auto;position:relative;animation:mUp .28s cubic-bezier(.34,1.1,.64,1)}
 .modal::-webkit-scrollbar{width:4px}
 .modal::-webkit-scrollbar-thumb{background:var(--g200);border-radius:2px}
 @keyframes mUp{from{opacity:0;transform:translateY(24px) scale(.97)}to{opacity:1;transform:none}}
-.modal-photo{height:240px;display:flex;align-items:center;justify-content:center;font-size:80px;background:linear-gradient(135deg,#e4edf8,#c0d4ec);border-radius:20px 20px 0 0;position:relative}
-.modal-x{position:absolute;top:12px;right:12px;width:32px;height:32px;background:rgba(255,255,255,.9);border:none;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--g700);box-shadow:var(--sh1)}
+.modal-photo{height:260px;overflow:hidden;display:flex;align-items:center;justify-content:center;background:var(--g100);border-radius:20px 20px 0 0;position:relative}
+.modal-photo img{width:100%;height:100%;object-fit:cover}
+.modal-photo .ep{font-size:80px;width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#e4edf8,#c0d4ec)}
+.modal-x{position:absolute;top:12px;right:12px;width:32px;height:32px;background:rgba(255,255,255,.9);border:none;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--g700);box-shadow:var(--sh1);z-index:5}
 .modal-body{padding:22px 24px 28px}
 .modal-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:16px}
 .modal-title{font-size:20px;font-weight:700;color:var(--g900);line-height:1.2;margin-bottom:4px}
-.modal-addr{font-size:13px;color:var(--g500)}
-.modal-price{text-align:right;flex-shrink:0}
+.modal-addr{font-size:13px;color:var(--g500);margin-top:3px}
 .modal-price-main{font-size:24px;font-weight:700;color:var(--navy)}
-.modal-price-sub{font-size:11px;color:var(--g400);margin-top:2px}
+.modal-price-sub{font-size:11px;color:var(--g400);margin-top:2px;text-align:right}
 .modal-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px}
 .mt{padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700}
 .mt-rent{background:rgba(30,58,110,.08);color:var(--navy)}
@@ -174,7 +159,7 @@ nav{height:68px;background:var(--white);border-bottom:1px solid var(--g200);disp
 .modal-agent{display:flex;align-items:center;gap:12px;padding:14px;background:var(--g50);border-radius:12px;margin-bottom:18px}
 .modal-av{width:42px;height:42px;background:var(--navy);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:var(--white);flex-shrink:0}
 .modal-an{font-size:14px;font-weight:600;color:var(--g900)}
-.modal-ar{font-size:11px;color:var(--g500)}
+.modal-ar{font-size:11px;color:var(--g500);margin-top:2px}
 .modal-cta{display:flex;gap:8px}
 .mc{flex:1;padding:13px;border-radius:12px;font-size:13px;font-weight:700;border:none;cursor:pointer;font-family:'Inter',sans-serif;text-decoration:none;text-align:center;display:block;transition:opacity .15s}
 .mc:hover{opacity:.87}
@@ -182,49 +167,44 @@ nav{height:68px;background:var(--white);border-bottom:1px solid var(--g200);disp
 .mc-red{background:var(--red);color:var(--white)}
 .mc-tg{background:#0088cc;color:var(--white)}
 
-/* ── TOAST ── */
+/* TOAST */
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(70px);background:var(--navy);color:var(--white);padding:10px 18px;border-radius:12px;font-size:13px;font-weight:600;box-shadow:var(--sh3);z-index:3000;display:flex;align-items:center;gap:9px;cursor:pointer;transition:transform .38s cubic-bezier(.34,1.4,.64,1);white-space:nowrap;border-left:4px solid var(--red)}
 .toast.show{transform:translateX(-50%) translateY(0)}
 
-/* ── LOADING ── */
+/* LOADING */
 .loading{position:fixed;inset:0;background:var(--navy);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;transition:opacity .5s}
 .loading.gone{opacity:0;pointer-events:none}
-.ld-circle{width:68px;height:68px;border-radius:50%;border:2px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:26px;color:var(--white)}
+.ld-circle{width:68px;height:68px;border-radius:50%;border:2px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:26px}
 .ld-name{font-size:24px;font-weight:700;color:var(--white);letter-spacing:-.3px}
 .ld-name em{color:var(--red);font-style:normal}
 .ld-sub{font-size:12px;color:rgba(255,255,255,.4)}
 .ld-bar{width:200px;height:2px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden}
 .ld-fill{height:100%;background:var(--red);border-radius:2px;animation:lfill 1.9s ease forwards}
 @keyframes lfill{from{width:0}to{width:100%}}
-
-/* mobile */
-@media(max-width:860px){
-  .map-panel{display:none}
-  .list-panel{width:100%}
-  .grid{grid-template-columns:1fr}
-  .s-seg:not(:first-child){display:none}
-}
+.empty{grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--g400)}
+.empty-icon{font-size:44px;margin-bottom:10px}
+.empty h3{font-size:15px;font-weight:600;color:var(--g700);margin-bottom:5px}
+.error-banner{background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:12px 16px;margin:12px;font-size:13px;color:#dc2626;display:none}
+.error-banner.show{display:block}
+@media(max-width:860px){.map-panel{display:none}.list-panel{width:100%}.grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 
-<!-- LOADING -->
 <div class="loading" id="ld">
   <div class="ld-circle">🇬🇪</div>
   <div class="ld-name">Rent in <em>Tbilisi</em></div>
-  <div class="ld-sub">Загружаем объявления с канала...</div>
+  <div class="ld-sub" id="ld-sub">Загружаем объявления с канала...</div>
   <div class="ld-bar"><div class="ld-fill"></div></div>
 </div>
 
-<!-- NAV -->
 <nav>
   <a class="brand" href="#">
     <div class="brand-logo"><div>RIT</div><div class="fl">🇬🇪</div></div>
-    <div class="brand-text"><strong>Rent in Tbilisi</strong><span>Verified listings</span></div>
+    <div class="brand-text"><strong>Rent in Tbilisi</strong><span>@rent_tbilisi_ge · live</span></div>
   </a>
-
   <div class="search-bar">
-    <div class="s-seg" style="flex:1.5">
+    <div class="s-seg" style="flex:1.4">
       <label>Район / адрес</label>
       <input type="text" id="sAddr" placeholder="Vake, Saburtalo, Isani..." oninput="run()">
     </div>
@@ -250,7 +230,6 @@ nav{height:68px;background:var(--white);border-bottom:1px solid var(--g200);disp
     </div>
     <button class="s-btn" onclick="run()">🔍</button>
   </div>
-
   <div class="nav-right">
     <div class="view-tabs">
       <button class="vt on" id="vSplit" onclick="setView('split')">Split</button>
@@ -261,10 +240,10 @@ nav{height:68px;background:var(--white);border-bottom:1px solid var(--g200);disp
   </div>
 </nav>
 
-<!-- FILTERS -->
 <div class="filters">
   <button class="fp on" data-r="" onclick="setRoom(this,'')">Все</button>
-  <button class="fp" data-r="1" onclick="setRoom(this,'1')">Студия / 1 к.</button>
+  <button class="fp" data-r="0" onclick="setRoom(this,'0')">Студия</button>
+  <button class="fp" data-r="1" onclick="setRoom(this,'1')">1 к.</button>
   <button class="fp" data-r="2" onclick="setRoom(this,'2')">2 к.</button>
   <button class="fp" data-r="3" onclick="setRoom(this,'3')">3 к.</button>
   <button class="fp" data-r="4" onclick="setRoom(this,'4')">4+ к.</button>
@@ -274,7 +253,8 @@ nav{height:68px;background:var(--white);border-bottom:1px solid var(--g200);disp
     <option>Vake</option><option>Saburtalo</option><option>Didube</option>
     <option>Isani</option><option>Gldani</option><option>Mtatsminda</option>
     <option>Nadzaladevi</option><option>Chugureti</option><option>Vera</option>
-    <option>Rustaveli</option><option>Tsereteli</option><option>Dighomi</option>
+    <option>Rustaveli</option><option>Tsereteli</option><option>Krtsanisi</option>
+    <option>Marjanishvili</option><option>Dighomi</option>
   </select>
   <select class="fp" id="fBuild" onchange="run()">
     <option value="">🏢 Здание</option>
@@ -288,21 +268,22 @@ nav{height:68px;background:var(--white);border-bottom:1px solid var(--g200);disp
     <option value="balcony">Балкон</option>
     <option value="conditioner">Кондиционер</option>
     <option value="elevator">Лифт</option>
-    <option value="pets">Питомцы ОК</option>
+    <option value="parking">Парковка</option>
   </select>
   <select class="fp" id="fSort" onchange="run()">
     <option value="new">↕ Новые</option>
     <option value="pa">↑ Цена</option>
     <option value="pd">↓ Цена</option>
     <option value="sa">↑ Площадь</option>
-    <option value="sd">↓ Площадь</option>
   </select>
-  <div class="fcount" id="fcnt"><strong>0</strong> объявлений</div>
+  <div class="fcount" id="fcnt"><strong>—</strong> объявлений</div>
 </div>
 
-<!-- BODY -->
 <div class="body" id="body">
   <div class="list-panel" id="lp">
+    <div class="error-banner" id="errBanner">
+      ⚠️ Не удалось загрузить данные из Google Sheets. Проверьте SHEET_ID в конфиге.
+    </div>
     <div class="grid" id="grid"></div>
   </div>
   <div class="map-panel" id="mp">
@@ -311,165 +292,131 @@ nav{height:68px;background:var(--white);border-bottom:1px solid var(--g200);disp
       <div class="ms-row"><span class="ms-lbl">Объявлений</span><span class="ms-val" id="stTotal">—</span></div>
       <div class="ms-row"><span class="ms-lbl">Средняя аренда</span><span class="ms-val" id="stAvg">—</span></div>
       <div class="ms-row"><span class="ms-lbl">Новых сегодня</span><span class="ms-val red" id="stNew">—</span></div>
+      <div class="ms-row" style="margin-top:6px;padding-top:6px;border-top:1px solid var(--g200)">
+        <span class="ms-lbl">Обновлено</span><span class="ms-val" id="stUpd" style="font-size:11px;color:var(--g400)">—</span>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- MODAL -->
 <div class="modal-wrap" id="mw" onclick="bgClose(event)">
   <div class="modal"><button class="modal-x" onclick="closeM()">✕</button><div id="mi"></div></div>
 </div>
 
-<!-- TOAST -->
 <div class="toast" id="toast" onclick="scrollTop()">🔔 <span id="ttext">Новое объявление!</span></div>
 
 <script>
-/* ═══════════════════════════
-   DATA — структура объявлений
-   из канала @rent_tbilisi_ge
-═══════════════════════════ */
+// ══════════════════════════════════════
+//  ⚙️  КОНФИГ — вставь свой SHEET_ID
+//  Найти: в URL таблицы после /d/ и перед /edit
+//  Пример: https://docs.google.com/spreadsheets/d/SHEET_ID/edit
+// ══════════════════════════════════════
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyEaMDPEKLzJ4ZOii7p4QiY2WWpz917AKFPemGEbwoffLUYZ4v1TPw1XG5YdsJul721xQ/exec";
+const REFRESH_MS = 5 * 60 * 1000;
+
+// ══════════════════════════════════════
+//  КООРДИНАТЫ РАЙОНОВ
+// ══════════════════════════════════════
 const COORD = {
-  Vake:[41.7151,44.7640],Saburtalo:[41.7237,44.7852],Didube:[41.7370,44.7730],
-  Isani:[41.6891,44.8289],Gldani:[41.7627,44.7989],Nadzaladevi:[41.7198,44.8124],
-  Mtatsminda:[41.6940,44.7934],Chugureti:[41.6973,44.8180],Vera:[41.7020,44.7870],
-  Tsereteli:[41.7100,44.7780],Rustaveli:[41.6960,44.8000],Dighomi:[41.7490,44.7630],
-  Ortachala:[41.6810,44.8390]
+  vake:[41.7151,44.7640],saburtalo:[41.7237,44.7852],didube:[41.7370,44.7730],
+  isani:[41.6891,44.8289],gldani:[41.7627,44.7989],nadzaladevi:[41.7198,44.8124],
+  mtatsminda:[41.6940,44.7934],chugureti:[41.6973,44.8180],vera:[41.7020,44.7870],
+  tsereteli:[41.7100,44.7780],rustaveli:[41.6960,44.8000],dighomi:[41.7490,44.7630],
+  marjanishvili:[41.6930,44.8120],krtsanisi:[41.6820,44.8050],
+  "liberty square":[41.6944,44.8016],ortachala:[41.6810,44.8390],
 };
-const EM=['🛋️','🏠','🏢','🔑','🏡','🌟','✨','🏗️'];
-const AG=['Серги','Давид','Ана','Лука','Нино','Мака','Зура','Дато'];
-
-function jit(d){return [d[0]+(Math.random()-.5)*.014, d[1]+(Math.random()-.5)*.014]}
-
-// Реальные объявления из @rent_tbilisi_ge (структура совпадает с хештег-форматом канала)
-const RAW=[
-  {id:1,new:true,excl:true,type:'rent',rooms:2,
-   title:'2-комн. • Новостройка • Цeретели',
-   addr:'10б ул. Спиридона Кедиа',dist:'Tsereteli',metro:'Цeретели',
-   sqm:50,fl:8,fls:12,heat:'Central',build:'New',price:500,dep:500,pets:false,
-   am:{wifi:true,stove:true,balcony:true,tv:true,cond:false,dish:false,lift:true,wash:true},
-   agent:'Серги',phone:'+995 599 20 67 16',
-   posted:new Date(Date.now()-2*36e5),emoji:'✨'},
-
-  {id:2,new:true,excl:false,type:'commercial',rooms:null,
-   title:'Коммерция • 92 м² • Руставели',
-   addr:'47 пр. Мераба Костава',dist:'Rustaveli',metro:'Руставели',
-   sqm:92,fl:3,fls:3,heat:'Electric',build:'Old',price:750,dep:750,pets:false,
-   am:{wifi:true,stove:false,balcony:false,tv:false,cond:true,dish:false,lift:false,wash:false},
-   agent:'Давид',phone:'+995 599 20 67 16',
-   posted:new Date(Date.now()-5*36e5),emoji:'🏢'},
-
-  {id:3,new:false,excl:true,type:'rent',rooms:3,
-   title:'3-комн. • Ремонт • Сабурало',
-   addr:'пр. Важа-Пшавела',dist:'Saburtalo',metro:'Вагзлис Моедани',
-   sqm:85,fl:5,fls:9,heat:'Central',build:'New',price:900,dep:900,pets:true,
-   am:{wifi:true,stove:true,balcony:true,tv:true,cond:true,dish:true,lift:true,wash:true},
-   agent:'Ана',phone:'+995 599 20 67 16',
-   posted:new Date(Date.now()-12*36e5),emoji:'🌟'},
-
-  {id:4,new:false,excl:false,type:'rent',rooms:1,
-   title:'Студия • Вид на город • Руставели',
-   addr:'пр. Руставели',dist:'Rustaveli',metro:'Руставели',
-   sqm:35,fl:7,fls:10,heat:'Electric',build:'New',price:450,dep:450,pets:false,
-   am:{wifi:true,stove:true,balcony:false,tv:false,cond:true,dish:false,lift:true,wash:true},
-   agent:'Лука',phone:'+995 599 20 67 16',
-   posted:new Date(Date.now()-18*36e5),emoji:'🏠'},
-
-  {id:5,new:false,excl:false,type:'sale',rooms:4,
-   title:'Пентхаус 4 к. • Панорама • Мтацминда',
-   addr:'Мтацминда',dist:'Mtatsminda',metro:'Площадь Свободы',
-   sqm:140,fl:12,fls:12,heat:'Central',build:'New',price:280000,dep:null,pets:false,
-   am:{wifi:true,stove:true,balcony:true,tv:true,cond:true,dish:true,lift:true,wash:true},
-   agent:'Нино',phone:'+995 599 20 67 16',
-   posted:new Date(Date.now()-24*36e5),emoji:'🔥'},
-
-  {id:6,new:false,excl:false,type:'rent',rooms:2,
-   title:'2-комн. • Ваке • Чавчавадзе',
-   addr:'пр. Чавчавадзе 42',dist:'Vake',metro:null,
-   sqm:68,fl:3,fls:6,heat:'Central',build:'Soviet',price:700,dep:700,pets:true,
-   am:{wifi:true,stove:true,balcony:true,tv:true,cond:false,dish:false,lift:false,wash:true},
-   agent:'Дато',phone:'+995 599 20 67 16',
-   posted:new Date(Date.now()-30*36e5),emoji:'🏡'},
-
-  {id:7,new:false,excl:true,type:'rent',rooms:1,
-   title:'Студия • Исани • рядом метро',
-   addr:'район Исани',dist:'Isani',metro:'Исани',
-   sqm:42,fl:4,fls:9,heat:'Gas',build:'New',price:380,dep:380,pets:false,
-   am:{wifi:true,stove:true,balcony:true,tv:false,cond:false,dish:false,lift:true,wash:false},
-   agent:'Мака',phone:'+995 599 20 67 16',
-   posted:new Date(Date.now()-36*36e5),emoji:'🔑'},
-
-  {id:8,new:false,excl:false,type:'rent',rooms:3,
-   title:'3-комн. семейная • Глдани',
-   addr:'Глдани, 3-й микрорайон',dist:'Gldani',metro:'Глдани',
-   sqm:78,fl:9,fls:16,heat:'Gas',build:'Soviet',price:550,dep:550,pets:true,
-   am:{wifi:true,stove:true,balcony:true,tv:true,cond:false,dish:false,lift:true,wash:true},
-   agent:'Зура',phone:'+995 599 20 67 16',
-   posted:new Date(Date.now()-48*36e5),emoji:'🏠'},
-
-  {id:9,new:false,excl:false,type:'rent',rooms:2,
-   title:'2-комн. • Новостройка • Дидубе',
-   addr:'ул. Дидубе 5',dist:'Didube',metro:'Дидубе',
-   sqm:61,fl:6,fls:9,heat:'Central',build:'New',price:620,dep:620,pets:false,
-   am:{wifi:true,stove:true,balcony:true,tv:true,cond:true,dish:false,lift:true,wash:true},
-   agent:'Серги',phone:'+995 599 20 67 16',
-   posted:new Date(Date.now()-55*36e5),emoji:'🛋️'},
-
-  {id:10,new:false,excl:false,type:'rent',rooms:2,
-   title:'2-комн. • Вера • Старый фонд',
-   addr:'ул. Вера',dist:'Vera',metro:null,
-   sqm:57,fl:2,fls:5,heat:'Gas',build:'Old',price:580,dep:580,pets:true,
-   am:{wifi:true,stove:true,balcony:false,tv:false,cond:false,dish:false,lift:false,wash:true},
-   agent:'Ана',phone:'+995 599 20 67 16',
-   posted:new Date(Date.now()-70*36e5),emoji:'🏡'},
-
-  {id:11,new:false,excl:false,type:'rent',rooms:1,
-   title:'1-комн. • Надзаладеви • Бюджет',
-   addr:'ул. Надзаладеви',dist:'Nadzaladevi',metro:null,
-   sqm:38,fl:3,fls:5,heat:'Gas',build:'Soviet',price:320,dep:320,pets:false,
-   am:{wifi:true,stove:true,balcony:false,tv:false,cond:false,dish:false,lift:false,wash:false},
-   agent:'Зура',phone:'+995 599 20 67 16',
-   posted:new Date(Date.now()-80*36e5),emoji:'🔑'},
-
-  {id:12,new:false,excl:false,type:'rent',rooms:2,
-   title:'2-комн. • Дигоми • Новостройка',
-   addr:'Дигоми 8',dist:'Dighomi',metro:null,
-   sqm:64,fl:11,fls:14,heat:'Central',build:'New',price:650,dep:650,pets:true,
-   am:{wifi:true,stove:true,balcony:true,tv:true,cond:true,dish:false,lift:true,wash:true},
-   agent:'Нино',phone:'+995 599 20 67 16',
-   posted:new Date(Date.now()-92*36e5),emoji:'🏗️'},
-];
-
-// Добавляем координаты
-RAW.forEach(l=>{
-  const c=COORD[l.dist]||[41.694,44.801];
-  const j=jit(c);l.lat=j[0];l.lng=j[1];
-});
-
-/* ═══════════════════════════
-   STATE
-═══════════════════════════ */
-let ALL=[...RAW], shown=[...ALL];
-let favs=new Set(), mkrs={}, map, activeId=null;
-let roomF='', nextId=ALL.length+1;
-
-/* ═══════════════════════════
-   HELPERS
-═══════════════════════════ */
-const ago=d=>{const s=(Date.now()-d)/1e3;if(s<60)return'только что';if(s<3600)return~~(s/60)+' мин';if(s<86400)return~~(s/3600)+' ч';return~~(s/86400)+' д';};
-const fmtP=(l)=>l.type==='sale'?'$'+l.price.toLocaleString():'$'+l.price;
-const fmtU=(l)=>l.type==='sale'?'':'/мес';
-const ini=n=>n.slice(0,2).toUpperCase();
-const today=d=>new Date(d).toDateString()===new Date().toDateString();
-const blbl={New:'Новостройка',Old:'Старый фонд',Soviet:'Советский'};
-
-/* ═══════════════════════════
-   FILTERS
-═══════════════════════════ */
-function setRoom(el,v){
-  document.querySelectorAll('[data-r]').forEach(x=>x.classList.remove('on'));
-  el.classList.add('on'); roomF=v; run();
+const EM = ['🛋️','🏠','🏢','🔑','🏡','🌟','✨','🏗️'];
+function rndCoord(d){
+  const k=d.toLowerCase();
+  const c=COORD[k]||[41.714,44.800];
+  return [c[0]+(Math.random()-.5)*.012, c[1]+(Math.random()-.5)*.012];
 }
 
+// ══════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════
+let ALL=[], shown=[], favs=new Set(), mkrs={}, map, activeId=null, roomF='';
+let lastCount = 0;
+
+// ══════════════════════════════════════
+//  LOAD FROM GOOGLE SHEETS
+// ══════════════════════════════════════
+async function loadSheets() {
+  if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL.includes('ВСТАВЬ')) {
+    ALL = getDemoData();
+    document.getElementById('stUpd').textContent = 'Demo';
+    return true;
+  }
+  try {
+    const res  = await fetch(APPS_SCRIPT_URL);
+    const data = await res.json();
+    const rows = data.listings || [];
+    const bool = v => v === 'TRUE' || v === true;
+
+    ALL = rows.map((obj, i) => {
+      obj._am = {
+        wifi: bool(obj.wifi), stove: bool(obj.stove),
+        balcony: bool(obj.balcony), tv: bool(obj.tv),
+        conditioner: bool(obj.conditioner), dishwasher: bool(obj.dishwasher),
+        elevator: bool(obj.elevator), washing_machine: bool(obj.washing_machine),
+        microwave: bool(obj.microwave), parking: bool(obj.parking),
+      };
+      obj.is_exclusive = bool(obj.is_exclusive);
+      obj.is_new       = bool(obj.is_new);
+      if (obj.lat && obj.lng && parseFloat(obj.lat) > 0) {
+        obj._lat = parseFloat(obj.lat);
+        obj._lng = parseFloat(obj.lng);
+      } else {
+        const c = rndCoord(obj.district || '');
+        obj._lat = c[0]; obj._lng = c[1];
+      }
+      obj._posted = obj.parsed_at ? new Date(obj.parsed_at) : new Date(Date.now() - i*3600000);
+      obj._isNew  = i < 5;
+      obj._emoji  = EM[i % EM.length];
+      return obj;
+    }).filter(l => l.price && parseFloat(l.price) > 0);
+
+    document.getElementById('stUpd').textContent = new Date().toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit'});
+    return true;
+  } catch(e) {
+    console.error('Load error:', e);
+    document.getElementById('errBanner').classList.add('show');
+    ALL = getDemoData();
+    return false;
+  }
+}
+
+// ══════════════════════════════════════
+//  DEMO DATA (пока не настроен Sheets)
+// ══════════════════════════════════════
+function getDemoData() {
+  return [
+    {id:'1',type:'rent',rooms:2,title:'2-комн. • Новостройка • Цeретели',address:'10б ул. Спиридона Кедиа',district:'Tsereteli',metro:'Цeретели',sqm:50,floor:8,floors:12,heating:'Central',building:'New',price:500,deposit:500,commission:0,agent:'Серги',phone:'+995 599 20 67 16',contact:'@David_Tibelashvili',tg_url:'https://t.me/rent_tbilisi_ge',photo:'',is_exclusive:'true',_am:{wifi:true,stove:true,balcony:true,tv:true,conditioner:false,elevator:true,washing_machine:true},_lat:41.7110,_lng:44.7788,_posted:new Date(Date.now()-2*36e5),_isNew:true,_emoji:'✨'},
+    {id:'2',type:'commercial',rooms:null,title:'Коммерция • 92 м² • Руставели',address:'47 пр. Мераба Костава',district:'Rustaveli',metro:'Руставели',sqm:92,floor:3,floors:3,heating:'Electric',building:'Old',price:750,deposit:750,commission:0,agent:'Давид',phone:'+995 599 20 67 16',contact:'@David_Tibelashvili',tg_url:'https://t.me/rent_tbilisi_ge',photo:'',is_exclusive:'false',_am:{wifi:true,conditioner:true},_lat:41.6968,_lng:44.8008,_posted:new Date(Date.now()-5*36e5),_isNew:true,_emoji:'🏢'},
+    {id:'3',type:'rent',rooms:3,title:'3-комн. • Ремонт • Ваке • Абашидзе',address:'56 ул. Ираклия Абашидзе',district:'Vake',metro:'Руставели',sqm:210,floor:5,floors:11,heating:'Central',building:'New',price:1800,deposit:1800,commission:0,agent:'Мишель',phone:'+995 599 20 67 16',contact:'@David_Tibelashvili',tg_url:'https://t.me/rent_tbilisi_ge',photo:'',is_exclusive:'true',_am:{wifi:true,stove:true,balcony:true,tv:true,conditioner:true,dishwasher:true,elevator:true,washing_machine:true,microwave:true,parking:true},_lat:41.7081,_lng:44.7594,_posted:new Date(Date.now()-6*36e5),_isNew:false,_emoji:'🌟'},
+    {id:'4',type:'commercial',rooms:null,title:'Коммерция • 230 м² • Крцаниси',address:'22/24 ул. Крцаниси',district:'Krtsanisi',metro:'Liberty Square',sqm:230,floor:1,floors:10,heating:'',building:'New',price:2800,deposit:2800,commission:0,agent:'Омар',phone:'+995 599 20 67 16',contact:'@David_Tibelashvili',tg_url:'https://t.me/rent_tbilisi_ge',photo:'',is_exclusive:'false',_am:{wifi:true,conditioner:true},_lat:41.6828,_lng:44.8052,_posted:new Date(Date.now()-5.5*36e5),_isNew:true,_emoji:'🏢'},
+    {id:'5',type:'commercial',rooms:null,title:'Коммерция • 50 м² • Марджанишвили',address:'8 ул. Иа Каргаретели',district:'Marjanishvili',metro:'Марджанишвили',sqm:50,floor:1,floors:5,heating:'',building:'New',price:1000,deposit:1000,commission:0,agent:'Давид',phone:'+995 599 20 67 16',contact:'@David_Tibelashvili',tg_url:'https://t.me/rent_tbilisi_ge',photo:'',is_exclusive:'false',_am:{wifi:false},_lat:41.6932,_lng:44.8118,_posted:new Date(Date.now()-4*36e5),_isNew:true,_emoji:'🏢'},
+  ];
+}
+
+// ══════════════════════════════════════
+//  HELPERS
+// ══════════════════════════════════════
+const ago = d => {const s=(Date.now()-d)/1e3;if(s<60)return'только что';if(s<3600)return~~(s/60)+' мин';if(s<86400)return~~(s/3600)+' ч';return~~(s/86400)+' д';};
+const fmtP = l => l.type==='sale'?'$'+parseInt(l.price).toLocaleString():'$'+parseInt(l.price);
+const fmtU = l => l.type==='sale'?'':'/мес';
+const ini = n => String(n||'?').slice(0,2).toUpperCase();
+const today = d => d && new Date(d).toDateString()===new Date().toDateString();
+const blbl = {New:'Новостройка',Old:'Старый фонд',Soviet:'Советский'};
+const amGet = (l,k) => l._am ? l._am[k] : false;
+
+// ══════════════════════════════════════
+//  FILTERS + SORT
+// ══════════════════════════════════════
+function setRoom(el,v){
+  document.querySelectorAll('[data-r]').forEach(x=>x.classList.remove('on'));
+  el.classList.add('on');roomF=v;run();
+}
 function run(){
   const addr=document.getElementById('sAddr').value.toLowerCase();
   const type=document.getElementById('sType').value;
@@ -478,74 +425,78 @@ function run(){
   const build=document.getElementById('fBuild').value;
   const am=document.getElementById('fAm').value;
   const sort=document.getElementById('fSort').value;
-
   shown=ALL.filter(l=>{
-    if(addr&&![l.title,l.addr,l.dist].some(s=>s.toLowerCase().includes(addr)))return false;
+    const r=parseInt(l.rooms)||0;
+    if(addr&&![l.title,l.address,l.district].some(s=>String(s).toLowerCase().includes(addr)))return false;
     if(type&&l.type!==type)return false;
-    if(dist&&l.dist!==dist)return false;
-    if(build&&l.build!==build)return false;
-    if(roomF){if(roomF==='4'&&(l.rooms||0)<4)return false;if(roomF!=='4'&&l.rooms!=roomF)return false;}
-    if(price){const[mn,mx]=price.split('-').map(Number);if(l.price<mn||l.price>mx)return false;}
-    if(am){if(am==='pets'&&!l.pets)return false;else if(am!=='pets'&&!l.am[am])return false;}
+    if(dist&&l.district!==dist)return false;
+    if(build&&l.building!==build)return false;
+    if(roomF!==''){if(roomF==='4'&&r<4)return false;if(roomF!=='4'&&r!=parseInt(roomF))return false;}
+    if(price){const[mn,mx]=price.split('-').map(Number);const p=parseFloat(l.price)||0;if(p<mn||p>mx)return false;}
+    if(am){if(am==='pets'&&!l.pets)return false;else if(am!=='pets'&&!amGet(l,am))return false;}
     return true;
   });
-
-  const s={new:(a,b)=>b.posted-a.posted,pa:(a,b)=>a.price-b.price,pd:(a,b)=>b.price-a.price,sa:(a,b)=>a.sqm-b.sqm,sd:(a,b)=>b.sqm-a.sqm};
-  shown.sort(s[sort]||s.new);
-
-  render(); pins(); stats();
+  const srt={new:(a,b)=>b._posted-a._posted,pa:(a,b)=>a.price-b.price,pd:(a,b)=>b.price-a.price,sa:(a,b)=>a.sqm-b.sqm};
+  shown.sort(srt[sort]||srt.new);
+  render();pins();stats();
 }
 
-/* ═══════════════════════════
-   RENDER CARDS
-═══════════════════════════ */
+// ══════════════════════════════════════
+//  RENDER
+// ══════════════════════════════════════
 function render(){
   const g=document.getElementById('grid');
-  const cnt=shown.length;
-  document.getElementById('fcnt').innerHTML=`<strong>${cnt}</strong> объявлений`;
-
-  if(!cnt){
-    g.innerHTML=`<div class="empty"><div class="empty-icon">🔍</div><h3>Ничего не найдено</h3><p>Попробуйте изменить фильтры</p></div>`;
-    return;
-  }
+  document.getElementById('fcnt').innerHTML=`<strong>${shown.length}</strong> объявлений`;
+  if(!shown.length){g.innerHTML=`<div class="empty"><div class="empty-icon">🔍</div><h3>Ничего не найдено</h3><p>Попробуйте изменить фильтры</p></div>`;return;}
   g.innerHTML=shown.map(card).join('');
+
+  // Детект новых (появились с последнего рендера)
+  if(shown.length > lastCount && lastCount > 0) {
+    const newest = shown[0];
+    showToast(`${newest.district} · ${fmtP(newest)}${fmtU(newest)} — ${String(newest.title).split('•')[0].trim()}`);
+  }
+  lastCount = shown.length;
+}
+
+function photoEl(l, cls) {
+  if (l.photo) return `<img src="${l.photo}" alt="" loading="lazy" onerror="this.parentNode.innerHTML='<div class=\\'emoji-placeholder\\'>${l._emoji||'🏠'}</div>'">`;
+  return `<div class="emoji-placeholder">${l._emoji||'🏠'}</div>`;
 }
 
 function card(l){
   const fv=favs.has(l.id);
-  return`<div class="card${activeId===l.id?' hl':''}" id="c${l.id}" onclick="openM(${l.id})" onmouseenter="hmk(${l.id},1)" onmouseleave="hmk(${l.id},0)">
+  const isNew = l._isNew || l.is_new==='True' || l.is_new===true;
+  const isExcl = l.is_exclusive==='True' || l.is_exclusive===true;
+  return`<div class="card${activeId===l.id?' hl':''}" id="c${l.id}" onclick="openM('${l.id}')" onmouseenter="hmk('${l.id}',1)" onmouseleave="hmk('${l.id}',0)">
   <div class="card-photo">
-    <div class="card-photo-inner">${l.emoji}</div>
+    <div class="card-photo-inner">${photoEl(l)}</div>
     <div class="card-badges">
-      ${l.new?'<span class="badge b-new">NEW</span>':''}
-      ${l.excl?'<span class="badge b-excl">EXCL</span>':''}
+      ${isNew?'<span class="badge b-new">NEW</span>':''}
+      ${isExcl?'<span class="badge b-excl">EXCL</span>':''}
       ${l.type==='sale'?'<span class="badge b-sale">ПРОДАЖА</span>':''}
       ${l.type==='commercial'?'<span class="badge b-comm">БИЗНЕС</span>':''}
     </div>
-    <button class="card-fav" onclick="fav(event,${l.id})">${fv?'❤️':'🤍'}</button>
+    <button class="card-fav" onclick="fav(event,'${l.id}')">${fv?'❤️':'🤍'}</button>
   </div>
   <div class="card-body">
-    <div class="card-loc">${l.dist}${l.metro?` · ${l.metro}`:''}</div>
-    <div class="card-sub">${l.title}</div>
-    <div class="card-sub">📍 ${l.addr}</div>
+    <div class="card-loc">${l.district||''}${l.metro?' · '+l.metro:''}</div>
+    <div class="card-sub">${l.title||''}</div>
+    <div class="card-sub">📍 ${l.address||''}</div>
     <div class="card-specs">
-      <span class="spec">📐 ${l.sqm} м²</span>
-      <span class="spec">🏢 ${l.fl}/${l.fls}</span>
-      ${l.rooms?`<span class="spec">🛋 ${l.rooms}к.</span>`:''}
-      ${l.am.wifi?'<span class="spec">📶 WiFi</span>':''}
-      ${l.am.balcony?'<span class="spec">🏗 Балкон</span>':''}
-      ${l.pets?'<span class="spec">🐾</span>':''}
+      ${l.sqm?`<span class="spec">📐 ${l.sqm} м²</span>`:''}
+      ${l.floor&&l.floors?`<span class="spec">🏢 ${l.floor}/${l.floors}</span>`:''}
+      ${l.rooms!=null?`<span class="spec">🛋 ${l.rooms||'ст'}к.</span>`:''}
+      ${amGet(l,'wifi')?'<span class="spec">📶 WiFi</span>':''}
+      ${amGet(l,'balcony')?'<span class="spec">🏗 Балкон</span>':''}
+      ${amGet(l,'parking')?'<span class="spec">🅿️</span>':''}
     </div>
     <div class="card-price">${fmtP(l)} <span>${fmtU(l)}</span></div>
-    ${l.dep?`<div class="no-comm">✅ 0% комиссия · депозит $${l.dep}</div>`:''}
+    ${l.deposit?`<div class="no-comm">✅ 0% комиссия · депозит $${l.deposit}</div>`:''}
     <div class="card-bottom">
-      <div class="agent-row">
-        <div class="av">${ini(l.agent)}</div>
-        <span class="agent-name">${l.agent} · ${ago(l.posted)}</span>
-      </div>
+      <div class="agent-row"><div class="av">${ini(l.agent)}</div><span class="agent-name">${l.agent||'Агент'} · ${ago(l._posted)}</span></div>
       <div class="card-btns">
-        <a class="cb cb-tg" href="https://t.me/David_Tibelashvili" target="_blank" onclick="event.stopPropagation()">✈️ TG</a>
-        <a class="cb cb-call" href="tel:${l.phone.replace(/\s/g,'')}" onclick="event.stopPropagation()">📞</a>
+        <a class="cb cb-tg" href="https://t.me/David_Tibelashvili" target="_blank" onclick="event.stopPropagation()">✈️</a>
+        <a class="cb cb-call" href="tel:${String(l.phone||'').replace(/\s/g,'')}" onclick="event.stopPropagation()">📞</a>
       </div>
     </div>
   </div>
@@ -554,69 +505,61 @@ function card(l){
 
 function fav(e,id){e.stopPropagation();favs.has(id)?favs.delete(id):favs.add(id);render();}
 
-/* ═══════════════════════════
-   MAP
-═══════════════════════════ */
+// ══════════════════════════════════════
+//  MAP
+// ══════════════════════════════════════
 function initMap(){
   map=L.map('map',{center:[41.714,44.800],zoom:13});
   L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{attribution:'© OpenStreetMap © CARTO',maxZoom:19}).addTo(map);
-  pins();
 }
-
 function pins(){
   Object.values(mkrs).forEach(m=>map.removeLayer(m));mkrs={};
   shown.forEach(l=>{
-    const html=`<div class="pm${l.new?' new-pin':''}">${fmtP(l)}</div>`;
+    if(!l._lat||!l._lng)return;
+    const isNew = l._isNew||l.is_new==='True';
+    const html=`<div class="pm${isNew?' new-pin':''}">${fmtP(l)}</div>`;
     const icon=L.divIcon({html,className:'',iconAnchor:[28,14]});
-    const m=L.marker([l.lat,l.lng],{icon}).addTo(map);
+    const m=L.marker([l._lat,l._lng],{icon}).addTo(map);
+    const photoHtml = l.photo
+      ? `<img src="${l.photo}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentNode.innerHTML='<div class=ep>🏠</div>'">`
+      : `<div class="ep">${l._emoji||'🏠'}</div>`;
     m.bindPopup(`
-      <div class="pu-photo">${l.emoji}</div>
+      <div class="pu-photo">${photoHtml}</div>
       <div class="pu-body">
-        <div class="pu-loc">${l.dist} · ${l.rooms?l.rooms+'к. ':''}${l.sqm}м²</div>
-        <div class="pu-sub">📍 ${l.addr}</div>
+        <div class="pu-loc">${l.district||''} ${l.rooms?'· '+l.rooms+'к.':''} ${l.sqm?l.sqm+'м²':''}</div>
+        <div class="pu-sub">📍 ${l.address||''}</div>
         <div class="pu-price">${fmtP(l)}${fmtU(l)}</div>
         <div class="pu-btns">
-          <button class="pu-btn pb-navy" onclick="openM(${l.id})">Подробнее</button>
+          <button class="pu-btn pb-navy" onclick="openM('${l.id}')">Подробнее</button>
           <a class="pu-btn pb-tg" href="https://t.me/David_Tibelashvili" target="_blank">✈️ TG</a>
         </div>
-      </div>`,{maxWidth:230});
+      </div>`,{maxWidth:240});
     m.on('click',()=>{scrollCard(l.id);setHL(l.id);});
     mkrs[l.id]=m;
   });
 }
-
-function hmk(id,on){
-  const el=mkrs[id]?.getElement();
-  if(el)el.querySelector('.pm').classList.toggle('on',on);
-}
-
-function scrollCard(id){
-  const el=document.getElementById('c'+id);
-  if(el)el.scrollIntoView({behavior:'smooth',block:'center'});
-  setHL(id);
-}
-
+function hmk(id,on){const el=mkrs[id]?.getElement();if(el)el.querySelector('.pm')?.classList.toggle('on',on);}
+function scrollCard(id){document.getElementById('c'+id)?.scrollIntoView({behavior:'smooth',block:'center'});setHL(id);}
 function setHL(id){
-  if(activeId){document.getElementById('c'+activeId)?.classList.remove('hl');}
-  activeId=id;
-  document.getElementById('c'+id)?.classList.add('hl');
+  if(activeId)document.getElementById('c'+activeId)?.classList.remove('hl');
+  activeId=id;document.getElementById('c'+id)?.classList.add('hl');
 }
 
-/* ═══════════════════════════
-   STATS
-═══════════════════════════ */
+// ══════════════════════════════════════
+//  STATS
+// ══════════════════════════════════════
 function stats(){
   const rents=shown.filter(l=>l.type==='rent');
-  const avg=rents.length?Math.round(rents.reduce((s,l)=>s+l.price,0)/rents.length):0;
-  const nw=ALL.filter(l=>today(l.posted)).length;
+  const avg=rents.length?Math.round(rents.reduce((s,l)=>s+parseFloat(l.price||0),0)/rents.length):0;
+  const nw=ALL.filter(l=>today(l._posted)).length;
   document.getElementById('stTotal').textContent=shown.length;
   document.getElementById('stAvg').textContent=avg?'$'+avg:'—';
-  document.getElementById('stNew').textContent=nw;
+  document.getElementById('stNew').textContent=nw||0;
 }
 
-/* ═══════════════════════════
-   VIEW TOGGLE
-═══════════════════════════ */
+// ══════════════════════════════════════
+//  VIEW TOGGLE
+// ══════════════════════════════════════
 function setView(v){
   ['split','map','list'].forEach(x=>document.getElementById('v'+x[0].toUpperCase()+x.slice(1)).classList.remove('on'));
   document.getElementById('v'+v[0].toUpperCase()+v.slice(1)).classList.add('on');
@@ -627,118 +570,109 @@ function setView(v){
   setTimeout(()=>map.invalidateSize(),120);
 }
 
-/* ═══════════════════════════
-   MODAL
-═══════════════════════════ */
+// ══════════════════════════════════════
+//  MODAL
+// ══════════════════════════════════════
 function openM(id){
-  const l=ALL.find(x=>x.id===id);if(!l)return;
+  const l=ALL.find(x=>String(x.id)===String(id));if(!l)return;
   setHL(id);
+  const am=l._am||{};
   const ams=[
-    ['📶','WiFi',l.am.wifi],['🍳','Плита',l.am.stove],['🌡','Кондиционер',l.am.cond],
-    ['🏗','Балкон',l.am.balcony],['📺','Телевизор',l.am.tv],['🍽','Посудомойка',l.am.dish],
-    ['🛗','Лифт',l.am.lift],['🫧','Стиралка',l.am.wash],['🐾','Питомцы',l.pets]
+    ['📶','WiFi',am.wifi],['🍳','Плита',am.stove],['🌡','Кондиционер',am.conditioner],
+    ['🏗','Балкон',am.balcony],['📺','Телевизор',am.tv],['🍽','Посудомойка',am.dishwasher],
+    ['🛗','Лифт',am.elevator],['🫧','Стиралка',am.washing_machine],
+    ['🅿️','Парковка',am.parking],['♨️','Микроволновка',am.microwave],
   ];
+  const isNew=l._isNew||l.is_new==='True';
+  const isExcl=l.is_exclusive==='True'||l.is_exclusive===true;
+  const photoHtml=l.photo?`<img src="${l.photo}" onerror="this.parentNode.innerHTML='<div class=ep>${l._emoji||'🏠'}</div>'">`:`<div class="ep">${l._emoji||'🏠'}</div>`;
   document.getElementById('mi').innerHTML=`
-  <div class="modal-photo">${l.emoji}</div>
+  <div class="modal-photo">${photoHtml}</div>
   <div class="modal-body">
     <div class="modal-top">
       <div>
-        <div class="modal-title">${l.title}</div>
-        <div class="modal-addr">📍 ${l.addr}, ${l.dist}${l.metro?` · 🚇 ${l.metro}`:''}</div>
+        <div class="modal-title">${l.title||''}</div>
+        <div class="modal-addr">📍 ${l.address||''}, ${l.district||''}${l.metro?' · 🚇 '+l.metro:''}</div>
       </div>
-      <div class="modal-price">
+      <div>
         <div class="modal-price-main">${fmtP(l)}</div>
-        <div class="modal-price-sub">${fmtU(l)}${l.dep?` · депозит $${l.dep}`:''}</div>
+        <div class="modal-price-sub">${fmtU(l)}${l.deposit?' · депозит $'+l.deposit:''}</div>
       </div>
     </div>
     <div class="modal-tags">
       ${l.type==='rent'?'<span class="mt mt-rent">🔑 Аренда</span>':''}
       ${l.type==='sale'?'<span class="mt mt-sale">🏷 Продажа</span>':''}
       ${l.type==='commercial'?'<span class="mt mt-comm">🏢 Коммерция</span>':''}
-      ${l.excl?'<span class="mt mt-excl">⭐ Эксклюзив</span>':''}
-      <span class="mt mt-ok">✅ 0% комиссия</span>
-      ${l.new?'<span class="mt mt-excl">🆕 Новое</span>':''}
+      ${isExcl?'<span class="mt mt-excl">⭐ Эксклюзив</span>':''}
+      ${l.commission==0||l.commission==='0'?'<span class="mt mt-ok">✅ 0% комиссия</span>':''}
+      ${isNew?'<span class="mt mt-excl">🆕 Новое</span>':''}
     </div>
     <div class="sec-title">Параметры</div>
     <div class="detail-grid">
-      <div class="di"><div class="di-lbl">Площадь</div><div class="di-val">${l.sqm} м²</div></div>
-      <div class="di"><div class="di-lbl">Этаж</div><div class="di-val">${l.fl} из ${l.fls}</div></div>
-      ${l.rooms?`<div class="di"><div class="di-lbl">Комнаты</div><div class="di-val">${l.rooms}</div></div>`:''}
-      <div class="di"><div class="di-lbl">Отопление</div><div class="di-val">${l.heat}</div></div>
-      <div class="di"><div class="di-lbl">Тип здания</div><div class="di-val">${blbl[l.build]||l.build}</div></div>
-      <div class="di"><div class="di-lbl">Добавлено</div><div class="di-val">${ago(l.posted)} назад</div></div>
+      ${l.sqm?`<div class="di"><div class="di-lbl">Площадь</div><div class="di-val">${l.sqm} м²</div></div>`:''}
+      ${l.floor&&l.floors?`<div class="di"><div class="di-lbl">Этаж</div><div class="di-val">${l.floor} из ${l.floors}</div></div>`:''}
+      ${l.rooms!=null?`<div class="di"><div class="di-lbl">Комнаты</div><div class="di-val">${l.rooms||'Студия'}</div></div>`:''}
+      ${l.heating?`<div class="di"><div class="di-lbl">Отопление</div><div class="di-val">${l.heating}</div></div>`:''}
+      ${l.building?`<div class="di"><div class="di-lbl">Тип здания</div><div class="di-val">${blbl[l.building]||l.building}</div></div>`:''}
+      <div class="di"><div class="di-lbl">Добавлено</div><div class="di-val">${ago(l._posted)} назад</div></div>
+      ${l.tenants?`<div class="di"><div class="di-lbl">Жильцы</div><div class="di-val">${l.tenants}</div></div>`:''}
+      ${l.term?`<div class="di"><div class="di-lbl">Срок</div><div class="di-val">${l.term}</div></div>`:''}
     </div>
     <div class="sec-title">Удобства</div>
     <div class="am-grid">${ams.map(([e,n,h])=>`<div class="am${h?'':' no'}">${e} ${n}</div>`).join('')}</div>
     <div class="modal-agent">
       <div class="modal-av">${ini(l.agent)}</div>
       <div>
-        <div class="modal-an">${l.agent}</div>
-        <div class="modal-ar">Агент · Rent in Tbilisi · Platform 90/10</div>
-        <div class="modal-ar">${l.phone}</div>
+        <div class="modal-an">${l.agent||'Агент'}</div>
+        <div class="modal-ar">Rent in Tbilisi · Platform 90/10</div>
+        <div class="modal-ar">${l.phone||'+995 599 20 67 16'}</div>
       </div>
     </div>
     <div class="modal-cta">
       <a class="mc mc-tg" href="https://t.me/David_Tibelashvili" target="_blank">✈️ Telegram</a>
-      <a class="mc mc-red" href="tel:${l.phone.replace(/\s/g,'')}">📞 Позвонить</a>
-      <a class="mc mc-navy" href="https://t.me/rent_tbilisi_ge" target="_blank">📢 Канал</a>
+      <a class="mc mc-red" href="tel:${String(l.phone||'+99559920 6716').replace(/\s/g,'')}">📞 Позвонить</a>
+      <a class="mc mc-navy" href="${l.tg_url||'https://t.me/rent_tbilisi_ge'}" target="_blank">📢 Пост в канале</a>
     </div>
   </div>`;
   document.getElementById('mw').classList.add('open');
-  if(mkrs[id]){map.flyTo([l.lat,l.lng],15,{duration:1});mkrs[id].openPopup();}
+  if(mkrs[id]){map.flyTo([l._lat,l._lng],15,{duration:1});mkrs[id].openPopup();}
 }
 function closeM(){document.getElementById('mw').classList.remove('open');}
 function bgClose(e){if(e.target===document.getElementById('mw'))closeM();}
 
-/* ═══════════════════════════
-   LIVE SIMULATION
-   (имитирует реальные посты канала)
-═══════════════════════════ */
-const DISTS=Object.keys(COORD);
-const TTLS=['1-комн. • Только добавлено','Студия • Рядом метро','2-комн. • С ремонтом','Меблированная • Новостройка','3-комн. семейная'];
-
-function liveAdd(){
-  const d=DISTS[~~(Math.random()*DISTS.length)];
-  const c=COORD[d],j=jit(c);
-  const pr=[350,380,420,450,500,550,600,650,700,750][~~(Math.random()*10)];
-  const rooms=[1,1,2,2,3][~~(Math.random()*5)];
-  const l={
-    id:nextId++,new:true,excl:false,type:'rent',rooms,
-    title:TTLS[~~(Math.random()*TTLS.length)]+' • '+d,
-    addr:d+' District',dist:d,metro:null,
-    sqm:35+~~(Math.random()*55),fl:1+~~(Math.random()*14),fls:9+~~(Math.random()*6),
-    heat:['Central','Gas','Electric'][~~(Math.random()*3)],
-    build:['New','Old','Soviet'][~~(Math.random()*3)],
-    price:pr,dep:pr,pets:Math.random()>.6,
-    am:{wifi:true,stove:true,balcony:Math.random()>.4,tv:false,cond:Math.random()>.6,dish:false,lift:Math.random()>.35,wash:true},
-    agent:AG[~~(Math.random()*AG.length)],phone:'+995 599 20 67 16',
-    posted:new Date(),emoji:EM[~~(Math.random()*EM.length)],
-    lat:j[0],lng:j[1]
-  };
-  ALL.unshift(l);run();
-  toast(`${d} · $${pr}/мес — ${l.title.split('•')[0].trim()}`);
-  setTimeout(liveAdd,38000+Math.random()*42000);
+// ══════════════════════════════════════
+//  AUTO REFRESH (каждые 5 минут)
+// ══════════════════════════════════════
+async function refresh(){
+  const prevCount=ALL.length;
+  await loadSheets();
+  run();
+  if(ALL.length>prevCount){
+    showToast(`+${ALL.length-prevCount} новых объявлений!`);
+  }
 }
 
-function toast(txt){
+function showToast(txt){
   document.getElementById('ttext').textContent=txt;
   const t=document.getElementById('toast');
   t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'),5000);
 }
-
 function scrollTop(){document.getElementById('lp').scrollTo({top:0,behavior:'smooth'});}
 
-/* ═══════════════════════════
-   INIT
-═══════════════════════════ */
-window.addEventListener('load',()=>{
+// ══════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════
+window.addEventListener('load', async ()=>{
+  document.getElementById('ld-sub').textContent='Подключаемся к Google Sheets...';
+  initMap();
+  await loadSheets();
+  run();
   setTimeout(()=>{
     document.getElementById('ld').classList.add('gone');
     setTimeout(()=>document.getElementById('ld').remove(),600);
-  },2000);
-  initMap();run();
-  setTimeout(liveAdd,45000);
+  },500);
+  setInterval(refresh, REFRESH_MS);
   document.addEventListener('keydown',e=>{if(e.key==='Escape')closeM();});
 });
 </script>
