@@ -105,19 +105,8 @@ function parseChannel() {
 
       const listing = parsePost(post);
       if (listing) {
-        // Сохраняем ВСЕ фото в Google Drive (обходим CORS Telegram CDN)
-        if (listing.photo) {
-          listing.photo = savePhoto(listing.photo, post.id + '_0') || '';
-        }
-        if (listing.photos) {
-          try {
-            var allPhotos = JSON.parse(listing.photos);
-            var drivePhotos = allPhotos.map(function(url, idx) {
-              return savePhoto(url, post.id + '_' + idx) || '';
-            }).filter(function(u){ return u; });
-            listing.photos = JSON.stringify(drivePhotos);
-          } catch(e) { listing.photos = ''; }
-        }
+        // Фото хранятся как прямые cdn4.telesco.pe ссылки
+        // img src работает напрямую без CORS
         newRows.push(listing);
         Logger.log('✓ [' + post.id + '] ' + listing.district + ' ' + listing.type + ' $' + listing.price);
       } else {
