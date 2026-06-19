@@ -4,12 +4,10 @@
 //  Запускается автоматически каждые 30 минут
 // ============================================================
 
-// ── КОНФИГ ──────────────────────────────────────────────────
-const CHANNEL_URL  = 'https://t.me/s/rent_tbilisi_ge';
-const SHEET_NAME   = 'listings';
-const MAX_PAGES    = 4;   // страниц за один запуск (~80 постов)
+const CHANNEL_URL = 'https://t.me/s/rent_tbilisi_ge';
+const SHEET_NAME  = 'listings';
+const MAX_PAGES   = 10;
 
-// ── КООРДИНАТЫ РАЙОНОВ ──────────────────────────────────────
 const COORDS = {
   'vake':          [41.7151, 44.7640],
   'saburtalo':     [41.7237, 44.7852],
@@ -23,330 +21,323 @@ const COORDS = {
   'tsereteli':     [41.7100, 44.7780],
   'rustaveli':     [41.6960, 44.8000],
   'dighomi':       [41.7490, 44.7630],
+  'digomi':        [41.7490, 44.7630],
   'marjanishvili': [41.6930, 44.8120],
   'krtsanisi':     [41.6820, 44.8050],
   'avlabari':      [41.6880, 44.8240],
   'ortachala':     [41.6810, 44.8390],
   'varketili':     [41.7040, 44.8640],
   'samgori':       [41.6880, 44.8480],
-  'digomi':        [41.7490, 44.7630],
   'temqa':         [41.7380, 44.8280],
   'lilo':          [41.7100, 44.8900],
 };
 
 // ════════════════════════════════════════════════════════════
-//  ГЛАВНАЯ ФУНКЦИЯ — запускается по триггеру каждые 30 минут
+//  ГЛАВНАЯ ФУНКЦИЯ
 // ════════════════════════════════════════════════════════════
 function parseChannel() {
   const ss    = SpreadsheetApp.getActiveSpreadsheet();
   const sheet = getOrCreateSheet(ss);
-  
-  // Читаем уже существующие ID чтобы не дублировать
-  const existingIds = getExistingIds(sheet);
-  Logger.log('Существующих объявлений: ' + existingIds.size);
-  
-  // Последний обработанный ID
-  const propStore  = PropertiesService.getScriptProperties();
-  const lastIdStr  = propStore.getProperty('LAST_MSG_ID') || '0';
-  const lastId     = parseInt(lastIdStr);
-  
-  const newRows    = [];
-  let maxSeenId    = lastId;
-  let url          = CHANNEL_URL;
-  let stopParsing  = false;
 
-  for (let page = 0; page < MAX_PAGES && !stopParsing; page++) {
-    Logger.log('Страница ' + (page + 1) + ': ' + url);
-    
+  const existingIds = getExistingIds(sheet);
+  Logger.log('Существующих: ' + existingIds.size);
+
+  const props   = PropertiesService.getScriptProperties();
+  const lastId  = parseInt(props.getProperty('LAST_MSG_ID') || '0');
+
+  const newRows = [];
+  let maxSeenId = lastId;
+  let url       = CHANNEL_URL;
+  let stop      = false;
+
+  for (let page = 0; page < MAX_PAGES && !stop; page++) {
+    Logger.log('Страница ' + (page+1) + ': ' + url);
+
     const html = fetchPage(url);
     if (!html) break;
-    
+
     const posts = extractPosts(html);
-    Logger.log('Постов на странице: ' + posts.length);
-    
+    Logger.log('Найдено постов: ' + posts.length);
+
     for (const post of posts) {
       const msgId = parseInt(post.id);
-      
+
       if (msgId <= lastId || existingIds.has(post.id)) {
-        Logger.log('ID ' + post.id + ' уже в базе — стоп');
-        stopParsing = true;
+        Logger.log('ID ' + post.id + ' уже есть — стоп');
+        stop = true;
         break;
       }
-      
+
       const listing = parsePost(post);
       if (listing) {
         newRows.push(listing);
         Logger.log('✓ [' + post.id + '] ' + listing.district + ' ' + listing.type + ' $' + listing.price);
+      } else {
+        Logger.log('– [' + post.id + '] не объявление');
       }
-      
+
       maxSeenId = Math.max(maxSeenId, msgId);
     }
-    
-    // Следующая страница
+
     const nextUrl = extractNextUrl(html);
     if (!nextUrl) break;
     url = nextUrl;
-    Utilities.sleep(1500); // пауза между запросами
+    Utilities.sleep(1500);
   }
-  
-  // Записываем новые строки в начало таблицы (после заголовка)
+
   if (newRows.length > 0) {
     const rows2d = newRows.map(rowToArray);
     sheet.insertRowsAfter(1, rows2d.length);
-    const range = sheet.getRange(2, 1, rows2d.length, HEADERS.length);
-    range.setValues(rows2d);
-    Logger.log('Записано: ' + newRows.length + ' объявлений');
-    
-    // Обновляем последний ID
-    propStore.setProperty('LAST_MSG_ID', maxSeenId.toString());
+    sheet.getRange(2, 1, rows2d.length, HEADERS.length).setValues(rows2d);
+    props.setProperty('LAST_MSG_ID', maxSeenId.toString());
+    Logger.log('Записано: ' + newRows.length);
   } else {
-    Logger.log('Новых объявлений нет');
+    Logger.log('Новых нет');
   }
-  
-  // Записываем время последнего обновления
-  propStore.setProperty('LAST_RUN', new Date().toISOString());
+
+  props.setProperty('LAST_RUN', new Date().toISOString());
 }
 
-
 // ════════════════════════════════════════════════════════════
-//  FETCH СТРАНИЦЫ
+//  FETCH
 // ════════════════════════════════════════════════════════════
 function fetchPage(url) {
   try {
-    const resp = UrlFetchApp.fetch(url, {
+    const r = UrlFetchApp.fetch(url, {
       muteHttpExceptions: true,
-      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; RentParser/1.0)' }
+      headers: { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/120.0 Safari/537.36' }
     });
-    if (resp.getResponseCode() !== 200) return null;
-    return resp.getContentText();
+    return r.getResponseCode() === 200 ? r.getContentText() : null;
   } catch(e) {
-    Logger.log('Ошибка fetch: ' + e);
+    Logger.log('Fetch error: ' + e);
     return null;
   }
 }
 
-
 // ════════════════════════════════════════════════════════════
-//  ИЗВЛЕЧЕНИЕ ПОСТОВ ИЗ HTML
+//  ИЗВЛЕЧЕНИЕ ПОСТОВ
 // ════════════════════════════════════════════════════════════
 function extractPosts(html) {
   const posts = [];
   const seen  = new Set();
 
-  // Разбиваем по tgme_widget_message — каждый такой блок = один пост
-  const blocks = html.split('class="tgme_widget_message ');
+  // Разбиваем по data-post — каждый уникален
+  const parts = html.split('data-post="rent_tbilisi_ge/');
 
-  for (let i = 1; i < blocks.length; i++) {
-    const block = blocks[i];
+  for (var i = 1; i < parts.length; i++) {
+    var part = parts[i];
 
-    // ID поста из data-post="rent_tbilisi_ge/12345"
-    const idMatch = block.match(/data-post="rent_tbilisi_ge\/(\d+)"/);
-    if (!idMatch) continue;
-    const id = idMatch[1];
+    // ID
+    var idEnd = part.indexOf('"');
+    if (idEnd === -1) continue;
+    var id = part.substring(0, idEnd);
     if (seen.has(id)) continue;
     seen.add(id);
 
     // Текст — ищем tgme_widget_message_text
-    let text = '';
-    const textStart = block.indexOf('tgme_widget_message_text');
-    if (textStart !== -1) {
-      // Найдём открывающий тег и возьмём содержимое
-      const tagEnd = block.indexOf('>', textStart);
-      if (tagEnd !== -1) {
-        // Берём всё до закрывающего </div> с учётом вложенности
-        let depth = 1, pos = tagEnd + 1, raw = '';
-        while (pos < block.length && depth > 0) {
-          if (block.substr(pos, 4) === '<div') depth++;
-          else if (block.substr(pos, 6) === '</div>') { depth--; if (depth === 0) break; }
-          raw += block[pos];
-          pos++;
+    var text = '';
+    var ti = part.indexOf('tgme_widget_message_text');
+    if (ti !== -1) {
+      var open = part.indexOf('>', ti);
+      if (open !== -1) {
+        var depth = 1;
+        var p = open + 1;
+        var buf = '';
+        while (p < part.length && depth > 0) {
+          // br → newline
+          if (part.substring(p, p+4).toLowerCase() === '<br>') {
+            buf += '\n'; p += 4; continue;
+          }
+          if (part.substring(p, p+5).toLowerCase() === '<br/>') {
+            buf += '\n'; p += 5; continue;
+          }
+          if (part[p] === '<') {
+            if (part[p+1] === '/') {
+              depth--;
+            } else if (part[p+1] !== '!' && part[p+1] !== '?') {
+              depth++;
+            }
+            // Пропускаем тег
+            while (p < part.length && part[p] !== '>') p++;
+          } else if (depth > 0) {
+            buf += part[p];
+          }
+          p++;
         }
-        text = raw
-          .replace(/<br\s*\/?>/gi, '\n')
-          .replace(/<a[^>]*>([\s\S]*?)<\/a>/g, '$1')
-          .replace(/<[^>]+>/g, '')
-          .replace(/&amp;/g, '&')
-          .replace(/&lt;/g, '<')
-          .replace(/&gt;/g, '>')
-          .replace(/&nbsp;/g, ' ')
-          .replace(/&#39;/g, "'")
+        text = buf
+          .replace(/&amp;/g,'&').replace(/&lt;/g,'<')
+          .replace(/&gt;/g,'>').replace(/&nbsp;/g,' ')
+          .replace(/&#39;/g,"'").replace(/&quot;/g,'"')
+          .replace(/\n{3,}/g,'\n\n')
           .trim();
       }
     }
 
     // Фото
-    let photoUrl = '';
-    const photoMatch = block.match(/background-image:url\('([^']+)'\)/);
-    if (photoMatch) photoUrl = photoMatch[1];
+    var photo = '';
+    var pi = part.indexOf("background-image:url('");
+    if (pi !== -1) {
+      var ps = pi + 22;
+      var pe = part.indexOf("')", ps);
+      if (pe !== -1) photo = part.substring(ps, pe);
+    }
 
-    if (text && text.length > 20) {
-      posts.push({ id, text, photo: photoUrl });
+    if (text.length > 30) {
+      posts.push({ id: id, text: text, photo: photo });
     }
   }
 
   return posts;
 }
 
-
 // ════════════════════════════════════════════════════════════
-//  ИЗВЛЕЧЕНИЕ URL СЛЕДУЮЩЕЙ СТРАНИЦЫ
+//  СЛЕДУЮЩАЯ СТРАНИЦА
 // ════════════════════════════════════════════════════════════
 function extractNextUrl(html) {
-  const match = html.match(/href="(\/s\/rent_tbilisi_ge\?before=\d+)"/);
-  if (match) return 'https://t.me' + match[1];
-  return null;
+  var m = html.match(/href="(\/s\/rent_tbilisi_ge\?before=\d+)"/);
+  return m ? 'https://t.me' + m[1] : null;
 }
 
-
 // ════════════════════════════════════════════════════════════
-//  ПАРСЕР ОДНОГО ПОСТА
+//  ПАРСЕР ПОСТА
 // ════════════════════════════════════════════════════════════
 function parsePost(post) {
-  const text = post.text;
-  
-  // Пост должен быть объявлением
+  var text = post.text;
+
   if (!text.includes('$') && !text.includes('💰')) return null;
   if (!text.includes('#Rent') && !text.includes('#Sale') && !text.includes('#Commercial')) return null;
-  
-  const l = {
-    id:          post.id,
-    tg_url:      'https://t.me/rent_tbilisi_ge/' + post.id,
-    photo:       post.photo || '',
-    parsed_at:   new Date().toISOString(),
-    is_new:      'TRUE',
+
+  var l = {
+    id:           post.id,
+    tg_url:       'https://t.me/rent_tbilisi_ge/' + post.id,
+    photo:        post.photo || '',
+    parsed_at:    new Date().toISOString(),
+    is_new:       'TRUE',
     is_exclusive: (text.includes('#Exclusive') || text.toLowerCase().includes('exclusive listing')) ? 'TRUE' : 'FALSE',
   };
-  
-  // ── ТИП СДЕЛКИ ──
-  if (text.includes('#Commercial')) l.type = 'commercial';
-  else if (text.includes('#Sale') && !text.includes('#Rent')) l.type = 'sale';
-  else l.type = 'rent';
-  
-  // ── КОМНАТЫ ──
-  const roomMap = {'#Studio':0,'#1Bed':1,'#2Bed':2,'#3Bed':3,'#4Bed':4,'#5Bed':5};
+
+  // Тип
+  if (text.includes('#Commercial'))                             l.type = 'commercial';
+  else if (text.includes('#Sale') && !text.includes('#Rent'))   l.type = 'sale';
+  else                                                          l.type = 'rent';
+
+  // Комнаты
+  var roomMap = {'#Studio':0,'#1Bed':1,'#2Bed':2,'#3Bed':3,'#4Bed':4,'#5Bed':5};
   l.rooms = '';
-  for (const [tag, val] of Object.entries(roomMap)) {
-    if (text.includes(tag)) { l.rooms = val; break; }
+  for (var tag in roomMap) {
+    if (text.includes(tag)) { l.rooms = roomMap[tag]; break; }
   }
-  
-  // ── РАЙОН ──
+
+  // Район — ищем хештеги в первых строках
   l.district = '';
   l.metro    = '';
   l.lat      = '';
   l.lng      = '';
-  
-  // Первые 3 строки поста содержат район как хештег
-  const firstLines = text.split('\n').slice(0, 4).join('\n');
-  const hashTags = firstLines.match(/#([A-Z][a-zA-Z]+)/g) || [];
-  
-  for (const tag of hashTags) {
-    const name = tag.slice(1); // убираем #
-    const low  = name.toLowerCase();
+
+  var firstLines = text.split('\n').slice(0, 5).join(' ');
+  var tags = firstLines.match(/#([A-Z][a-zA-Z]+)/g) || [];
+
+  for (var t = 0; t < tags.length; t++) {
+    var name = tags[t].slice(1);
+    var low  = name.toLowerCase();
     if (COORDS[low]) {
       l.district = name;
-      const c = COORDS[low];
-      // небольшой jitter чтобы маркеры не сливались
-      l.lat = (c[0] + (Math.random() - 0.5) * 0.01).toFixed(6);
-      l.lng = (c[1] + (Math.random() - 0.5) * 0.01).toFixed(6);
+      var c = COORDS[low];
+      l.lat = (c[0] + (Math.random()-0.5)*0.01).toFixed(6);
+      l.lng = (c[1] + (Math.random()-0.5)*0.01).toFixed(6);
       break;
     }
   }
-  
+
   // Метро
-  const metroMatch = text.match(/🚇\s*#?([A-Za-z][A-Za-z ]+)/);
-  if (metroMatch) l.metro = metroMatch[1].trim();
-  
-  // ── АДРЕС ──
-  const addrMatch = text.match(/📍\s*([^\n]+)/);
-  l.address = addrMatch ? addrMatch[1].replace(/\[|\]/g, '').trim() : '';
-  
-  // ── ПЛОЩАДЬ ──
-  const sqmMatch = text.match(/(\d+(?:\.\d+)?)\s*[Ss]q\.?m/);
-  l.sqm = sqmMatch ? parseFloat(sqmMatch[1]) : '';
-  
-  // ── ЭТАЖ ──
-  const floorMatch = text.match(/(\d+)\s*\/\s*(\d+)\s*[Ff]loor/);
-  if (floorMatch) {
-    l.floor  = parseInt(floorMatch[1]);
-    l.floors = parseInt(floorMatch[2]);
-  } else {
-    l.floor  = '';
-    l.floors = '';
-  }
-  
-  // ── ОТОПЛЕНИЕ ──
-  if (text.includes('#CentralHeating'))  l.heating = 'Central';
-  else if (text.includes('#GasHeating')) l.heating = 'Gas';
+  var metroM = text.match(/🚇\s*#?([A-Za-z][A-Za-z ]+)/);
+  l.metro = metroM ? metroM[1].trim() : '';
+
+  // Адрес
+  var addrM = text.match(/📍\s*([^\n]+)/);
+  l.address = addrM ? addrM[1].replace(/[\[\]]/g,'').trim() : '';
+
+  // Площадь
+  var sqmM = text.match(/(\d+(?:\.\d+)?)\s*[Ss]q\.?m/);
+  l.sqm = sqmM ? parseFloat(sqmM[1]) : '';
+
+  // Этаж
+  var floorM = text.match(/(\d+)\s*\/\s*(\d+)\s*[Ff]loor/);
+  if (floorM) { l.floor = parseInt(floorM[1]); l.floors = parseInt(floorM[2]); }
+  else        { l.floor = ''; l.floors = ''; }
+
+  // Отопление
+  if      (text.includes('#CentralHeating'))  l.heating = 'Central';
+  else if (text.includes('#GasHeating'))      l.heating = 'Gas';
   else if (text.includes('#ElectricHeating')) l.heating = 'Electric';
-  else l.heating = '';
-  
-  // ── ЗДАНИЕ ──
-  if (text.includes('#NewBuilding'))      l.building = 'New';
-  else if (text.includes('#OldBuilding')) l.building = 'Old';
-  else l.building = '';
-  
-  // ── ЦЕНА ──
-  // Форматы: 💰 550$ / 💰 1800$ + Deposit / Each 1400$
-  const priceMatch = text.match(/💰\s*(?:Each\s*)?(\d[\d,]+)\s*\$/) ||
-                     text.match(/(\d[\d,]+)\s*\$\s*\+\s*Deposit/);
-  l.price = priceMatch ? parseInt(priceMatch[1].replace(/,/g, '')) : '';
-  
-  // ── ДЕПОЗИТ ──
-  const depMatch = text.match(/Deposit\s+(\d[\d,]+)\s*\$/) ||
-                   text.match(/\+\s*(\d[\d,]+)\s*\$\s*Deposit/) ||
-                   text.match(/(\d[\d,]+)\s*\$\s*Deposit/);
-  l.deposit = depMatch ? parseInt(depMatch[1].replace(/,/g, '')) : '';
-  
-  // ── КОМИССИЯ ──
+  else                                        l.heating = '';
+
+  // Здание
+  if      (text.includes('#NewBuilding'))  l.building = 'New';
+  else if (text.includes('#OldBuilding'))  l.building = 'Old';
+  else                                     l.building = '';
+
+  // Цена
+  var priceM = text.match(/💰\s*(?:Each\s*)?(\d[\d,]*)\s*\$/) ||
+               text.match(/(\d[\d,]*)\s*\$\s*\+\s*Deposit/) ||
+               text.match(/💰\s*(\d[\d,]*)/);
+  l.price = priceM ? parseInt(priceM[1].replace(/,/g,'')) : '';
+
+  // Депозит
+  var depM = text.match(/Deposit\s+(\d[\d,]*)\s*\$/) ||
+             text.match(/\+\s*(\d[\d,]*)\s*\$\s*Deposit/) ||
+             text.match(/(\d[\d,]*)\s*\$\s*Deposit/);
+  l.deposit = depM ? parseInt(depM[1].replace(/,/g,'')) : '';
+
+  // Комиссия
   l.commission = (text.includes('0% Commission') || text.includes('0% commission')) ? 0 : '';
-  
-  // ── УДОБСТВА ──
-  l.wifi           = text.includes('#WiFi')           ? 'TRUE' : 'FALSE';
-  l.stove          = text.includes('#Stove')          ? 'TRUE' : 'FALSE';
-  l.balcony        = text.includes('#Balcony')        ? 'TRUE' : 'FALSE';
-  l.tv             = text.includes('#TV')             ? 'TRUE' : 'FALSE';
-  l.conditioner    = text.includes('#Conditioner')    ? 'TRUE' : 'FALSE';
-  l.dishwasher     = text.includes('#Dishwasher')     ? 'TRUE' : 'FALSE';
-  l.elevator       = text.includes('#Elevator')       ? 'TRUE' : 'FALSE';
-  l.washing_machine= text.includes('#WashingMachine') ? 'TRUE' : 'FALSE';
-  l.microwave      = text.includes('#Microwave')      ? 'TRUE' : 'FALSE';
-  l.parking        = text.includes('#ParkingPlace')   ? 'TRUE' : 'FALSE';
-  
-  // ── ПИТОМЦЫ ──
-  if (text.includes('Pets: #NotAllowed') || text.includes('Pets:#NotAllowed')) l.pets = 'FALSE';
-  else if (text.includes('#ByAgreement') && text.includes('Pets')) l.pets = 'byagreement';
+
+  // Удобства
+  l.wifi            = text.includes('#WiFi')            ? 'TRUE':'FALSE';
+  l.stove           = text.includes('#Stove')           ? 'TRUE':'FALSE';
+  l.balcony         = text.includes('#Balcony')         ? 'TRUE':'FALSE';
+  l.tv              = text.includes('#TV')              ? 'TRUE':'FALSE';
+  l.conditioner     = text.includes('#Conditioner')     ? 'TRUE':'FALSE';
+  l.dishwasher      = text.includes('#Dishwasher')      ? 'TRUE':'FALSE';
+  l.elevator        = text.includes('#Elevator')        ? 'TRUE':'FALSE';
+  l.washing_machine = text.includes('#WashingMachine')  ? 'TRUE':'FALSE';
+  l.microwave       = text.includes('#Microwave')       ? 'TRUE':'FALSE';
+  l.parking         = text.includes('#ParkingPlace')    ? 'TRUE':'FALSE';
+
+  // Питомцы
+  if      (text.includes('Pets: #NotAllowed'))  l.pets = 'FALSE';
+  else if (text.includes('#ByAgreement'))        l.pets = 'byagreement';
   else if (text.includes('Pets') && text.includes('Allowed')) l.pets = 'TRUE';
-  else l.pets = 'FALSE';
-  
-  // ── ЖИЛЬЦЫ ──
-  const tenantsMatch = text.match(/👬\s*Tenants:\s*([0-9\-]+)/);
-  l.tenants = tenantsMatch ? tenantsMatch[1] : '';
-  
-  // ── СРОК ──
-  const terms = (text.match(/#\d+Month/g) || []).join(',');
+  else                                           l.pets = 'FALSE';
+
+  // Жильцы
+  var tenM = text.match(/👬\s*Tenants:\s*([0-9\-]+)/);
+  l.tenants = tenM ? tenM[1] : '';
+
+  // Срок
+  var terms = (text.match(/#\d+Month/g) || []).join(',');
   l.term = terms;
-  
-  // ── АГЕНТ ──
-  const agentMatch = text.match(/\|\s*#([A-Z][a-z]+)\s*$/) ||
-                     text.match(/#([A-Z][a-z]+)\s*\n?\s*🌟/);
-  l.agent   = agentMatch ? agentMatch[1] : 'David';
+
+  // Агент
+  var agentM = text.match(/\|\s*#([A-Z][a-z]+)\s*$/) ||
+               text.match(/#([A-Z][a-z]+)\s*\n?\s*🌟/) ||
+               text.match(/📲[^#]*#([A-Z][a-z]+)/);
+  l.agent   = agentM ? agentM[1] : 'David';
   l.phone   = '+995 599 20 67 16';
   l.contact = '@David_Tibelashvili';
-  
-  // ── ЗАГОЛОВОК ──
-  const roomLabels = {0:'Студия', 1:'1-комн.', 2:'2-комн.', 3:'3-комн.', 4:'4-комн.', 5:'5-комн.'};
-  const rLabel = roomLabels[l.rooms] || '';
-  const bLabel = {New:'Новостройка', Old:'Старый фонд'}[l.building] || '';
+
+  // Заголовок
+  var rLabel = {0:'Студия',1:'1-комн.',2:'2-комн.',3:'3-комн.',4:'4-комн.',5:'5-комн.'}[l.rooms] || '';
+  var bLabel = {New:'Новостройка',Old:'Старый фонд'}[l.building] || '';
   l.title = [rLabel, bLabel, l.district].filter(Boolean).join(' • ');
-  
-  return l.price ? l : null; // пропускаем без цены
+
+  return l.price ? l : null;
 }
 
-
 // ════════════════════════════════════════════════════════════
-//  GOOGLE SHEETS HELPERS
+//  SHEETS HELPERS
 // ════════════════════════════════════════════════════════════
-const HEADERS = [
+var HEADERS = [
   'id','tg_url','photo','parsed_at','is_new','is_exclusive',
   'type','rooms','title','address','district','metro',
   'lat','lng','sqm','floor','floors','heating','building',
@@ -357,111 +348,100 @@ const HEADERS = [
 ];
 
 function rowToArray(l) {
-  return HEADERS.map(h => l[h] !== undefined ? l[h] : '');
+  return HEADERS.map(function(h){ return l[h] !== undefined ? l[h] : ''; });
 }
 
 function getOrCreateSheet(ss) {
-  let sheet = ss.getSheetByName(SHEET_NAME);
+  var sheet = ss.getSheetByName(SHEET_NAME);
   if (!sheet) {
     sheet = ss.insertSheet(SHEET_NAME);
     sheet.appendRow(HEADERS);
     sheet.setFrozenRows(1);
-    // Заголовки жирным
-    sheet.getRange(1, 1, 1, HEADERS.length).setFontWeight('bold');
-    Logger.log('Создан лист: ' + SHEET_NAME);
+    sheet.getRange(1,1,1,HEADERS.length).setFontWeight('bold');
   }
   return sheet;
 }
 
 function getExistingIds(sheet) {
-  const ids = new Set();
-  const lastRow = sheet.getLastRow();
-  if (lastRow < 2) return ids;
-  const vals = sheet.getRange(2, 1, lastRow - 1, 1).getValues();
-  vals.forEach(row => { if (row[0]) ids.add(String(row[0])); });
+  var ids = new Set();
+  var last = sheet.getLastRow();
+  if (last < 2) return ids;
+  sheet.getRange(2,1,last-1,1).getValues()
+       .forEach(function(r){ if(r[0]) ids.add(String(r[0])); });
   return ids;
 }
 
-
 // ════════════════════════════════════════════════════════════
-//  WEB APP — отдаёт JSON для сайта
-//  Деплоить как Web App: Execute as Me, Anyone can access
+//  WEB APP — JSON для сайта
 // ════════════════════════════════════════════════════════════
 function doGet(e) {
-  const ss      = SpreadsheetApp.getActiveSpreadsheet();
-  const sheet   = ss.getSheetByName(SHEET_NAME);
-  const props   = PropertiesService.getScriptProperties();
-  
-  if (!sheet) {
-    return jsonResponse({ listings: [], updated_at: '', total: 0 });
+  var ss    = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName(SHEET_NAME);
+  var props = PropertiesService.getScriptProperties();
+
+  if (!sheet || sheet.getLastRow() < 2) {
+    return out({ listings:[], total:0, updated_at:'' });
   }
-  
-  const lastRow = sheet.getLastRow();
-  if (lastRow < 2) {
-    return jsonResponse({ listings: [], updated_at: props.getProperty('LAST_RUN') || '', total: 0 });
-  }
-  
-  // Читаем все данные
-  const data = sheet.getRange(2, 1, lastRow - 1, HEADERS.length).getValues();
-  
-  const listings = data
-    .filter(row => row[0] && row[19]) // id и price не пустые
-    .slice(0, 200) // максимум 200 объявлений
-    .map(row => {
-      const obj = {};
-      HEADERS.forEach((h, i) => { obj[h] = row[i]; });
-      return obj;
+
+  var data = sheet.getRange(2,1,sheet.getLastRow()-1,HEADERS.length).getValues();
+
+  var listings = data
+    .filter(function(r){ return r[0] && r[19]; })
+    .slice(0, 300)
+    .map(function(r){
+      var o = {};
+      HEADERS.forEach(function(h,i){ o[h]=r[i]; });
+      return o;
     });
-  
-  return jsonResponse({
+
+  return out({
     listings:   listings,
     total:      listings.length,
-    updated_at: props.getProperty('LAST_RUN') || new Date().toISOString(),
+    updated_at: props.getProperty('LAST_RUN') || '',
   });
 }
 
-function jsonResponse(data) {
-  const output = ContentService
+function out(data) {
+  return ContentService
     .createTextOutput(JSON.stringify(data))
     .setMimeType(ContentService.MimeType.JSON);
-  return output;
 }
 
-
 // ════════════════════════════════════════════════════════════
-//  SETUP — запустить один раз вручную
-//  Создаёт триггер на каждые 30 минут
+//  SETUP — запустить один раз
 // ════════════════════════════════════════════════════════════
 function setup() {
-  // Удаляем старые триггеры
-  ScriptApp.getProjectTriggers().forEach(t => {
-    if (t.getHandlerFunction() === 'parseChannel') {
-      ScriptApp.deleteTrigger(t);
-    }
+  ScriptApp.getProjectTriggers().forEach(function(t){
+    if (t.getHandlerFunction() === 'parseChannel') ScriptApp.deleteTrigger(t);
   });
-  
-  // Создаём новый триггер каждые 30 минут
-  ScriptApp.newTrigger('parseChannel')
-    .timeBased()
-    .everyMinutes(30)
-    .create();
-  
+  ScriptApp.newTrigger('parseChannel').timeBased().everyMinutes(30).create();
   Logger.log('✅ Триггер создан — парсер запускается каждые 30 минут');
-  
-  // Первый запуск сразу
   parseChannel();
 }
 
-
 // ════════════════════════════════════════════════════════════
-//  RESET — очистить таблицу и начать заново
+//  RESET — очистить и начать заново
 // ════════════════════════════════════════════════════════════
 function reset() {
-  const ss    = SpreadsheetApp.getActiveSpreadsheet();
-  const sheet = ss.getSheetByName(SHEET_NAME);
+  var ss    = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName(SHEET_NAME);
   if (sheet && sheet.getLastRow() > 1) {
-    sheet.deleteRows(2, sheet.getLastRow() - 1);
+    sheet.deleteRows(2, sheet.getLastRow()-1);
   }
   PropertiesService.getScriptProperties().deleteAllProperties();
-  Logger.log('База очищена');
+  Logger.log('✅ База очищена');
+}
+
+// ════════════════════════════════════════════════════════════
+//  DEBUG — для диагностики
+// ════════════════════════════════════════════════════════════
+function debugHtml() {
+  var html = fetchPage(CHANNEL_URL);
+  Logger.log('Размер: ' + html.length);
+  var posts = extractPosts(html);
+  Logger.log('Постов: ' + posts.length);
+  posts.forEach(function(p){
+    Logger.log('--- ID:' + p.id + ' ---');
+    Logger.log(p.text.substring(0,300));
+  });
 }
