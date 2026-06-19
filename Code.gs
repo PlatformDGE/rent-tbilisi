@@ -105,9 +105,18 @@ function parseChannel() {
 
       const listing = parsePost(post);
       if (listing) {
-        // Сохраняем фото в Google Drive (обходим CORS Telegram CDN)
+        // Сохраняем ВСЕ фото в Google Drive (обходим CORS Telegram CDN)
         if (listing.photo) {
-          listing.photo = savePhoto(listing.photo, post.id) || '';
+          listing.photo = savePhoto(listing.photo, post.id + '_0') || '';
+        }
+        if (listing.photos) {
+          try {
+            var allPhotos = JSON.parse(listing.photos);
+            var drivePhotos = allPhotos.map(function(url, idx) {
+              return savePhoto(url, post.id + '_' + idx) || '';
+            }).filter(function(u){ return u; });
+            listing.photos = JSON.stringify(drivePhotos);
+          } catch(e) { listing.photos = ''; }
         }
         newRows.push(listing);
         Logger.log('✓ [' + post.id + '] ' + listing.district + ' ' + listing.type + ' $' + listing.price);
@@ -212,30 +221,24 @@ function extractPosts(html) {
       }
     }
 
-    // Фото — ищем photo_wrap с cdn4.telesco.pe
-    var photo = '';
-    var pwi = part.indexOf('photo_wrap');
-    while (pwi !== -1 && !photo) {
-      var bgi = part.indexOf("background-image:url('https://cdn4.telesco.pe/", pwi);
-      if (bgi !== -1 && bgi < pwi + 2000) {
-        var ps = bgi + 24; // после url('
-        var pe = part.indexOf("')", ps);
-        if (pe !== -1) photo = part.substring(ps, pe);
-      }
-      pwi = part.indexOf('photo_wrap', pwi + 10);
+    // Фото — собираем ВСЕ фото поста из photo_wrap
+    var photos = [];
+    var searchPos = 0;
+    while (searchPos < part.length) {
+      var bgi = part.indexOf("background-image:url('https://cdn4.telesco.pe/file/", searchPos);
+      if (bgi === -1) break;
+      var ps = bgi + 23; // после url('
+      var pe = part.indexOf("')", ps);
+      if (pe === -1) break;
+      var photoUrl = part.substring(ps, pe);
+      if (photos.indexOf(photoUrl) === -1) photos.push(photoUrl);
+      searchPos = pe + 1;
     }
-    // Fallback: любой cdn4 url в блоке
-    if (!photo) {
-      var ci = part.indexOf('https://cdn4.telesco.pe/file/');
-      if (ci !== -1) {
-        var ce = part.indexOf("'", ci);
-        if (ce === -1) ce = part.indexOf('"', ci);
-        if (ce !== -1) photo = part.substring(ci, ce);
-      }
-    }
+    var photo = photos.length > 0 ? photos[0] : '';
+    var photos_json = photos.length > 1 ? JSON.stringify(photos) : '';
 
     if (text.length > 30) {
-      posts.push({ id: id, text: text, photo: photo });
+      posts.push({ id: id, text: text, photo: photo, photos_json: photos_json });
     }
   }
 
@@ -263,6 +266,7 @@ function parsePost(post) {
     id:           post.id,
     tg_url:       'https://t.me/rent_tbilisi_ge/' + post.id,
     photo:        post.photo || '',
+    photos:       post.photos_json || '',
     parsed_at:    new Date().toISOString(),
     is_new:       'TRUE',
     is_exclusive: (text.includes('#Exclusive') || text.toLowerCase().includes('exclusive listing')) ? 'TRUE' : 'FALSE',
@@ -390,7 +394,7 @@ function parsePost(post) {
 //  SHEETS HELPERS
 // ════════════════════════════════════════════════════════════
 var HEADERS = [
-  'id','tg_url','photo','parsed_at','is_new','is_exclusive',
+  'id','tg_url','photo','photos','parsed_at','is_new','is_exclusive',
   'type','rooms','title','address','district','metro',
   'lat','lng','sqm','floor','floors','heating','building',
   'price','deposit','commission',
