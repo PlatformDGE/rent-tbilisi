@@ -187,6 +187,19 @@ nav{height:68px;background:var(--white);border-bottom:1px solid var(--g200);disp
 .error-banner{background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:12px 16px;margin:12px;font-size:13px;color:#dc2626;display:none}
 .error-banner.show{display:block}
 @media(max-width:860px){.map-panel{display:none}.list-panel{width:100%}.grid{grid-template-columns:1fr}}
+
+/* ── GALLERY ── */
+.gallery{position:relative;width:100%;height:260px;overflow:hidden;border-radius:20px 20px 0 0;background:var(--g100)}
+.gallery-track{display:flex;height:100%;transition:transform .35s cubic-bezier(.4,0,.2,1)}
+.gallery-slide{flex-shrink:0;width:100%;height:100%;object-fit:cover}
+.gallery-slide.ep{display:flex;align-items:center;justify-content:center;font-size:80px;background:linear-gradient(135deg,#e4edf8,#c0d4ec)}
+.gallery-prev,.gallery-next{position:absolute;top:50%;transform:translateY(-50%);width:36px;height:36px;background:rgba(255,255,255,.9);border:none;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;box-shadow:var(--sh1);z-index:5;transition:background .15s}
+.gallery-prev{left:12px}.gallery-next{right:12px}
+.gallery-prev:hover,.gallery-next:hover{background:var(--white)}
+.gallery-dots{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:5px;z-index:5}
+.gallery-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.5);border:none;cursor:pointer;padding:0;transition:background .15s}
+.gallery-dot.on{background:var(--white)}
+.gallery-count{position:absolute;top:12px;right:50px;background:rgba(0,0,0,.45);color:#fff;font-size:11px;font-weight:600;padding:3px 8px;border-radius:10px;z-index:5}
 </style>
 </head>
 <body>
@@ -354,6 +367,14 @@ async function loadSheets() {
     const bool = v => v === 'TRUE' || v === true;
 
     ALL = rows.map((obj, i) => {
+      // Parse photos array
+      if (obj.photos && String(obj.photos).startsWith('[')) {
+        try { obj._photos = JSON.parse(obj.photos); } catch(e){ obj._photos = []; }
+      } else { obj._photos = []; }
+      if (obj.photo && String(obj.photo).startsWith('http') && obj._photos.indexOf(obj.photo) === -1) {
+        obj._photos.unshift(obj.photo);
+      }
+      obj.photos = JSON.stringify(obj._photos);
       obj._am = {
         wifi: bool(obj.wifi), stove: bool(obj.stove),
         balcony: bool(obj.balcony), tv: bool(obj.tv),
@@ -589,9 +610,36 @@ function openM(id){
   ];
   const isNew=l._isNew||l.is_new==='True';
   const isExcl=l.is_exclusive==='True'||l.is_exclusive===true;
-  const photoHtml=l.photo && String(l.photo).startsWith('http')?`<img src="${l.photo}" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'">`:`<div class="ep">${l._emoji||'🏠'}</div>`;
+  // Build gallery
+  let galleryPhotos = [];
+  if (l.photos) {
+    try { galleryPhotos = JSON.parse(l.photos); } catch(e){}
+  }
+  if (galleryPhotos.length === 0 && l.photo && String(l.photo).startsWith('http')) {
+    galleryPhotos = [l.photo];
+  }
+
+  const buildGallery = (photos, emoji) => {
+    if (photos.length === 0) return `<div class="gallery"><div class="gallery-slide ep">${emoji||'🏠'}</div></div>`;
+    const slides = photos.map(u =>
+      `<img class="gallery-slide" src="${u}" referrerpolicy="no-referrer" loading="lazy" onerror="this.style.display='none'">`
+    ).join('');
+    const dots = photos.length > 1 ? photos.map((_,i) =>
+      `<button class="gallery-dot${i===0?' on':''}" onclick="gotoSlide(${i})"></button>`
+    ).join('') : '';
+    const nav = photos.length > 1 ? `
+      <button class="gallery-prev" onclick="prevSlide()">‹</button>
+      <button class="gallery-next" onclick="nextSlide()">›</button>
+      <div class="gallery-dots">${dots}</div>
+      <div class="gallery-count">1 / ${photos.length}</div>` : '';
+    return `<div class="gallery" id="gallery">
+      <div class="gallery-track" id="gtrack">${slides}</div>
+      ${nav}
+    </div>`;
+  };
+
   document.getElementById('mi').innerHTML=`
-  <div class="modal-photo">${photoHtml}</div>
+  <div class="modal-x-wrap" style="position:relative">${buildGallery(galleryPhotos, l._emoji)}</div>
   <div class="modal-body">
     <div class="modal-top">
       <div>
@@ -639,6 +687,7 @@ function openM(id){
     </div>
   </div>`;
   document.getElementById('mw').classList.add('open');
+  setTimeout(initGallery, 50);
   if(mkrs[id]){map.flyTo([l._lat,l._lng],15,{duration:1});mkrs[id].openPopup();}
 }
 function closeM(){document.getElementById('mw').classList.remove('open');}
@@ -679,6 +728,36 @@ window.addEventListener('load', async ()=>{
   setInterval(refresh, REFRESH_MS);
   document.addEventListener('keydown',e=>{if(e.key==='Escape')closeM();});
 });
+
+// ── GALLERY CONTROLS ──
+let _gIdx = 0;
+let _gTotal = 0;
+
+function initGallery() {
+  _gIdx = 0;
+  const track = document.getElementById('gtrack');
+  if (!track) return;
+  _gTotal = track.children.length;
+  updateGallery();
+}
+
+function gotoSlide(i) {
+  _gIdx = Math.max(0, Math.min(i, _gTotal - 1));
+  updateGallery();
+}
+
+function nextSlide() { gotoSlide(_gIdx + 1); }
+function prevSlide() { gotoSlide(_gIdx - 1); }
+
+function updateGallery() {
+  const track = document.getElementById('gtrack');
+  if (!track) return;
+  track.style.transform = `translateX(-${_gIdx * 100}%)`;
+  document.querySelectorAll('.gallery-dot').forEach((d,i) => d.classList.toggle('on', i===_gIdx));
+  const cnt = document.querySelector('.gallery-count');
+  if (cnt) cnt.textContent = (_gIdx+1) + ' / ' + _gTotal;
+}
+
 </script>
 </body>
 </html>
