@@ -693,12 +693,12 @@ function fmtP(l){ return l.type==="sale"?"$"+parseInt(l.price).toLocaleString():
 function fmtU(l){ return l.type==="sale"?"":"/mo"; }
 function ini(n){ return String(n||"?").slice(0,2).toUpperCase(); }
 function today(d){ return d&&new Date(d).toDateString()===new Date().toDateString(); }
-function pImg(l,size){
-  const url=(l._photos&&l._photos[0])||l.photo||"";
+function pImg(l){
+  var url=(l._photos&&l._photos[0])||l.photo||"";
   if(url&&url.startsWith("http")){
-    return '<img src="'+url+'" referrerpolicy="no-referrer" loading="lazy" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'">';
+    return "<img src=\""+url+"\" referrerpolicy=\"no-referrer\" loading=\"lazy\" style=\"width:100%;height:100%;object-fit:cover\" onerror=\"this.style.display='none'\">";
   }
-  return '<div class="ep">'+( l._emoji||"🏠")+"</div>";
+  return "<div class=\"ep\">"+(l._emoji||"🏠")+"</div>";
 }
 
 // TG & Phone SVG
@@ -810,49 +810,60 @@ function render(){
     '<div style="color:var(--g400);font-size:13px;padding:20px 0">'+t("no_results")+"</div>";
 
   // Vertical all
-  const vl=document.getElementById("vlist");
+  var vl=document.getElementById("vlist");
   document.getElementById("listCount").textContent=allItems.length+" "+t("listings");
-  vl.innerHTML=allItems.length?allItems.map(vcard).join(""):
-    '<div class="empty"><div class="empty-icon">🔍</div><h3>'+t("no_results")+"</h3><p>"+t("no_results_sub")+"</p></div>";
+  vl.innerHTML="";
+  if(allItems.length){
+    allItems.forEach(function(l){ vl.appendChild(vcard(l)); });
+  } else {
+    vl.innerHTML='<div class="empty"><div class="empty-icon">🔍</div><h3>'+t("no_results")+"</h3><p>"+t("no_results_sub")+"</p></div>";
+  }
 
   // Fav nav icon
   document.getElementById("bn-fav").querySelector(".bnav-icon").textContent=favs.size>0?"❤️":"🤍";
 }
 
 function hcard(l){
-  const fv=favs.has(l.id);
-  return '<div class="hcard" onclick="openModal(''+l.id+')">'
-    +"<div class="hcard-photo">"
-    +pImg(l)
+  var fv=favs.has(l.id);
+  var el=document.createElement("div");
+  el.className="hcard";
+  el.dataset.id=l.id;
+  el.onclick=function(){ openModal(l.id); };
+  el.innerHTML='<div class="hcard-photo">'+pImg(l)
     +(l._isNew?'<div class="hcard-badge">'+t("badge_new")+"</div>":"")
     +(l.is_exclusive?'<div class="hcard-badge" style="top:auto;bottom:10px;left:10px">'+t("badge_excl")+"</div>":"")
-    +'<button class="hcard-fav" onclick="fav(event,''+l.id+'')">'+( fv?"❤️":"🤍")+"</button>"
-    +"</div>"
-    +"<div class="hcard-body">"
-    +"<div class="hcard-loc">"+(l.district||"")+(l.metro?" · "+l.metro:"")+"</div>"
-    +"<div class="hcard-sub">"+(l.title||"")+"</div>"
-    +"<div class="hcard-price">"+fmtP(l)+" <span>"+fmtU(l)+"</span></div>"
-    +"</div></div>";
+    +'<button class="hcard-fav">'+(fv?"❤️":"🤍")+"</button>"
+    +'</div><div class="hcard-body">'
+    +'<div class="hcard-loc">'+(l.district||"")+(l.metro?" · "+l.metro:"")+"</div>"
+    +'<div class="hcard-sub">'+(l.title||"")+"</div>"
+    +'<div class="hcard-price">'+fmtP(l)+' <span>'+fmtU(l)+"</span></div>"
+    +"</div>";
+  el.querySelector(".hcard-fav").onclick=function(e){ e.stopPropagation(); fav(e,l.id); };
+  return el;
 }
 
 function vcard(l){
-  const fv=favs.has(l.id);
-  return '<div class="vcard" onclick="openModal(''+l.id+')">'
-    +"<div class="vcard-photo">"+pImg(l)+"</div>"
-    +"<div class="vcard-body">"
-    +"<div class="vcard-loc">"+(l.district||"")+"</div>"
-    +"<div class="vcard-sub">"+(l.title||"")+"</div>"
-    +"<div class="vcard-specs">"
-    +(l.sqm?"<span class="vspec">"+l.sqm+" m²</span>":"")
-    +(l.floor&&l.floors?"<span class="vspec">"+l.floor+"/"+l.floors+"</span>":"")
-    +(l.rooms!=null?"<span class="vspec">"+(l.rooms||"S")+"br</span>":"")
-    +(l._am&&l._am.wifi?"<span class="vspec">WiFi</span>":"")
+  var fv=favs.has(l.id);
+  var el=document.createElement("div");
+  el.className="vcard";
+  el.onclick=function(){ openModal(l.id); };
+  el.innerHTML='<div class="vcard-photo">'+pImg(l)+"</div>"
+    +'<div class="vcard-body">'
+    +'<div class="vcard-loc">'+(l.district||"")+"</div>"
+    +'<div class="vcard-sub">'+(l.title||"")+"</div>"
+    +'<div class="vcard-specs">'
+    +(l.sqm?'<span class="vspec">'+l.sqm+' m²</span>':"")
+    +(l.floor&&l.floors?'<span class="vspec">'+l.floor+"/"+l.floors+"</span>":"")
+    +(l.rooms!=null?'<span class="vspec">'+(l.rooms||"S")+"br</span>":"")
+    +(l._am&&l._am.wifi?'<span class="vspec">WiFi</span>':"")
     +"</div>"
-    +"<div class="vcard-price">"+fmtP(l)+" <span>"+fmtU(l)+"</span></div>"
+    +'<div class="vcard-price">'+fmtP(l)+' <span>'+fmtU(l)+"</span></div>"
     +"</div>"
-    +'<button class="vcard-fav" onclick="fav(event,''+l.id+'')">'+( fv?"❤️":"🤍")+"</button>"
-    +"</div>";
+    +'<button class="vcard-fav">'+(fv?"❤️":"🤍")+"</button>";
+  el.querySelector(".vcard-fav").onclick=function(e){ e.stopPropagation(); fav(e,l.id); };
+  return el;
 }
+
 
 function fav(e,id){
   e.stopPropagation();
@@ -888,7 +899,7 @@ function openModal(id){
           +'<div style="width:52px;height:52px;background:rgba(255,255,255,.9);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px">▶️</div>'
           +"</div></div>";
       }
-      return '<img class="gallery-slide" src="'+src+'" referrerpolicy="no-referrer" loading="lazy" style="flex-shrink:0;width:100%;height:100%;object-fit:cover" onerror="this.style.background='#e4edf8'">';
+      return '<img class="gallery-slide" src="'+src+'" referrerpolicy="no-referrer" loading="lazy" style="flex-shrink:0;width:100%;height:100%;object-fit:cover">';
     }).join("");
     const nav=photos.length>1
       ?'<button class="g-btn g-prev" onclick="gPrev()">‹</button>'
@@ -901,44 +912,44 @@ function openModal(id){
 
   const blbl={New:t("new_build"),Old:t("old_build"),Soviet:t("soviet_build")};
 
-  document.getElementById("modalContent").innerHTML=
-    buildGallery(photos)
-    +'<button class="modal-close" onclick="closeModal()">✕</button>'
-    +"<div class="modal-body">"
-    +"<div class="modal-title">"+(l.title||"")+"</div>"
-    +"<div class="modal-addr">📍 "+(l.address||"")+", "+(l.district||"")+(l.metro?" · 🚇 "+l.metro:"")+"</div>"
-    +"<div class="modal-price-row">"
-    +"<div><div class="modal-price">"+fmtP(l)+" <span>"+fmtU(l)+"</span></div>"
-    +(l.deposit?"<div class="modal-nocomm">"+t("deposit")+" $"+l.deposit+"</div>":"")
-    +"<div class="modal-nocomm">"+t("nocomm")+"</div></div>"
-    +"<div class="modal-tags">"
-    +(l.type==="rent"?"<span class="mtag mt-rent">🔑 "+t("deal_rent")+"</span>":"")
-    +(l.type==="sale"?"<span class="mtag mt-sale">🏷 "+t("deal_sale")+"</span>":"")
-    +(l.type==="commercial"?"<span class="mtag mt-comm">🏢 "+t("deal_comm")+"</span>":"")
-    +(l.is_exclusive?"<span class="mtag mt-excl">"+t("tag_excl")+"</span>":"")
-    +"</div></div>"
-    +"<div class="modal-sec"><div class="modal-sec-title">"+t("sec_params")+"</div>"
-    +"<div class="params-grid">"
-    +(l.sqm?"<div class="param-item"><div class="param-lbl">"+t("lbl_area")+"</div><div class="param-val">"+l.sqm+" m²</div></div>":"")
-    +(l.floor&&l.floors?"<div class="param-item"><div class="param-lbl">"+t("lbl_floor")+"</div><div class="param-val">"+l.floor+" "+t("of")+" "+l.floors+"</div></div>":"")
-    +(l.rooms!=null?"<div class="param-item"><div class="param-lbl">"+t("lbl_rooms")+"</div><div class="param-val">"+(l.rooms||"Studio")+"</div></div>":"")
-    +(l.heating?"<div class="param-item"><div class="param-lbl">"+t("lbl_heat")+"</div><div class="param-val">"+l.heating+"</div></div>":"")
-    +(l.building?"<div class="param-item"><div class="param-lbl">"+t("lbl_bld")+"</div><div class="param-val">"+(blbl[l.building]||l.building)+"</div></div>":"")
-    +"<div class="param-item"><div class="param-lbl">"+t("lbl_added")+"</div><div class="param-val">"+ago(l._posted)+"</div></div>"
-    +"</div></div>"
-    +"<div class="modal-sec"><div class="modal-sec-title">"+t("sec_ams")+"</div>"
-    +"<div class="am-grid">"+ams.map(function(a){ return "<div class="am-item"+(a[2]?"":" no")+"">"+a[0]+" "+a[1]+"</div>"; }).join("")+"</div></div>"
-    +"<div class="agent-row">"
-    +"<div class="agent-av">"+ini(l.agent)+"</div>"
-    +"<div><div class="agent-name">"+(l.agent||"Agent")+"</div>"
-    +"<div class="agent-role">"+t("agent_role")+"</div>"
-    +"<div class="agent-role">+995 599 20 67 16</div></div>"
+  var mc = document.getElementById("modalContent");
+  mc.innerHTML = buildGallery(photos);
+  var closeBtn = document.createElement("button");
+  closeBtn.className = "modal-close"; closeBtn.textContent = "✕";
+  closeBtn.onclick = closeModal; mc.appendChild(closeBtn);
+  var amsHTML = ams.map(function(a){ return '<div class="am-item'+(a[2]?"":" no")+'">'+a[0]+" "+a[1]+"</div>"; }).join("");
+  var tagsHTML = (l.type==="rent"?'<span class="mtag mt-rent">🔑 '+t("deal_rent")+"</span>":"")
+    +(l.type==="sale"?'<span class="mtag mt-sale">🏷 '+t("deal_sale")+"</span>":"")
+    +(l.type==="commercial"?'<span class="mtag mt-comm">🏢 '+t("deal_comm")+"</span>":"")
+    +(l.is_exclusive?'<span class="mtag mt-excl">'+t("tag_excl")+"</span>":"");
+  var paramsHTML = (l.sqm?'<div class="param-item"><div class="param-lbl">'+t("lbl_area")+'</div><div class="param-val">'+l.sqm+' m²</div></div>':"")
+    +(l.floor&&l.floors?'<div class="param-item"><div class="param-lbl">'+t("lbl_floor")+'</div><div class="param-val">'+l.floor+" "+t("of")+" "+l.floors+'</div></div>':"")
+    +(l.rooms!=null?'<div class="param-item"><div class="param-lbl">'+t("lbl_rooms")+'</div><div class="param-val">'+(l.rooms||"Studio")+'</div></div>':"")
+    +(l.heating?'<div class="param-item"><div class="param-lbl">'+t("lbl_heat")+'</div><div class="param-val">'+l.heating+'</div></div>':"")
+    +(l.building?'<div class="param-item"><div class="param-lbl">'+t("lbl_bld")+'</div><div class="param-val">'+(blbl[l.building]||l.building)+'</div></div>':"")
+    +'<div class="param-item"><div class="param-lbl">'+t("lbl_added")+'</div><div class="param-val">'+ago(l._posted)+'</div></div>';
+  var body = document.createElement("div");
+  body.className = "modal-body";
+  body.innerHTML = '<div class="modal-title">'+(l.title||"")+"</div>"
+    +'<div class="modal-addr">📍 '+(l.address||"")+", "+(l.district||"")+(l.metro?" · 🚇 "+l.metro:"")+"</div>"
+    +'<div class="modal-price-row"><div>'
+    +'<div class="modal-price">'+fmtP(l)+' <span>'+fmtU(l)+"</span></div>"
+    +(l.deposit?'<div class="modal-nocomm">'+t("deposit")+" $"+l.deposit+"</div>":"")
+    +'<div class="modal-nocomm">'+t("nocomm")+"</div>"
     +"</div>"
-    +"<div class="modal-cta">"
-    +"<a class="mcta mc-tg" href="https://t.me/David_Tibelashvili" target="_blank">"+TG_ICO+" "+t("btn_tg")+"</a>"
-    +"<a class="mcta mc-green" href="tel:+995599206716">"+PH_ICO+" "+t("btn_call")+"</a>"
-    +"<a class="mcta mc-navy" href=""+(l.tg_url||"https://t.me/rent_tbilisi_ge")+"" target="_blank">📢</a>"
-    +"</div></div>";
+    +'<div class="modal-tags">'+tagsHTML+"</div></div>"
+    +'<div class="modal-sec"><div class="modal-sec-title">'+t("sec_params")+'</div><div class="params-grid">'+paramsHTML+"</div></div>"
+    +'<div class="modal-sec"><div class="modal-sec-title">'+t("sec_ams")+'</div><div class="am-grid">'+amsHTML+"</div></div>"
+    +'<div class="agent-row"><div class="agent-av">'+ini(l.agent)+"</div><div>"
+    +'<div class="agent-name">'+(l.agent||"Agent")+"</div>"
+    +'<div class="agent-role">'+t("agent_role")+"</div>"
+    +'<div class="agent-role">+995 599 20 67 16</div></div></div>'
+    +'<div class="modal-cta">'
+    +'<a class="mcta mc-tg" href="https://t.me/David_Tibelashvili" target="_blank">'+TG_ICO+" "+t("btn_tg")+"</a>"
+    +'<a class="mcta mc-green" href="tel:+995599206716">'+PH_ICO+" "+t("btn_call")+"</a>"
+    +'<a class="mcta mc-navy" href="'+(l.tg_url||"https://t.me/rent_tbilisi_ge")+'" target="_blank">📢</a>'
+    +"</div>";
+  mc.appendChild(body);
 
   document.getElementById("modalBg").classList.add("open");
   setTimeout(initGallery,50);
@@ -997,7 +1008,7 @@ function updateMapPins(){
       +'<div class="pu-loc">'+(l.district||"")+" · "+(l.title||"").split("•")[0]+"</div>"
       +'<div class="pu-price">'+fmtP(l)+fmtU(l)+"</div>"
       +'<div class="pu-btns">'
-      +'<button class="pu-btn pb-navy" onclick="closeMap();openModal(''+l.id+'')">'+t("btn_details")+"</button>"
+      +'<button class="pu-btn pb-navy" data-mid="'+l.id+'" onclick="closeMap();openModal(this.dataset.mid)">'+t("btn_details")+"</button>"
       +'<a class="pu-btn pb-tg" href="https://t.me/David_Tibelashvili" target="_blank">'+TG_ICO+" TG</a>"
       +"</div></div>",{maxWidth:240});
     mkrs[l.id]=m;
@@ -1083,7 +1094,10 @@ function renderFavs(){
     body.innerHTML='<div class="empty"><div class="empty-icon">🤍</div><h3>'+t("fav_empty")+"</h3><p>"+t("fav_empty_sub")+"</p></div>";
     return;
   }
-  body.innerHTML='<div class="vlist">'+favList.map(vcard).join("")+"</div>";
+  body.innerHTML="";
+  var favDiv=document.createElement("div"); favDiv.className="vlist";
+  favList.forEach(function(l){ favDiv.appendChild(vcard(l)); });
+  body.appendChild(favDiv);
 }
 
 // ════════════════════════════════
