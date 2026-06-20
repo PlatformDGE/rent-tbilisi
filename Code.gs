@@ -443,13 +443,20 @@ function doGet(e) {
   var sheet = ss.getSheetByName(SHEET_NAME);
   var props = PropertiesService.getScriptProperties();
 
+  var channel = e && e.parameter && e.parameter.channel ? e.parameter.channel : '';
   var result;
   if (!sheet || sheet.getLastRow() < 2) {
     result = { listings:[], total:0, updated_at:'' };
   } else {
     var data = sheet.getRange(2,1,sheet.getLastRow()-1,HEADERS.length).getValues();
     var listings = data
-      .filter(function(r){ return r[0] && r[19]; })
+      .filter(function(r){
+        if (!r[0] || !r[19]) return false;
+        // Фильтр по каналу
+        if (channel === 'rent') return String(r[0]).indexOf('sale_in_tbilisi') === -1;
+        if (channel === 'sale') return String(r[0]).indexOf('sale_in_tbilisi') !== -1;
+        return true;
+      })
       .slice(0, 300)
       .map(function(r){
         var o = {};
