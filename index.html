@@ -396,6 +396,55 @@ button, a, .hcard, .vcard, .cat-btn, .bnav-item {
   .hcard{width:200px}
   .hcard-photo{width:200px;height:150px}
 }
+
+/* ── MAIN FILTERS ── */
+.main-filters{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
+.f-row{display:flex;gap:8px}
+.f-sel{
+  flex:1;padding:9px 12px;border:1.5px solid var(--g200);
+  border-radius:10px;font-size:13px;font-weight:500;
+  color:var(--g700);background:var(--white);
+  font-family:"Inter",sans-serif;appearance:none;
+  cursor:pointer;outline:none;touch-action:manipulation;
+}
+.f-sel:focus{border-color:var(--navy)}
+
+/* Advanced toggle button */
+.adv-toggle{
+  display:flex;align-items:center;gap:6px;
+  background:none;border:1.5px solid var(--g200);
+  border-radius:10px;padding:8px 14px;
+  font-size:13px;font-weight:600;color:var(--g500);
+  cursor:pointer;font-family:"Inter",sans-serif;
+  width:100%;touch-action:manipulation;transition:all .15s;
+}
+.adv-toggle.open{border-color:var(--navy);color:var(--navy)}
+
+/* Advanced filters panel */
+.adv-filters{
+  display:none;flex-direction:column;gap:14px;
+  padding:14px;background:var(--g50);border-radius:12px;
+  margin-bottom:8px;
+}
+.adv-filters.open{display:flex}
+.adv-group{}
+.adv-title{font-size:11px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.6px;color:var(--g400);margin-bottom:8px}
+.adv-pills{display:flex;flex-wrap:wrap;gap:6px}
+.ap{
+  padding:6px 12px;border:1.5px solid var(--g200);border-radius:20px;
+  font-size:12px;font-weight:600;color:var(--g500);background:var(--white);
+  cursor:pointer;font-family:"Inter",sans-serif;transition:all .15s;
+  touch-action:manipulation;
+}
+.ap:active{transform:scale(.97)}
+.ap.on{background:var(--navy);border-color:var(--navy);color:var(--white)}
+.adv-reset{
+  margin-top:4px;background:none;border:none;
+  font-size:13px;font-weight:600;color:var(--red);
+  cursor:pointer;font-family:"Inter",sans-serif;text-align:left;
+  padding:4px 0;touch-action:manipulation;
+}
 </style>
 </head>
 <body>
@@ -415,57 +464,116 @@ button, a, .hcard, .vcard, .cat-btn, .bnav-item {
     </div>
   </div>
 
-  <!-- SEARCH PILL -->
-  <div class="search-pill" onclick="toggleSearch()">
-    <div class="search-icon">🔍</div>
-    <div class="search-pill-texts">
-      <div class="search-pill-main" data-i18n="search_where">Where are you looking?</div>
-      <div class="search-pill-sub" id="searchSub" data-i18n="search_sub">Any district · Any price</div>
+    <!-- MAIN FILTERS -->
+  <div class="main-filters">
+    <!-- Row 1: District + Metro -->
+    <div class="f-row">
+      <select class="f-sel" id="sDist" onchange="run()">
+        <option value="">📍 District</option>
+        <option value="Vera">Vera</option><option value="Mtatsminda">Mtatsminda</option>
+        <option value="Vake">Vake</option><option value="Sololaki">Sololaki</option>
+        <option value="Saburtalo">Saburtalo</option><option value="Chugureti">Chugureti</option>
+        <option value="Nutsubidze">Nutsubidze</option><option value="Didube">Didube</option>
+        <option value="Nadzaladevi">Nadzaladevi</option><option value="Gldani">Gldani</option>
+        <option value="Avlabari">Avlabari</option><option value="Isani">Isani</option>
+        <option value="Samgori">Samgori</option><option value="Varketili">Varketili</option>
+        <option value="Digomi">Digomi</option><option value="Ortachala">Ortachala</option>
+        <option value="Krtsanisi">Krtsanisi</option><option value="Bagebi">Bagebi</option>
+        <option value="Temqa">Temqa</option><option value="Vashlijvari">Vashlijvari</option>
+        <option value="Kukia">Kukia</option><option value="Abanotubani">Abanotubani</option>
+      </select>
+      <select class="f-sel" id="sMetro" onchange="run()">
+        <option value="">🚇 Metro</option>
+        <option value="LibertySquare">Liberty Square</option>
+        <option value="Rustaveli">Rustaveli</option>
+        <option value="Marjanishvili">Marjanishvili</option>
+        <option value="Tsereteli">Tsereteli</option>
+        <option value="Gotsiridze">Gotsiridze</option>
+        <option value="Nadzaladevi">Nadzaladevi</option>
+        <option value="Didube">Didube</option>
+        <option value="Guramishvili">Guramishvili</option>
+        <option value="Sarajishvili">Sarajishvili</option>
+        <option value="AhmeteliTheatre">Ahmeteli Theatre</option>
+        <option value="VazhaPshavela">Vazha-Pshavela</option>
+        <option value="Delisi">Delisi</option>
+        <option value="TCUniversity">TC University</option>
+        <option value="MCUniversity">MC University</option>
+        <option value="AvlabariMetro">Avlabari</option>
+        <option value="IsaniMetro">Isani</option>
+        <option value="SamgoriMetro">Samgori</option>
+        <option value="Varketili">Varketili</option>
+      </select>
     </div>
-    <div class="search-pill-filter" id="filterDot">⚙️</div>
+    <!-- Row 2: Price + Rooms -->
+    <div class="f-row">
+      <select class="f-sel" id="sPrice" onchange="run()">
+        <option value="">💰 Price</option>
+        <option value="0-300">to $300</option>
+        <option value="300-500">$300–500</option>
+        <option value="500-700">$500–700</option>
+        <option value="700-900">$700–900</option>
+        <option value="900-1200">$900–1200</option>
+        <option value="1200-99999">$1200+</option>
+      </select>
+      <select class="f-sel" id="sRooms" onchange="run()">
+        <option value="">🛋 Rooms</option>
+        <option value="0">Studio</option>
+        <option value="1">1 bed</option>
+        <option value="2">2 bed</option>
+        <option value="3">3 bed</option>
+        <option value="4">4+ bed</option>
+      </select>
+    </div>
+    <!-- Advanced toggle -->
+    <button class="adv-toggle" id="advToggle" onclick="toggleAdv()">
+      ⚙️ <span id="advLabel">More filters</span> <span id="advArrow">▾</span>
+    </button>
   </div>
 
-  <!-- SEARCH EXPANDED -->
-  <div class="search-expanded" id="searchExp">
-    <div class="s-input-wrap">
-      <span>📍</span>
-      <input type="text" id="sAddr" data-i18n-ph="ph_addr" placeholder="#Vake #2Bed #Price500to700..." oninput="run()">
+  <!-- ADVANCED FILTERS -->
+  <div class="adv-filters" id="advFilters">
+    <div class="adv-group">
+      <div class="adv-title">🏢 Building</div>
+      <div class="adv-pills" id="fBuild">
+        <button class="ap on" data-val="" onclick="setAdv(this,'fBuild','')">Any</button>
+        <button class="ap" data-val="New" onclick="setAdv(this,'fBuild','New')">New</button>
+        <button class="ap" data-val="Old" onclick="setAdv(this,'fBuild','Old')">Old</button>
+        <button class="ap" data-val="Soviet" onclick="setAdv(this,'fBuild','Soviet')">Soviet</button>
+      </div>
     </div>
-    <div class="s-row">
-      <select class="s-sel" id="sPrice" onchange="run()">
-        <option value="" data-i18n="any_price">Any price</option>
-        <option value="0-400">to $400</option>
-        <option value="400-600">$400–600</option>
-        <option value="600-900">$600–900</option>
-        <option value="900-1500">$900–1500</option>
-        <option value="1500-99999">from $1500</option>
-      </select>
-      <select class="s-sel" id="sBuild" onchange="run()">
-        <option value="" data-i18n="any_build">Any building</option>
-        <option value="New" data-i18n="new_build">New building</option>
-        <option value="Old" data-i18n="old_build">Old building</option>
-        <option value="Soviet" data-i18n="soviet_build">Soviet</option>
-      </select>
+    <div class="adv-group">
+      <div class="adv-title">✅ Amenities</div>
+      <div class="adv-pills" id="fAmenities">
+        <button class="ap" data-val="wifi" onclick="toggleAm(this,'wifi')">📶 WiFi</button>
+        <button class="ap" data-val="balcony" onclick="toggleAm(this,'balcony')">🏗 Balcony</button>
+        <button class="ap" data-val="conditioner" onclick="toggleAm(this,'conditioner')">🌡 A/C</button>
+        <button class="ap" data-val="elevator" onclick="toggleAm(this,'elevator')">🛗 Elevator</button>
+        <button class="ap" data-val="parking" onclick="toggleAm(this,'parking')">🅿️ Parking</button>
+        <button class="ap" data-val="dishwasher" onclick="toggleAm(this,'dishwasher')">🍽 Dishwasher</button>
+        <button class="ap" data-val="tv" onclick="toggleAm(this,'tv')">📺 TV</button>
+        <button class="ap" data-val="washing_machine" onclick="toggleAm(this,'washing_machine')">🫧 Washer</button>
+        <button class="ap" data-val="microwave" onclick="toggleAm(this,'microwave')">♨️ Microwave</button>
+        <button class="ap" data-val="stove" onclick="toggleAm(this,'stove')">🍳 Stove</button>
+      </div>
     </div>
-    <div class="s-row">
-      <select class="s-sel" id="sDist" onchange="run()">
-        <option value="" data-i18n="any_dist">Any district</option>
-        <option>Vake</option><option>Saburtalo</option><option>Didube</option>
-        <option>Isani</option><option>Gldani</option><option>Mtatsminda</option>
-        <option>Nadzaladevi</option><option>Chugureti</option><option>Vera</option>
-        <option>Rustaveli</option><option>Tsereteli</option><option>Dighomi</option>
-        <option>Marjanishvili</option><option>Krtsanisi</option>
-      </select>
-      <select class="s-sel" id="sRooms" onchange="run()">
-        <option value="" data-i18n="any_rooms">Any rooms</option>
-        <option value="0" data-i18n="studio">Studio</option>
-        <option value="1">1 br.</option>
-        <option value="2">2 br.</option>
-        <option value="3">3 br.</option>
-        <option value="4">4+ br.</option>
-      </select>
+    <div class="adv-group">
+      <div class="adv-title">🐾 Pets</div>
+      <div class="adv-pills" id="fPets">
+        <button class="ap on" data-val="" onclick="setAdv(this,'fPets','')">Any</button>
+        <button class="ap" data-val="yes" onclick="setAdv(this,'fPets','yes')">✅ Allowed</button>
+        <button class="ap" data-val="no" onclick="setAdv(this,'fPets','no')">🚫 Not allowed</button>
+      </div>
     </div>
-    <button class="s-apply" onclick="applySearch()" data-i18n="apply">Apply</button>
+    <div class="adv-group">
+      <div class="adv-title">⏱ Rental period</div>
+      <div class="adv-pills" id="fTerm">
+        <button class="ap on" data-val="" onclick="setAdv(this,'fTerm','')">Any</button>
+        <button class="ap" data-val="1Month" onclick="setAdv(this,'fTerm','1Month')">1 mo</button>
+        <button class="ap" data-val="6Month" onclick="setAdv(this,'fTerm','6Month')">6 mo</button>
+        <button class="ap" data-val="12Month" onclick="setAdv(this,'fTerm','12Month')">12 mo</button>
+      </div>
+    </div>
+    <button class="adv-reset" onclick="resetAdv()">Reset all filters</button>
   </div>
 
   <!-- CATEGORIES -->
@@ -882,60 +990,47 @@ function parseHashtags(query) {
 }
 
 function run(){
-  var rawQuery = (document.getElementById("sAddr").value||"");
-  var ht = parseHashtags(rawQuery);
   var price = document.getElementById("sPrice").value;
-  var build = document.getElementById("sBuild").value;
   var dist  = document.getElementById("sDist").value;
+  var metro = document.getElementById("sMetro").value;
   var rooms = document.getElementById("sRooms").value;
 
   shown=ALL.filter(function(l){
     var r=parseInt(l.rooms)||0;
-    var lDist = (l.district||"").toLowerCase();
-    var lMetro = (l.metro||"").toLowerCase().replace(/\s/g,"");
-    var lAddr = (l.address||"").toLowerCase();
-    var lTitle = (l.title||"").toLowerCase();
+    var lDist  = (l.district||"").toLowerCase();
+    var lMetro = (l.metro||"").toLowerCase().replace(/ /g,"");
+    var lAddr  = (l.address||"").toLowerCase();
 
-    // Hashtag district filter
-    if(ht.districts.length>0){
-      var matchDist=ht.districts.some(function(d){ return lDist.includes(d)||lAddr.includes(d); });
-      if(!matchDist) return false;
+    // District
+    if(dist && l.district!==dist) return false;
+    // Metro
+    if(metro){
+      var mLow=metro.toLowerCase();
+      if(!lMetro.includes(mLow) && !lAddr.replace(/ /g,"").includes(mLow)) return false;
     }
-    // Hashtag metro filter
-    if(ht.metros.length>0){
-      var matchMetro=ht.metros.some(function(m){ return lMetro.includes(m)||lAddr.toLowerCase().replace(/\s/g,"").includes(m); });
-      if(!matchMetro) return false;
+    // Price
+    if(price){
+      var pts=price.split("-"); var mn=parseFloat(pts[0]),mx=parseFloat(pts[1]);
+      var pp=parseFloat(l.price)||0;
+      if(pp<mn||pp>mx) return false;
     }
-    // Hashtag price
-    if(ht.priceMin!==null){ var p2=parseFloat(l.price)||0; if(p2<ht.priceMin||p2>ht.priceMax) return false; }
-    // Hashtag rooms
-    if(ht.rooms!==null){
-      if(ht.rooms===1&&r>1) return false;
-      if(ht.rooms>1&&r!==ht.rooms) return false;
-      if(ht.rooms===0&&r!==0) return false;
-    }
-    // Hashtag building
-    if(ht.building&&l.building!==ht.building) return false;
-    // Hashtag amenities
-    for(var ai=0;ai<ht.amenities.length;ai++){
-      var am=ht.amenities[ai];
-      if(l._am&&l._am[am]===false) return false;
-    }
-    // Hashtag pets
-    if(ht.pets===true&&!l.pets) return false;
-    if(ht.pets===false&&l.pets) return false;
-    // Free text
-    if(ht.freeText&&![lTitle,lAddr,lDist].some(function(s){ return s.includes(ht.freeText); })) return false;
-
-    // Dropdown filters
-    if(dist&&l.district!==dist) return false;
-    if(build&&l.building!==build) return false;
+    // Rooms
     if(rooms!==""){
       if(rooms==="4"&&r<4) return false;
       if(rooms!=="4"&&r!==parseInt(rooms)) return false;
     }
-    if(price){ var mn=parseFloat(price.split("-")[0]),mx=parseFloat(price.split("-")[1]); var pp=parseFloat(l.price)||0; if(pp<mn||pp>mx) return false; }
-    // Category filter
+    // Advanced: building
+    if(advBuild&&l.building!==advBuild) return false;
+    // Advanced: pets
+    if(advPets==="yes"&&!l.pets) return false;
+    if(advPets==="no"&&l.pets) return false;
+    // Advanced: term
+    if(advTerm&&!(l.term||"").includes(advTerm)) return false;
+    // Advanced: amenities
+    for(var ai=0;ai<advAms.length;ai++){
+      if(!l._am||!l._am[advAms[ai]]) return false;
+    }
+    // Category
     if(catFilter==="new"&&l.building!=="New") return false;
     if(catFilter==="excl"&&!l.is_exclusive) return false;
     if(catFilter==="comm"&&l.type!=="commercial") return false;
@@ -945,7 +1040,7 @@ function run(){
       if(cv>1&&r!==cv) return false;
     }
     return true;
-  });
+  })
   shown.sort(function(a,b){ return b._posted-a._posted; });
   render();
   updateMapPins();
@@ -1237,14 +1332,45 @@ function closeMap(){
 // ════════════════════════════════
 //  SEARCH
 // ════════════════════════════════
-var searchOpen=false;
-function toggleSearch(){
-  searchOpen=!searchOpen;
-  document.getElementById("searchExp").classList.toggle("open",searchOpen);
+// Advanced filter state
+var advBuild="", advPets="", advTerm="", advAms=[];
+var advOpen=false;
+
+function toggleAdv(){
+  advOpen=!advOpen;
+  document.getElementById("advFilters").classList.toggle("open",advOpen);
+  document.getElementById("advToggle").classList.toggle("open",advOpen);
+  document.getElementById("advArrow").textContent=advOpen?"▴":"▾";
+  document.getElementById("advLabel").textContent=advOpen?"Hide filters":"More filters";
 }
-function applySearch(){
-  searchOpen=false;
-  document.getElementById("searchExp").classList.remove("open");
+
+function setAdv(el,group,val){
+  document.querySelectorAll("#"+group+" .ap").forEach(function(b){b.classList.remove("on");});
+  el.classList.add("on");
+  if(group==="fBuild") advBuild=val;
+  if(group==="fPets")  advPets=val;
+  if(group==="fTerm")  advTerm=val;
+  run();
+}
+
+function toggleAm(el,am){
+  el.classList.toggle("on");
+  if(el.classList.contains("on")){
+    if(advAms.indexOf(am)===-1) advAms.push(am);
+  } else {
+    advAms=advAms.filter(function(a){return a!==am;});
+  }
+  run();
+}
+
+function resetAdv(){
+  advBuild=""; advPets=""; advTerm=""; advAms=[];
+  document.querySelectorAll(".adv-filters .ap").forEach(function(b){b.classList.remove("on");});
+  document.querySelectorAll(".adv-filters .ap[data-val='']").forEach(function(b){b.classList.add("on");});
+  document.getElementById("sDist").value="";
+  document.getElementById("sMetro").value="";
+  document.getElementById("sPrice").value="";
+  document.getElementById("sRooms").value="";
   run();
 }
 
