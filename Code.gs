@@ -343,11 +343,11 @@ function parsePost(post, channelName) {
   else if (text.includes('#OldBuilding'))  l.building = 'Old';
   else                                     l.building = '';
 
-  // Цена
-  var priceM = text.match(/💰\s*(?:Each\s*)?(\d[\d,]*)\s*\$/) ||
-               text.match(/(\d[\d,]*)\s*\$\s*\+\s*Deposit/) ||
-               text.match(/💰\s*(\d[\d,]*)/);
-  l.price = priceM ? parseInt(priceM[1].replace(/,/g,'')) : '';
+  // Цена — поддержка форматов: 115,000$ / 115.000$ / 115000$
+  var priceM = text.match(/💰\s*(?:Each\s*)?(\d[\d.,]*)\s*\$/) ||
+               text.match(/(\d[\d.,]*)\s*\$\s*\+\s*Deposit/) ||
+               text.match(/💰\s*(\d[\d.,]*)/);
+  l.price = priceM ? parseInt(priceM[1].replace(/[,.]/g,'')) : '';
 
   // Депозит
   var depM = text.match(/Deposit\s+(\d[\d,]*)\s*\$/) ||
