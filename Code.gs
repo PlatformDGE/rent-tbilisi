@@ -166,23 +166,29 @@ function fetchPage(url) {
 //  ИЗВЛЕЧЕНИЕ ПОСТОВ
 // ════════════════════════════════════════════════════════════
 function extractPosts(html) {
-  const posts = [];
-  const seen  = new Set();
+  var posts = [];
+  var seen  = new Set();
 
-  // Разбиваем по data-post — каждый уникален
-  const parts = html.split('data-post="rent_tbilisi_ge/');
+  // Разбиваем по data-post — универсально для любого канала
+  // Ищем паттерн data-post="channel_name/ID"
+  var parts = html.split('data-post="');
 
   for (var i = 1; i < parts.length; i++) {
     var part = parts[i];
 
-    // ID
-    var idEnd = part.indexOf('"');
+    // Пропускаем если это не пост (нет слэша в ID)
+    var slashIdx = part.indexOf('/');
+    var quoteIdx = part.indexOf('"');
+    if (slashIdx === -1 || slashIdx > quoteIdx) continue;
+
+    // ID после слэша
+    var idEnd = part.indexOf('"', slashIdx + 1);
     if (idEnd === -1) continue;
-    var id = part.substring(0, idEnd);
-    if (seen.has(id)) continue;
+    var id = part.substring(slashIdx + 1, idEnd);
+    if (!id || seen.has(id)) continue;
     seen.add(id);
 
-    // Текст — ищем tgme_widget_message_text
+    // Текст
     var text = '';
     var ti = part.indexOf('tgme_widget_message_text');
     if (ti !== -1) {
@@ -192,20 +198,17 @@ function extractPosts(html) {
         var p = open + 1;
         var buf = '';
         while (p < part.length && depth > 0) {
-          // br → newline
           if (part.substring(p, p+4).toLowerCase() === '<br>') {
-            buf += '\n'; p += 4; continue;
+            buf += '
+'; p += 4; continue;
           }
           if (part.substring(p, p+5).toLowerCase() === '<br/>') {
-            buf += '\n'; p += 5; continue;
+            buf += '
+'; p += 5; continue;
           }
           if (part[p] === '<') {
-            if (part[p+1] === '/') {
-              depth--;
-            } else if (part[p+1] !== '!' && part[p+1] !== '?') {
-              depth++;
-            }
-            // Пропускаем тег
+            if (part[p+1] === '/') depth--;
+            else if (part[p+1] !== '!' && part[p+1] !== '?') depth++;
             while (p < part.length && part[p] !== '>') p++;
           } else if (depth > 0) {
             buf += part[p];
@@ -216,12 +219,14 @@ function extractPosts(html) {
           .replace(/&amp;/g,'&').replace(/&lt;/g,'<')
           .replace(/&gt;/g,'>').replace(/&nbsp;/g,' ')
           .replace(/&#39;/g,"'").replace(/&quot;/g,'"')
-          .replace(/\n{3,}/g,'\n\n')
-          .trim();
+          .replace(/
+{3,}/g,'
+
+').trim();
       }
     }
 
-    // Собираем фото и превью видео
+    // Фото — все cdn4 из photo_wrap и video_thumb
     var photos = [];
     var searchPos = 0;
     while (searchPos < part.length) {
@@ -231,10 +236,8 @@ function extractPosts(html) {
       var pe = part.indexOf("')", ps);
       if (pe !== -1) {
         var mediaUrl = part.substring(ps, pe);
-        // Проверяем — видео или фото
         var beforeBgi = part.substring(Math.max(0, bgi - 200), bgi);
         var isVideoThumb = beforeBgi.indexOf('video_thumb') !== -1 || beforeBgi.indexOf('video_player') !== -1;
-        // Добавляем с пометкой для видео
         var entry = isVideoThumb ? 'video:' + mediaUrl : mediaUrl;
         if (photos.indexOf(entry) === -1) photos.push(entry);
       }
@@ -251,11 +254,9 @@ function extractPosts(html) {
   return posts;
 }
 
-// ════════════════════════════════════════════════════════════
-//  СЛЕДУЮЩАЯ СТРАНИЦА
-// ════════════════════════════════════════════════════════════
+
 function extractNextUrl(html) {
-  var m = html.match(/href="(\/s\/[a-z_]+\?before=\d+)"/);
+  var m = html.match(/href="(\/s\/[a-zA-Z0-9_]+\?before=\d+)"/);
   return m ? 'https://t.me' + m[1] : null;
 }
 
