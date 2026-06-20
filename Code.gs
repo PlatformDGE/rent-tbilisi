@@ -4,7 +4,10 @@
 //  Запускается автоматически каждые 30 минут
 // ============================================================
 
-const CHANNEL_URL = 'https://t.me/s/rent_tbilisi_ge';
+const CHANNELS = [
+  'https://t.me/s/rent_tbilisi_ge',
+  'https://t.me/s/sale_in_tbilisi',
+];
 const SHEET_NAME  = 'listings';
 const MAX_PAGES   = 10;
 
@@ -71,61 +74,72 @@ function savePhoto(url, msgId) {
 //  ГЛАВНАЯ ФУНКЦИЯ
 // ════════════════════════════════════════════════════════════
 function parseChannel() {
-  const ss    = SpreadsheetApp.getActiveSpreadsheet();
-  const sheet = getOrCreateSheet(ss);
-
-  const existingIds = getExistingIds(sheet);
+  var ss    = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = getOrCreateSheet(ss);
+  var existingIds = getExistingIds(sheet);
   Logger.log('Существующих: ' + existingIds.size);
 
-  const props   = PropertiesService.getScriptProperties();
-  const lastId  = parseInt(props.getProperty('LAST_MSG_ID') || '0');
+  var props   = PropertiesService.getScriptProperties();
+  var newRows = [];
 
-  const newRows = [];
-  let maxSeenId = lastId;
-  let url       = CHANNEL_URL;
-  let stop      = false;
+  for (var ci = 0; ci < CHANNELS.length; ci++) {
+    var channelUrl  = CHANNELS[ci];
+    var channelName = channelUrl.split('/s/')[1];
+    var lastIdKey   = 'LAST_ID_' + channelName;
+    var lastId      = parseInt(props.getProperty(lastIdKey) || '0');
+    var maxSeenId   = lastId;
+    var url         = channelUrl;
+    var stop        = false;
 
-  for (let page = 0; page < MAX_PAGES && !stop; page++) {
-    Logger.log('Страница ' + (page+1) + ': ' + url);
+    Logger.log('=== Канал: ' + channelName + ' (last_id=' + lastId + ') ===');
 
-    const html = fetchPage(url);
-    if (!html) break;
+    for (var page = 0; page < MAX_PAGES && !stop; page++) {
+      Logger.log('Страница ' + (page+1) + ': ' + url);
+      var html = fetchPage(url);
+      if (!html) break;
 
-    const posts = extractPosts(html);
-    Logger.log('Найдено постов: ' + posts.length);
+      var posts = extractPosts(html);
+      Logger.log('Найдено постов: ' + posts.length);
 
-    for (const post of posts) {
-      const msgId = parseInt(post.id);
+      for (var pi = 0; pi < posts.length; pi++) {
+        var post     = posts[pi];
+        var msgId    = parseInt(post.id);
+        var uniqueId = channelName + '_' + post.id;
 
-      if (msgId <= lastId || existingIds.has(post.id)) {
-        Logger.log('ID ' + post.id + ' уже есть — стоп');
-        stop = true;
-        break;
+        if (msgId <= lastId || existingIds.has(uniqueId) || existingIds.has(String(post.id))) {
+          Logger.log('ID ' + post.id + ' уже есть — стоп');
+          stop = true;
+          break;
+        }
+
+        var listing = parsePost(post, channelName);
+        if (listing) {
+          listing.id     = uniqueId;
+          listing.tg_url = 'https://t.me/' + channelName + '/' + post.id;
+          newRows.push(listing);
+          Logger.log('✓ [' + post.id + '] ' + listing.district + ' ' + listing.type + ' $' + listing.price);
+        } else {
+          Logger.log('– [' + post.id + '] не объявление');
+        }
+        maxSeenId = Math.max(maxSeenId, msgId);
       }
 
-      const listing = parsePost(post);
-      if (listing) {
-
-        newRows.push(listing);
-        Logger.log('✓ [' + post.id + '] ' + listing.district + ' ' + listing.type + ' $' + listing.price);
-      } else {
-        Logger.log('– [' + post.id + '] не объявление');
-      }
-
-      maxSeenId = Math.max(maxSeenId, msgId);
+      var nextUrl = extractNextUrl(html);
+      if (!nextUrl) break;
+      url = nextUrl;
+      Utilities.sleep(1500);
     }
 
-    const nextUrl = extractNextUrl(html);
-    if (!nextUrl) break;
-    url = nextUrl;
-    Utilities.sleep(1500);
+    if (maxSeenId > lastId) {
+      props.setProperty(lastIdKey, maxSeenId.toString());
+      Logger.log('Канал ' + channelName + ': last_id=' + maxSeenId);
+    }
   }
 
   if (newRows.length > 0) {
-    const rows2d = newRows.map(rowToArray);
+    var rows2d = newRows.map(rowToArray);
     sheet.insertRowsAfter(1, rows2d.length);
     sheet.getRange(2, 1, rows2d.length, HEADERS.length).setValues(rows2d);
-    props.setProperty('LAST_MSG_ID', maxSeenId.toString());
     Logger.log('Записано: ' + newRows.length);
   } else {
     Logger.log('Новых нет');
@@ -134,9 +148,7 @@ function parseChannel() {
   props.setProperty('LAST_RUN', new Date().toISOString());
 }
 
-// ════════════════════════════════════════════════════════════
-//  FETCH
-// ════════════════════════════════════════════════════════════
+
 function fetchPage(url) {
   try {
     const r = UrlFetchApp.fetch(url, {
@@ -243,14 +255,15 @@ function extractPosts(html) {
 //  СЛЕДУЮЩАЯ СТРАНИЦА
 // ════════════════════════════════════════════════════════════
 function extractNextUrl(html) {
-  var m = html.match(/href="(\/s\/rent_tbilisi_ge\?before=\d+)"/);
+  var m = html.match(/href="(\/s\/[a-z_]+\?before=\d+)"/);
   return m ? 'https://t.me' + m[1] : null;
 }
 
 // ════════════════════════════════════════════════════════════
 //  ПАРСЕР ПОСТА
 // ════════════════════════════════════════════════════════════
-function parsePost(post) {
+function parsePost(post, channelName) {
+  channelName = channelName || 'rent_tbilisi_ge';
   var text = post.text;
 
   if (!text.includes('$') && !text.includes('💰')) return null;
@@ -266,10 +279,11 @@ function parsePost(post) {
     is_exclusive: (text.includes('#Exclusive') || text.toLowerCase().includes('exclusive listing')) ? 'TRUE' : 'FALSE',
   };
 
-  // Тип
-  if (text.includes('#Commercial'))                             l.type = 'commercial';
-  else if (text.includes('#Sale') && !text.includes('#Rent'))   l.type = 'sale';
-  else                                                          l.type = 'rent';
+  // Тип — учитываем канал
+  if (text.includes('#Commercial'))                              l.type = 'commercial';
+  else if (text.includes('#Sale') && !text.includes('#Rent'))    l.type = 'sale';
+  else if (channelName === 'sale_in_tbilisi' && !text.includes('#Rent')) l.type = 'sale';
+  else                                                           l.type = 'rent';
 
   // Комнаты
   var roomMap = {'#Studio':0,'#1Bed':1,'#2Bed':2,'#3Bed':3,'#4Bed':4,'#5Bed':5};
@@ -483,7 +497,7 @@ function reset() {
     sheet.deleteRows(2, sheet.getLastRow()-1);
   }
   PropertiesService.getScriptProperties().deleteAllProperties();
-  Logger.log('✅ База очищена');
+  Logger.log('✅ База очищена (оба канала)');
 }
 
 // ════════════════════════════════════════════════════════════
