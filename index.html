@@ -1262,8 +1262,8 @@ var mapInited=false;
 function initMap(){
   if(mapInited) return;
   map=L.map("map",{center:[41.714,44.800],zoom:13});
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-    {attribution:"© OpenStreetMap contributors",maxZoom:19}).addTo(map);
+  L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
+    {attribution:"© OpenStreetMap © CARTO",maxZoom:19}).addTo(map);
   mapInited=true;
   updateMapPins();
 }
