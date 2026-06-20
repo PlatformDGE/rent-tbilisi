@@ -393,8 +393,8 @@ function parsePost(post, channelName) {
   l.contact = '@David_Tibelashvili';
 
   // Заголовок
-  var rLabel = {0:'Студия',1:'1-комн.',2:'2-комн.',3:'3-комн.',4:'4-комн.',5:'5-комн.'}[l.rooms] || '';
-  var bLabel = {New:'Новостройка',Old:'Старый фонд'}[l.building] || '';
+  var rLabel = {0:'Studio',1:'1-bed',2:'2-bed',3:'3-bed',4:'4-bed',5:'5-bed'}[l.rooms] || '';
+  var bLabel = {New:'New building',Old:'Old building'}[l.building] || '';
   l.title = [rLabel, bLabel, l.district].filter(Boolean).join(' • ');
 
   return l.price ? l : null;
