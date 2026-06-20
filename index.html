@@ -841,7 +841,6 @@ function scrollTop(){document.getElementById('lp').scrollTo({top:0,behavior:'smo
 //  INIT
 // ══════════════════════════════════════
 window.addEventListener('load', async ()=>{
-  document.getElementById('ld-sub').textContent='Подключаемся к Google Sheets...';
   initMap();
   await loadSheets();
   run();
