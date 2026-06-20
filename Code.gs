@@ -209,30 +209,27 @@ function extractPosts(html) {
       }
     }
 
-    // Фото — собираем только картинки (не видео) из photo_wrap
+    // Собираем фото и превью видео
     var photos = [];
     var searchPos = 0;
     while (searchPos < part.length) {
       var bgi = part.indexOf("background-image:url('https://cdn4.telesco.pe/file/", searchPos);
       if (bgi === -1) break;
-      // Проверяем что это photo_wrap а не video_thumb
-      var beforeBgi = part.substring(Math.max(0, bgi - 300), bgi);
-      var isVideo = beforeBgi.indexOf('video') !== -1 && beforeBgi.lastIndexOf('photo_wrap') < beforeBgi.lastIndexOf('video');
-      if (!isVideo) {
-        var ps = bgi + 22;
-        var pe = part.indexOf("')", ps);
-        if (pe !== -1) {
-          var photoUrl = part.substring(ps, pe);
-          // Только jpg/jpeg/png/webp — не видео
-          if (photoUrl.match(/\.(jpg|jpeg|png|webp)/i) || photoUrl.indexOf('.mp4') === -1) {
-            if (photos.indexOf(photoUrl) === -1) photos.push(photoUrl);
-          }
-        }
+      var ps = bgi + 22;
+      var pe = part.indexOf("')", ps);
+      if (pe !== -1) {
+        var mediaUrl = part.substring(ps, pe);
+        // Проверяем — видео или фото
+        var beforeBgi = part.substring(Math.max(0, bgi - 200), bgi);
+        var isVideoThumb = beforeBgi.indexOf('video_thumb') !== -1 || beforeBgi.indexOf('video_player') !== -1;
+        // Добавляем с пометкой для видео
+        var entry = isVideoThumb ? 'video:' + mediaUrl : mediaUrl;
+        if (photos.indexOf(entry) === -1) photos.push(entry);
       }
       searchPos = bgi + 1;
     }
-    var photo = photos.length > 0 ? photos[0] : '';
-    var photos_json = photos.length > 1 ? JSON.stringify(photos) : '';
+    var photo = photos.length > 0 ? photos[0].replace('video:','') : '';
+    var photos_json = photos.length > 0 ? JSON.stringify(photos) : '';
 
     if (text.length > 30) {
       posts.push({ id: id, text: text, photo: photo, photos_json: photos_json });
