@@ -459,7 +459,6 @@ button, a, .hcard, .vcard, .cat-btn, .bnav-item {
     </a>
     <div class="lang-sw">
       <button class="lb on" onclick="setLang('en')">EN</button>
-      <button class="lb" onclick="setLang('ru')">RU</button>
       <button class="lb" onclick="setLang('ka')">KA</button>
     </div>
   </div>
@@ -718,28 +717,6 @@ const T = {
     listings:"listings",just_now:"just now",fav_empty:"No saved listings yet",
     fav_empty_sub:"Tap ♡ on any listing to save it",
   },
-  ru:{
-    search_where:"Где ищем?",search_sub:"Любой район · Любая цена",
-    ph_addr:"#Vake #2Bed #Price500to700...",any_price:"Любая цена",any_build:"Любое здание",
-    new_build:"Новостройка",old_build:"Старый фонд",soviet_build:"Советский",
-    any_dist:"Любой район",any_rooms:"Любые комнаты",studio:"Студия",apply:"Применить",
-    cat_all:"Все",cat_1:"Студия/1к",cat_2:"2 к.",cat_3:"3 к.",cat_new:"Новостройка",cat_excl:"Эксклюзив",cat_comm:"Коммерция",
-    sec_new:"Только добавлено",see_all:"Все →",sec_all:"Все объявления",
-    map_title:"Карта",fav_title:"Избранное",
-    nav_rent:"Аренда",nav_sale:"Продажа",nav_map:"Карта",nav_fav:"Избранное",
-    load_err:"Ошибка загрузки. Проверьте соединение.",
-    badge_new:"НОВОЕ",badge_excl:"ЭКСКЛЮЗИВ",
-    deal_rent:"Аренда",deal_sale:"Продажа",deal_comm:"Коммерция",tag_excl:"⭐ Эксклюзив",tag_nocomm:"✅ 0% комиссия",tag_new:"🆕 Новое",
-    sec_params:"Параметры",sec_ams:"Удобства",
-    lbl_area:"Площадь",lbl_floor:"Этаж",lbl_rooms:"Комнаты",lbl_heat:"Отопление",lbl_bld:"Здание",lbl_added:"Добавлено",
-    am_wifi:"WiFi",am_stove:"Плита",am_cond:"Кондиционер",am_balc:"Балкон",am_tv:"ТВ",am_dish:"Посудомойка",
-    am_lift:"Лифт",am_wash:"Стиралка",am_park:"Парковка",am_micro:"Микроволновка",
-    btn_tg:"Telegram",btn_call:"Позвонить",btn_ch:"Канал",btn_details:"Подробнее",
-    deposit:"Депозит",nocomm:"0% комиссия",agent_role:"Агент · Rent in Tbilisi",
-    of:"из",no_results:"Ничего не найдено",no_results_sub:"Попробуйте изменить фильтры",
-    listings:"объявлений",just_now:"только что",fav_empty:"Нет сохранённых объявлений",
-    fav_empty_sub:"Нажмите ♡ на любом объявлении",
-  },
   ka:{
     search_where:"სად ეძებთ?",search_sub:"ნებისმიერი რაიონი · ნებისმიერი ფასი",
     ph_addr:"#Vake #2Bed #Price500to700...",any_price:"ნებისმიერი ფასი",any_build:"ნებისმიერი შენობა",
@@ -763,9 +740,10 @@ const T = {
     fav_empty_sub:"დააჭირეთ ♡ განცხადებაზე",
   }
 };
-var LANG = localStorage.getItem("rit_lang") || "en";
+var LANG = localStorage.getItem("rit_lang") || "en"; if(LANG==="ru") LANG="en";
 function t(k){ return (T[LANG]&&T[LANG][k]) || T.en[k] || k; }
 function setLang(l){
+  if(l==='ru') l='en';
   LANG=l; localStorage.setItem("rit_lang",l);
   document.querySelectorAll(".lb").forEach(b=>b.classList.toggle("on",b.textContent===l.toUpperCase()));
   applyI18n(); render();
