@@ -909,7 +909,7 @@ function openMobileMap() {
         '<div class="pu-loc">' + (l.district||'') + '</div>' +
         '<div class="pu-price">' + fmtP(l) + fmtU(l) + '</div>' +
         '<div class="pu-btns">' +
-        '<button class="pu-btn pb-navy" onclick="closeMobileMap();openM('' + l.id + '')">Подробнее</button>' +
+        '<button class="pu-btn pb-navy" onclick="closeMobileMap();openM(\'' + l.id + '\')">Подробнее</button>' +
         '<a class="pu-btn pb-tg" href="https://t.me/David_Tibelashvili" target="_blank">✈️ TG</a>' +
         '</div></div>', {maxWidth:240});
       mobileMarkers[l.id] = m;
