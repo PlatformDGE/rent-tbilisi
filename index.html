@@ -563,7 +563,9 @@ async function loadSheets() {
       if (obj.photos && String(obj.photos).startsWith('[')) {
         try { obj._photos = JSON.parse(obj.photos); } catch(e){ obj._photos=[]; }
       } else { obj._photos=[]; }
-      if (obj.photo && String(obj.photo).startsWith('http') && !obj._photos.includes(obj.photo)) {
+      // Add main photo if not already in list
+      const mainPhoto = String(obj.photo||'').replace('video:','');
+      if (mainPhoto.startsWith('http') && !obj._photos.some(p=>String(p).replace('video:','')=== mainPhoto)) {
         obj._photos.unshift(obj.photo);
       }
 
@@ -765,7 +767,20 @@ function openM(id) {
 
   const buildGallery = photos => {
     if(!photos.length) return '<div class="gallery"><div class="gallery-slide ep">'+(l._emoji||'🏠')+'</div></div>';
-    const slides = photos.map(u=>'<img class="gallery-slide" src="'+u+'" referrerpolicy="no-referrer" loading="lazy" style="flex-shrink:0;width:100%;height:100%;object-fit:cover" onerror="this.style.background='#e4edf8'">').join('');
+    const slides = photos.map(u => {
+      const isVideo = String(u).startsWith('video:');
+      const src = isVideo ? u.replace('video:','') : u;
+      if (isVideo) {
+        return '<div class="gallery-slide" style="flex-shrink:0;width:100%;height:100%;position:relative;background:#111">'
+          +'<img src="'+src+'" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover;opacity:.85">'
+          +'<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">'
+          +'<div style="width:56px;height:56px;background:rgba(255,255,255,.9);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px">▶️</div>'
+          +'</div>'
+          +'<div style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.6);color:#fff;font-size:11px;font-weight:600;padding:3px 10px;border-radius:10px">Video preview</div>'
+          +'</div>';
+      }
+      return '<img class="gallery-slide" src="'+src+'" referrerpolicy="no-referrer" loading="lazy" style="flex-shrink:0;width:100%;height:100%;object-fit:cover" onerror="this.style.background='#e4edf8'">';
+    }).join('');
     const nav = photos.length>1
       ? '<button class="gallery-prev" onclick="prevSlide()">‹</button>'
         +'<button class="gallery-next" onclick="nextSlide()">›</button>'
