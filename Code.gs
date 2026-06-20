@@ -214,10 +214,13 @@ function extractPosts(html) {
           p++;
         }
         text = buf
-          .replace(/&amp;/g,'&').replace(/&lt;/g,'<')
-          .replace(/&gt;/g,'>').replace(/&nbsp;/g,' ')
-          .replace(/&#39;/g,"'").replace(/&quot;/g,'"')
-          .replace(/\n{3,}/g,'\n\n').trim();
+          .replace(/&amp;/g,'&')
+          .replace(/&lt;/g,'<')
+          .replace(/&gt;/g,'>')
+          .replace(/&nbsp;/g,' ')
+          .replace(/&#39;/g,"'")
+          .replace(/&quot;/g,'"')
+          .trim();
 
 
 
