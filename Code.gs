@@ -439,28 +439,29 @@ function getExistingIds(sheet) {
 //  WEB APP — JSON для сайта
 // ════════════════════════════════════════════════════════════
 function doGet(e) {
-  var ss    = SpreadsheetApp.getActiveSpreadsheet();
-  var sheet = ss.getSheetByName(SHEET_NAME);
-  var props = PropertiesService.getScriptProperties();
+  var ss      = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet   = ss.getSheetByName(SHEET_NAME);
+  var props   = PropertiesService.getScriptProperties();
+  var params  = (e && e.parameter) ? e.parameter : {};
+  var cb      = params.cb || params.callback || null;
+  var channel = params.channel || '';
 
-  var channel = e && e.parameter && e.parameter.channel ? e.parameter.channel : '';
   var result;
   if (!sheet || sheet.getLastRow() < 2) {
     result = { listings:[], total:0, updated_at:'' };
   } else {
-    var data = sheet.getRange(2,1,sheet.getLastRow()-1,HEADERS.length).getValues();
+    var data = sheet.getRange(2, 1, sheet.getLastRow()-1, HEADERS.length).getValues();
     var listings = data
-      .filter(function(r){
+      .filter(function(r) {
         if (!r[0] || !r[19]) return false;
-        // Фильтр по каналу
         if (channel === 'rent') return String(r[0]).indexOf('sale_in_tbilisi') === -1;
         if (channel === 'sale') return String(r[0]).indexOf('sale_in_tbilisi') !== -1;
         return true;
       })
       .slice(0, 300)
-      .map(function(r){
+      .map(function(r) {
         var o = {};
-        HEADERS.forEach(function(h,i){ o[h]=r[i]; });
+        HEADERS.forEach(function(h, i) { o[h] = r[i]; });
         return o;
       });
     result = {
@@ -470,8 +471,6 @@ function doGet(e) {
     };
   }
 
-  // Support callback param for CORS bypass
-  var cb = e && e.parameter && e.parameter.cb ? e.parameter.cb : null;
   if (cb) {
     return ContentService
       .createTextOutput(cb + '(' + JSON.stringify(result) + ')')
@@ -482,9 +481,7 @@ function doGet(e) {
     .setMimeType(ContentService.MimeType.JSON);
 }
 
-// ════════════════════════════════════════════════════════════
-//  SETUP — запустить один раз
-// ════════════════════════════════════════════════════════════
+
 function setup() {
   ScriptApp.getProjectTriggers().forEach(function(t){
     if (t.getHandlerFunction() === 'parseChannel') ScriptApp.deleteTrigger(t);
