@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Rent in Tbilisi</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
@@ -283,6 +283,14 @@ body{font-family:"Inter",sans-serif;background:var(--white);color:var(--g700);di
 }
 .modal::-webkit-scrollbar{display:none}
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+
+/* Prevent zoom on double tap */
+button, a, .hcard, .vcard, .cat-btn, .bnav-item {
+  touch-action: manipulation;
+}
+/* Gallery swipe */
+.gallery { touch-action: pan-y; user-select: none; }
+.gallery-track { will-change: transform; }
 
 /* Gallery in modal */
 .gallery{position:relative;width:100%;height:240px;overflow:hidden;background:var(--g100)}
@@ -969,10 +977,25 @@ function bgClose(e){ if(e.target===document.getElementById("modalBg")) closeModa
 // ════════════════════════════════
 //  GALLERY
 // ════════════════════════════════
+// Touch swipe for gallery
+var _gTouchX=0;
+function gTouchStart(e){ _gTouchX=e.touches[0].clientX; }
+function gTouchEnd(e){
+  var dx=e.changedTouches[0].clientX-_gTouchX;
+  if(Math.abs(dx)>40){ if(dx<0) gNext(); else gPrev(); }
+}
+
 var _gI=0,_gT=0;
 function initGallery(){
-  _gI=0; const tr=document.getElementById("gtrack");
+  _gI=0; var gal=document.getElementById("gal");
+  var tr=document.getElementById("gtrack");
   if(!tr) return; _gT=tr.children.length; updGallery();
+  if(gal){
+    gal.removeEventListener("touchstart",gTouchStart);
+    gal.removeEventListener("touchend",gTouchEnd);
+    gal.addEventListener("touchstart",gTouchStart,{passive:true});
+    gal.addEventListener("touchend",gTouchEnd,{passive:true});
+  }
 }
 function gGoto(i){ _gI=Math.max(0,Math.min(i,_gT-1)); updGallery(); }
 function gNext(){ gGoto(_gI+1); }
