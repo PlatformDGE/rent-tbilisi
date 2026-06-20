@@ -805,9 +805,13 @@ function render(){
   const allItems=shown;
 
   // Horizontal new
-  const ns=document.getElementById("newScroll");
-  ns.innerHTML=newItems.length?newItems.map(hcard).join(""):
-    '<div style="color:var(--g400);font-size:13px;padding:20px 0">'+t("no_results")+"</div>";
+  var ns=document.getElementById("newScroll");
+  ns.innerHTML="";
+  if(newItems.length){
+    newItems.forEach(function(l){ ns.appendChild(hcard(l)); });
+  } else {
+    ns.innerHTML='<div style="color:var(--g400);font-size:13px;padding:20px 0">'+t("no_results")+"</div>";
+  }
 
   // Vertical all
   var vl=document.getElementById("vlist");
