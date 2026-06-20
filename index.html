@@ -397,8 +397,32 @@ button, a, .hcard, .vcard, .cat-btn, .bnav-item {
   .hcard-photo{width:200px;height:150px}
 }
 
-/* ── MAIN FILTERS ── */
-.main-filters{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
+
+/* ── SEARCH PILL ── */
+.search-pill{
+  display:flex;align-items:center;gap:12px;
+  background:var(--white);border:1px solid var(--g200);
+  border-radius:40px;padding:10px 16px;
+  box-shadow:var(--sh);cursor:pointer;
+  margin-bottom:0;transition:box-shadow .2s;
+  touch-action:manipulation;
+}
+.search-pill.active{border-color:var(--navy);box-shadow:0 0 0 3px rgba(30,58,110,.1)}
+.search-icon{font-size:18px;flex-shrink:0}
+.search-pill-texts{flex:1}
+.search-pill-main{font-size:14px;font-weight:700;color:var(--g900)}
+.search-pill-sub{font-size:12px;color:var(--g400)}
+.search-pill-filter{width:32px;height:32px;border-radius:50%;border:1px solid var(--g200);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.search-pill-filter.active{background:var(--navy);border-color:var(--navy)}
+
+/* ── FILTER PANEL ── */
+.filter-panel{
+  display:none;flex-direction:column;gap:8px;
+  padding:14px;background:var(--white);
+  border:1px solid var(--g200);border-radius:16px;
+  margin-top:8px;box-shadow:var(--sh2);
+}
+.filter-panel.open{display:flex}
 .f-row{display:flex;gap:8px}
 .f-sel{
   flex:1;padding:9px 12px;border:1.5px solid var(--g200);
@@ -408,6 +432,7 @@ button, a, .hcard, .vcard, .cat-btn, .bnav-item {
   cursor:pointer;outline:none;touch-action:manipulation;
 }
 .f-sel:focus{border-color:var(--navy)}
+
 
 /* Advanced toggle button */
 .adv-toggle{
@@ -463,11 +488,20 @@ button, a, .hcard, .vcard, .cat-btn, .bnav-item {
     </div>
   </div>
 
-    <!-- MAIN FILTERS -->
-  <div class="main-filters">
-    <!-- Row 1: District + Metro -->
+    <!-- SEARCH PILL -->
+  <div class="search-pill" onclick="toggleSearch()">
+    <div class="search-icon">🔍</div>
+    <div class="search-pill-texts">
+      <div class="search-pill-main" id="pillMain">Where are you looking?</div>
+      <div class="search-pill-sub" id="pillSub">Any district · Any price</div>
+    </div>
+    <div class="search-pill-filter" id="filterDot">⚙️</div>
+  </div>
+
+  <!-- FILTER PANEL (slides down) -->
+  <div class="filter-panel" id="filterPanel">
     <div class="f-row">
-      <select class="f-sel" id="sDist" onchange="run()">
+      <select class="f-sel" id="sDist" onchange="run();updatePillSub()">
         <option value="">📍 District</option>
         <option value="Vera">Vera</option><option value="Mtatsminda">Mtatsminda</option>
         <option value="Vake">Vake</option><option value="Sololaki">Sololaki</option>
@@ -478,10 +512,10 @@ button, a, .hcard, .vcard, .cat-btn, .bnav-item {
         <option value="Samgori">Samgori</option><option value="Varketili">Varketili</option>
         <option value="Digomi">Digomi</option><option value="Ortachala">Ortachala</option>
         <option value="Krtsanisi">Krtsanisi</option><option value="Bagebi">Bagebi</option>
-        <option value="Temqa">Temqa</option><option value="Vashlijvari">Vashlijvari</option>
-        <option value="Kukia">Kukia</option><option value="Abanotubani">Abanotubani</option>
+        <option value="Temqa">Temqa</option><option value="Kukia">Kukia</option>
+        <option value="Abanotubani">Abanotubani</option><option value="Vashlijvari">Vashlijvari</option>
       </select>
-      <select class="f-sel" id="sMetro" onchange="run()">
+      <select class="f-sel" id="sMetro" onchange="run();updatePillSub()">
         <option value="">🚇 Metro</option>
         <option value="LibertySquare">Liberty Square</option>
         <option value="Rustaveli">Rustaveli</option>
@@ -495,7 +529,6 @@ button, a, .hcard, .vcard, .cat-btn, .bnav-item {
         <option value="AhmeteliTheatre">Ahmeteli Theatre</option>
         <option value="VazhaPshavela">Vazha-Pshavela</option>
         <option value="Delisi">Delisi</option>
-        <option value="TCUniversity">TC University</option>
         <option value="MCUniversity">MC University</option>
         <option value="AvlabariMetro">Avlabari</option>
         <option value="IsaniMetro">Isani</option>
@@ -503,9 +536,8 @@ button, a, .hcard, .vcard, .cat-btn, .bnav-item {
         <option value="Varketili">Varketili</option>
       </select>
     </div>
-    <!-- Row 2: Price + Rooms -->
     <div class="f-row">
-      <select class="f-sel" id="sPrice" onchange="run()">
+      <select class="f-sel" id="sPrice" onchange="run();updatePillSub()">
         <option value="">💰 Price</option>
         <option value="0-300">to $300</option>
         <option value="300-500">$300–500</option>
@@ -514,7 +546,7 @@ button, a, .hcard, .vcard, .cat-btn, .bnav-item {
         <option value="900-1200">$900–1200</option>
         <option value="1200-99999">$1200+</option>
       </select>
-      <select class="f-sel" id="sRooms" onchange="run()">
+      <select class="f-sel" id="sRooms" onchange="run();updatePillSub()">
         <option value="">🛋 Rooms</option>
         <option value="0">Studio</option>
         <option value="1">1 bed</option>
@@ -523,56 +555,54 @@ button, a, .hcard, .vcard, .cat-btn, .bnav-item {
         <option value="4">4+ bed</option>
       </select>
     </div>
-    <!-- Advanced toggle -->
+    <!-- Advanced -->
     <button class="adv-toggle" id="advToggle" onclick="toggleAdv()">
       ⚙️ <span id="advLabel">More filters</span> <span id="advArrow">▾</span>
     </button>
-  </div>
-
-  <!-- ADVANCED FILTERS -->
-  <div class="adv-filters" id="advFilters">
-    <div class="adv-group">
-      <div class="adv-title">🏢 Building</div>
-      <div class="adv-pills" id="fBuild">
-        <button class="ap on" data-val="" onclick="setAdv(this,'fBuild','')">Any</button>
-        <button class="ap" data-val="New" onclick="setAdv(this,'fBuild','New')">New</button>
-        <button class="ap" data-val="Old" onclick="setAdv(this,'fBuild','Old')">Old</button>
-        <button class="ap" data-val="Soviet" onclick="setAdv(this,'fBuild','Soviet')">Soviet</button>
+    <div class="adv-filters" id="advFilters">
+      <div class="adv-group">
+        <div class="adv-title">🏢 Building</div>
+        <div class="adv-pills" id="fBuild">
+          <button class="ap on" data-val="" onclick="setAdv(this,'fBuild','')">Any</button>
+          <button class="ap" data-val="New" onclick="setAdv(this,'fBuild','New')">New</button>
+          <button class="ap" data-val="Old" onclick="setAdv(this,'fBuild','Old')">Old</button>
+          <button class="ap" data-val="Soviet" onclick="setAdv(this,'fBuild','Soviet')">Soviet</button>
+        </div>
       </div>
-    </div>
-    <div class="adv-group">
-      <div class="adv-title">✅ Amenities</div>
-      <div class="adv-pills" id="fAmenities">
-        <button class="ap" data-val="wifi" onclick="toggleAm(this,'wifi')">📶 WiFi</button>
-        <button class="ap" data-val="balcony" onclick="toggleAm(this,'balcony')">🏗 Balcony</button>
-        <button class="ap" data-val="conditioner" onclick="toggleAm(this,'conditioner')">🌡 A/C</button>
-        <button class="ap" data-val="elevator" onclick="toggleAm(this,'elevator')">🛗 Elevator</button>
-        <button class="ap" data-val="parking" onclick="toggleAm(this,'parking')">🅿️ Parking</button>
-        <button class="ap" data-val="dishwasher" onclick="toggleAm(this,'dishwasher')">🍽 Dishwasher</button>
-        <button class="ap" data-val="tv" onclick="toggleAm(this,'tv')">📺 TV</button>
-        <button class="ap" data-val="washing_machine" onclick="toggleAm(this,'washing_machine')">🫧 Washer</button>
-        <button class="ap" data-val="microwave" onclick="toggleAm(this,'microwave')">♨️ Microwave</button>
-        <button class="ap" data-val="stove" onclick="toggleAm(this,'stove')">🍳 Stove</button>
+      <div class="adv-group">
+        <div class="adv-title">✅ Amenities</div>
+        <div class="adv-pills" id="fAmenities">
+          <button class="ap" data-val="wifi" onclick="toggleAm(this,'wifi')">📶 WiFi</button>
+          <button class="ap" data-val="balcony" onclick="toggleAm(this,'balcony')">🏗 Balcony</button>
+          <button class="ap" data-val="conditioner" onclick="toggleAm(this,'conditioner')">🌡 A/C</button>
+          <button class="ap" data-val="elevator" onclick="toggleAm(this,'elevator')">🛗 Elevator</button>
+          <button class="ap" data-val="parking" onclick="toggleAm(this,'parking')">🅿️ Parking</button>
+          <button class="ap" data-val="dishwasher" onclick="toggleAm(this,'dishwasher')">🍽 Dishwasher</button>
+          <button class="ap" data-val="tv" onclick="toggleAm(this,'tv')">📺 TV</button>
+          <button class="ap" data-val="washing_machine" onclick="toggleAm(this,'washing_machine')">🫧 Washer</button>
+          <button class="ap" data-val="microwave" onclick="toggleAm(this,'microwave')">♨️ Microwave</button>
+          <button class="ap" data-val="stove" onclick="toggleAm(this,'stove')">🍳 Stove</button>
+        </div>
       </div>
-    </div>
-    <div class="adv-group">
-      <div class="adv-title">🐾 Pets</div>
-      <div class="adv-pills" id="fPets">
-        <button class="ap on" data-val="" onclick="setAdv(this,'fPets','')">Any</button>
-        <button class="ap" data-val="yes" onclick="setAdv(this,'fPets','yes')">✅ Allowed</button>
-        <button class="ap" data-val="no" onclick="setAdv(this,'fPets','no')">🚫 Not allowed</button>
+      <div class="adv-group">
+        <div class="adv-title">🐾 Pets</div>
+        <div class="adv-pills" id="fPets">
+          <button class="ap on" data-val="" onclick="setAdv(this,'fPets','')">Any</button>
+          <button class="ap" data-val="yes" onclick="setAdv(this,'fPets','yes')">✅ Allowed</button>
+          <button class="ap" data-val="no" onclick="setAdv(this,'fPets','no')">🚫 No</button>
+        </div>
       </div>
-    </div>
-    <div class="adv-group">
-      <div class="adv-title">⏱ Rental period</div>
-      <div class="adv-pills" id="fTerm">
-        <button class="ap on" data-val="" onclick="setAdv(this,'fTerm','')">Any</button>
-        <button class="ap" data-val="1Month" onclick="setAdv(this,'fTerm','1Month')">1 mo</button>
-        <button class="ap" data-val="6Month" onclick="setAdv(this,'fTerm','6Month')">6 mo</button>
-        <button class="ap" data-val="12Month" onclick="setAdv(this,'fTerm','12Month')">12 mo</button>
+      <div class="adv-group">
+        <div class="adv-title">⏱ Term</div>
+        <div class="adv-pills" id="fTerm">
+          <button class="ap on" data-val="" onclick="setAdv(this,'fTerm','')">Any</button>
+          <button class="ap" data-val="1Month" onclick="setAdv(this,'fTerm','1Month')">1 mo</button>
+          <button class="ap" data-val="6Month" onclick="setAdv(this,'fTerm','6Month')">6 mo</button>
+          <button class="ap" data-val="12Month" onclick="setAdv(this,'fTerm','12Month')">12 mo</button>
+        </div>
       </div>
+      <button class="adv-reset" onclick="resetAdv()">Reset all</button>
     </div>
-    <button class="adv-reset" onclick="resetAdv()">Reset all filters</button>
   </div>
 
   <!-- CATEGORIES -->
@@ -1310,6 +1340,30 @@ function closeMap(){
 // ════════════════════════════════
 //  SEARCH
 // ════════════════════════════════
+// Search panel state
+var searchPanelOpen = false;
+function toggleSearch(){
+  searchPanelOpen = !searchPanelOpen;
+  document.getElementById("filterPanel").classList.toggle("open", searchPanelOpen);
+  document.getElementById("search-pill") && document.querySelector(".search-pill").classList.toggle("active", searchPanelOpen);
+  document.querySelector(".search-pill").classList.toggle("active", searchPanelOpen);
+  document.getElementById("filterDot").classList.toggle("active", searchPanelOpen);
+}
+
+function updatePillSub(){
+  var dist  = document.getElementById("sDist").value;
+  var metro = document.getElementById("sMetro").value;
+  var price = document.getElementById("sPrice").value;
+  var rooms = document.getElementById("sRooms").value;
+  var parts = [];
+  if(dist)  parts.push(dist);
+  if(metro) parts.push(metro);
+  if(price) parts.push("$"+price.replace("-","–").replace("99999","+"));
+  if(rooms) parts.push(rooms==="0"?"Studio":rooms+"br");
+  document.getElementById("pillSub").textContent = parts.length ? parts.join(" · ") : "Any district · Any price";
+  document.getElementById("pillMain").textContent = parts.length ? "Showing filtered results" : "Where are you looking?";
+}
+
 // Advanced filter state
 var advBuild="", advPets="", advTerm="", advAms=[];
 var advOpen=false;
