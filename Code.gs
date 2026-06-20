@@ -199,12 +199,10 @@ function extractPosts(html) {
         var buf = '';
         while (p < part.length && depth > 0) {
           if (part.substring(p, p+4).toLowerCase() === '<br>') {
-            buf += '
-'; p += 4; continue;
+            buf += '\n'; p += 4; continue;
           }
           if (part.substring(p, p+5).toLowerCase() === '<br/>') {
-            buf += '
-'; p += 5; continue;
+            buf += '\n'; p += 5; continue;
           }
           if (part[p] === '<') {
             if (part[p+1] === '/') depth--;
