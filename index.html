@@ -549,7 +549,7 @@ function loadJSONP(url) {
     const id = 'gs_' + Date.now();
     window[id] = resolve;
     const s = document.createElement('script');
-    s.src = url + '?cb=' + id;
+    s.src = url + (url.includes('?') ? '&' : '?') + 'cb=' + id;
     s.onerror = () => reject(new Error('load failed'));
     setTimeout(() => reject(new Error('timeout')), 12000);
     document.head.appendChild(s);
@@ -561,8 +561,7 @@ async function loadSheets() {
     return true;
   }
   try {
-    const url = APPS_SCRIPT_URL + '&channel=' + ACTIVE_TAB;
-    const data = await loadJSONP(url);
+    const data = await loadJSONP(APPS_SCRIPT_URL + '?channel=' + ACTIVE_TAB);
     const rows = data.listings || [];
     const bool = v => v==='TRUE'||v===true;
 
