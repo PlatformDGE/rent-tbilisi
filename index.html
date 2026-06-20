@@ -812,9 +812,9 @@ var catFilter="", roomFilter="";
 function ago(d){
   const s=(Date.now()-d)/1e3;
   if(s<60)return t("just_now");
-  if(s<3600)return ~~(s/60)+"m";
-  if(s<86400)return ~~(s/3600)+"h";
-  return ~~(s/86400)+"d";
+  if(s<3600)return ~~(s/60)+"m ago";
+  if(s<86400)return ~~(s/3600)+"h ago";
+  return ~~(s/86400)+"d ago";
 }
 function fmtP(l){ return l.type==="sale"?"$"+parseInt(l.price).toLocaleString():"$"+parseInt(l.price); }
 function fmtU(l){ return l.type==="sale"?"":"/mo"; }
