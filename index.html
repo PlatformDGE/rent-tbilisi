@@ -429,7 +429,7 @@ button, a, .hcard, .vcard, .cat-btn, .bnav-item {
   <div class="search-expanded" id="searchExp">
     <div class="s-input-wrap">
       <span>📍</span>
-      <input type="text" id="sAddr" data-i18n-ph="ph_addr" placeholder="District or address..." oninput="run()">
+      <input type="text" id="sAddr" data-i18n-ph="ph_addr" placeholder="#Vake #2Bed #Price500to700..." oninput="run()">
     </div>
     <div class="s-row">
       <select class="s-sel" id="sPrice" onchange="run()">
@@ -590,7 +590,7 @@ var ACTIVE_TAB = "rent";
 const T = {
   en:{
     search_where:"Where are you looking?",search_sub:"Any district · Any price",
-    ph_addr:"District or address...",any_price:"Any price",any_build:"Any building",
+    ph_addr:"#Vake #2Bed #Price500to700...",any_price:"Any price",any_build:"Any building",
     new_build:"New building",old_build:"Old building",soviet_build:"Soviet",
     any_dist:"Any district",any_rooms:"Any rooms",studio:"Studio",apply:"Apply filters",
     cat_all:"All",cat_1:"Studio/1br",cat_2:"2 br.",cat_3:"3 br.",cat_new:"New bld",cat_excl:"Exclusive",cat_comm:"Commercial",
@@ -612,7 +612,7 @@ const T = {
   },
   ru:{
     search_where:"Где ищем?",search_sub:"Любой район · Любая цена",
-    ph_addr:"Район или адрес...",any_price:"Любая цена",any_build:"Любое здание",
+    ph_addr:"#Vake #2Bed #Price500to700...",any_price:"Любая цена",any_build:"Любое здание",
     new_build:"Новостройка",old_build:"Старый фонд",soviet_build:"Советский",
     any_dist:"Любой район",any_rooms:"Любые комнаты",studio:"Студия",apply:"Применить",
     cat_all:"Все",cat_1:"Студия/1к",cat_2:"2 к.",cat_3:"3 к.",cat_new:"Новостройка",cat_excl:"Эксклюзив",cat_comm:"Коммерция",
@@ -634,7 +634,7 @@ const T = {
   },
   ka:{
     search_where:"სად ეძებთ?",search_sub:"ნებისმიერი რაიონი · ნებისმიერი ფასი",
-    ph_addr:"რაიონი ან მისამართი...",any_price:"ნებისმიერი ფასი",any_build:"ნებისმიერი შენობა",
+    ph_addr:"#Vake #2Bed #Price500to700...",any_price:"ნებისმიერი ფასი",any_build:"ნებისმიერი შენობა",
     new_build:"ახალი აშენება",old_build:"ძველი ფონდი",soviet_build:"საბჭოური",
     any_dist:"ნებისმიერი რაიონი",any_rooms:"ნებისმიერი",studio:"სტუდიო",apply:"გამოყენება",
     cat_all:"ყველა",cat_1:"სტუდიო/1",cat_2:"2 ოთ.",cat_3:"3 ოთ.",cat_new:"ახალი",cat_excl:"ექსკლუზ.",cat_comm:"კომერცია",
@@ -775,29 +775,172 @@ async function loadSheets(){
 // ════════════════════════════════
 //  FILTERS
 // ════════════════════════════════
+// ════════════════════════════════
+//  HASHTAG SEARCH ENGINE
+// ════════════════════════════════
+
+// Metro → district coords mapping
+var METRO_TAGS = [
+  "libertysquare","rustaveli","marjanishvili","stationsquare","tsereteli",
+  "gotsiridze","nadzaladevi","didube","grmagele","guramishvili","sarajishvili",
+  "ahmeletitheatre","stuniversity","vazhapshavela","delisi","tcuniversity",
+  "mcuniversity","avlabari","isani","300aragveli","samgori","varketili"
+];
+
+var DISTRICT_TAGS = [
+  "vera","mtatsminda","vake","sololaki","kukia","nadzaladevi","naxalovka",
+  "savnetissubani","tskneti","chugureti","vazhapshavela","nutsubidze","saburtalo",
+  "didube","gldani","avlabari","isani","samgori","digomi","dididigomi",
+  "digomimassive","digomi1to9","varketili","ortachala","abanotubani","saguramo",
+  "krtsanisi","vashlijvari","temqa","iverubani","vazisubani","afrika",
+  "qvemoponichala","ponichala","avchala","bagebi","lisi","tskhneti","outoftown"
+];
+
+var PRICE_TAGS = {
+  "price0to300":   [0,300],
+  "price300to500": [300,500],
+  "price500to700": [500,700],
+  "price700to900": [700,900],
+  "price900to1200":[900,1200],
+  "price1200plus": [1200,999999]
+};
+
+var AM_TAGS = {
+  "wifi":"wifi","wifi":true,
+  "conditioner":"conditioner","conditioner":true,
+  "balcony":"balcony","balcony":true,
+  "elevator":"elevator","elevator":true,
+  "dishwasher":"dishwasher","dishwasher":true,
+  "parkingplace":"parking","parking":true,
+  "tv":"tv","tv":true,
+  "microwave":"microwave","microwave":true,
+  "stove":"stove","stove":true,
+  "oven":"stove"
+};
+
+var AM_TAG_MAP = {
+  "wifi":"wifi","conditioner":"conditioner","balcony":"balcony",
+  "elevator":"elevator","dishwasher":"dishwasher","parkingplace":"parking",
+  "tv":"tv","microwave":"microwave","stove":"stove","oven":"stove",
+  "bath":"bath","shower":"shower","terrace":"balcony","courtyard":"parking",
+  "vacuumcleaner":"wifi"
+};
+
+var BUILD_TAGS = {
+  "newbuilding":"New","oldbuilding":"Old","historicalbuilding":"Old","reconstruction":"Old"
+};
+
+var BED_TAGS = {"studio":0,"1bed":1,"2bed":2,"3bed":3,"4bed":4,"5bed":5};
+
+var PRICE_RANGES = {
+  "price0to300":[0,300],"price300to500":[300,500],"price500to700":[500,700],
+  "price700to900":[700,900],"price900to1200":[900,1200],"price1200plus":[1200,999999]
+};
+
+function parseHashtags(query) {
+  var result = {
+    districts:[], metros:[], priceMin:null, priceMax:null,
+    rooms:null, building:null, amenities:[], type:null,
+    freeText:"", pets:null
+  };
+  var raw = query.trim();
+  // Extract hashtags
+  var tags = (raw.match(/#[A-Za-z0-9]+/g)||[]).map(function(t){ return t.slice(1).toLowerCase(); });
+  // Remaining free text (non-hashtag words)
+  result.freeText = raw.replace(/#[A-Za-z0-9]+/g,"").trim().toLowerCase();
+
+  tags.forEach(function(tag){
+    // District
+    if(DISTRICT_TAGS.indexOf(tag)!==-1){ result.districts.push(tag); return; }
+    // Metro
+    if(METRO_TAGS.indexOf(tag)!==-1){ result.metros.push(tag); return; }
+    // Price range
+    if(PRICE_RANGES[tag]){
+      result.priceMin=PRICE_RANGES[tag][0];
+      result.priceMax=PRICE_RANGES[tag][1];
+      return;
+    }
+    // Beds
+    if(BED_TAGS[tag]!==undefined){ result.rooms=BED_TAGS[tag]; return; }
+    // Building
+    if(BUILD_TAGS[tag]){ result.building=BUILD_TAGS[tag]; return; }
+    // Amenities
+    if(AM_TAG_MAP[tag]){ result.amenities.push(AM_TAG_MAP[tag]); return; }
+    // Type
+    if(tag==="apartment"||tag==="house") result.type="rent";
+    if(tag==="commercial") result.type="commercial";
+    // Pets
+    if(tag==="allowed") result.pets=true;
+    if(tag==="notallowed") result.pets=false;
+    if(tag==="byagreement") result.pets="byagreement";
+    // Heating
+    if(tag==="gasheating") result.amenities.push("gas");
+    if(tag==="centralheating") result.amenities.push("central");
+    if(tag==="electricalheating"||tag==="acheating") result.amenities.push("electric");
+  });
+  return result;
+}
+
 function run(){
-  const addr=(document.getElementById("sAddr").value||"").toLowerCase();
-  const price=document.getElementById("sPrice").value;
-  const build=document.getElementById("sBuild").value;
-  const dist=document.getElementById("sDist").value;
-  const rooms=document.getElementById("sRooms").value;
+  var rawQuery = (document.getElementById("sAddr").value||"");
+  var ht = parseHashtags(rawQuery);
+  var price = document.getElementById("sPrice").value;
+  var build = document.getElementById("sBuild").value;
+  var dist  = document.getElementById("sDist").value;
+  var rooms = document.getElementById("sRooms").value;
 
   shown=ALL.filter(function(l){
-    const r=parseInt(l.rooms)||0;
-    if(addr&&![l.title,l.address,l.district].some(function(s){ return String(s).toLowerCase().includes(addr); })) return false;
+    var r=parseInt(l.rooms)||0;
+    var lDist = (l.district||"").toLowerCase();
+    var lMetro = (l.metro||"").toLowerCase().replace(/\s/g,"");
+    var lAddr = (l.address||"").toLowerCase();
+    var lTitle = (l.title||"").toLowerCase();
+
+    // Hashtag district filter
+    if(ht.districts.length>0){
+      var matchDist=ht.districts.some(function(d){ return lDist.includes(d)||lAddr.includes(d); });
+      if(!matchDist) return false;
+    }
+    // Hashtag metro filter
+    if(ht.metros.length>0){
+      var matchMetro=ht.metros.some(function(m){ return lMetro.includes(m)||lAddr.toLowerCase().replace(/\s/g,"").includes(m); });
+      if(!matchMetro) return false;
+    }
+    // Hashtag price
+    if(ht.priceMin!==null){ var p2=parseFloat(l.price)||0; if(p2<ht.priceMin||p2>ht.priceMax) return false; }
+    // Hashtag rooms
+    if(ht.rooms!==null){
+      if(ht.rooms===1&&r>1) return false;
+      if(ht.rooms>1&&r!==ht.rooms) return false;
+      if(ht.rooms===0&&r!==0) return false;
+    }
+    // Hashtag building
+    if(ht.building&&l.building!==ht.building) return false;
+    // Hashtag amenities
+    for(var ai=0;ai<ht.amenities.length;ai++){
+      var am=ht.amenities[ai];
+      if(l._am&&l._am[am]===false) return false;
+    }
+    // Hashtag pets
+    if(ht.pets===true&&!l.pets) return false;
+    if(ht.pets===false&&l.pets) return false;
+    // Free text
+    if(ht.freeText&&![lTitle,lAddr,lDist].some(function(s){ return s.includes(ht.freeText); })) return false;
+
+    // Dropdown filters
     if(dist&&l.district!==dist) return false;
     if(build&&l.building!==build) return false;
     if(rooms!==""){
       if(rooms==="4"&&r<4) return false;
       if(rooms!=="4"&&r!==parseInt(rooms)) return false;
     }
-    if(price){ const[mn,mx]=price.split("-").map(Number); const p=parseFloat(l.price)||0; if(p<mn||p>mx) return false; }
-    // category filter
+    if(price){ var mn=parseFloat(price.split("-")[0]),mx=parseFloat(price.split("-")[1]); var pp=parseFloat(l.price)||0; if(pp<mn||pp>mx) return false; }
+    // Category filter
     if(catFilter==="new"&&l.building!=="New") return false;
     if(catFilter==="excl"&&!l.is_exclusive) return false;
     if(catFilter==="comm"&&l.type!=="commercial") return false;
     if(catFilter&&!isNaN(catFilter)){
-      const cv=parseInt(catFilter);
+      var cv=parseInt(catFilter);
       if(cv===1&&r>1) return false;
       if(cv>1&&r!==cv) return false;
     }
