@@ -668,7 +668,7 @@ function pins(){
     const icon=L.divIcon({html,className:'',iconAnchor:[28,14]});
     const m=L.marker([l._lat,l._lng],{icon}).addTo(map);
     const photoHtml = l.photo && String(l.photo).startsWith('http')
-      ? `<img src="${l.photo}" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'">`
+      ? `<img src="${l.photo}" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover" onerror="this.outerHTML='<div class=ep>${l._emoji||'🏠'}</div>'">`
       : `<div class="ep">${l._emoji||'🏠'}</div>`;
     m.bindPopup(`
       <div class="pu-photo">${photoHtml}</div>
@@ -903,7 +903,7 @@ function openMobileMap() {
       var icon = L.divIcon({html:html2, className:'', iconAnchor:[28,14]});
       var m = L.marker([l._lat, l._lng], {icon:icon}).addTo(mobileMap);
       m.bindPopup(
-        '<div class="pu-photo"><div class="ep">' + (l._emoji||'🏠') + '</div></div>' +
+        '<div class="pu-photo">' + (l.photo && l.photo.startsWith('http') ? '<img src="' + l.photo + '" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover">' : '<div class="ep">' + (l._emoji||'🏠') + '</div>') + '</div>' +
         '<div class="pu-body">' +
         '<div class="pu-loc">' + (l.district||'') + '</div>' +
         '<div class="pu-price">' + fmtP(l) + fmtU(l) + '</div>' +
