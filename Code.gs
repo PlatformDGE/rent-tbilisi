@@ -209,18 +209,27 @@ function extractPosts(html) {
       }
     }
 
-    // Фото — собираем ВСЕ фото поста из photo_wrap
+    // Фото — собираем только картинки (не видео) из photo_wrap
     var photos = [];
     var searchPos = 0;
     while (searchPos < part.length) {
       var bgi = part.indexOf("background-image:url('https://cdn4.telesco.pe/file/", searchPos);
       if (bgi === -1) break;
-      var ps = bgi + 22; // после url('  (22 = length of "background-image:url('")
-      var pe = part.indexOf("')", ps);
-      if (pe === -1) break;
-      var photoUrl = part.substring(ps, pe);
-      if (photos.indexOf(photoUrl) === -1) photos.push(photoUrl);
-      searchPos = pe + 1;
+      // Проверяем что это photo_wrap а не video_thumb
+      var beforeBgi = part.substring(Math.max(0, bgi - 300), bgi);
+      var isVideo = beforeBgi.indexOf('video') !== -1 && beforeBgi.lastIndexOf('photo_wrap') < beforeBgi.lastIndexOf('video');
+      if (!isVideo) {
+        var ps = bgi + 22;
+        var pe = part.indexOf("')", ps);
+        if (pe !== -1) {
+          var photoUrl = part.substring(ps, pe);
+          // Только jpg/jpeg/png/webp — не видео
+          if (photoUrl.match(/\.(jpg|jpeg|png|webp)/i) || photoUrl.indexOf('.mp4') === -1) {
+            if (photos.indexOf(photoUrl) === -1) photos.push(photoUrl);
+          }
+        }
+      }
+      searchPos = bgi + 1;
     }
     var photo = photos.length > 0 ? photos[0] : '';
     var photos_json = photos.length > 1 ? JSON.stringify(photos) : '';
