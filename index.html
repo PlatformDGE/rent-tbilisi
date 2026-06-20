@@ -241,6 +241,13 @@ nav{height:64px;background:var(--white);border-bottom:1px solid var(--g200);disp
 .mobile-map-title{font-size:15px;font-weight:700;color:var(--navy)}
 .mobile-map-body{flex:1;position:relative}
 .mobile-map-body #map-mobile{width:100%;height:100%}
+
+/* CHANNEL TABS */
+.channel-tabs{display:flex;background:var(--g100);border-radius:10px;padding:3px;gap:2px;flex-shrink:0}
+.ct{padding:6px 14px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;border:none;background:transparent;color:var(--g500);transition:all .2s;font-family:'Inter',sans-serif;display:flex;align-items:center;gap:5px}
+.ct.on{background:var(--navy);color:var(--white);box-shadow:var(--sh1)}
+.ct:not(.on):hover{background:var(--g200);color:var(--navy)}
+@media(max-width:860px){.channel-tabs{order:-1}.ct{flex:1;justify-content:center;font-size:12px;padding:7px 8px}}
 </style>
 </head>
 <body>
@@ -280,6 +287,10 @@ nav{height:64px;background:var(--white);border-bottom:1px solid var(--g200);disp
   </div>
 
   <div class="nav-right">
+    <div class="channel-tabs">
+      <button class="ct on" id="ctRent" onclick="setTab('rent')">🔑 <span data-i18n="tab_rent">Rent</span></button>
+      <button class="ct" id="ctSale" onclick="setTab('sale')">🏷 <span data-i18n="tab_sale">Sale</span></button>
+    </div>
     <div class="view-tabs">
       <button class="vt on" id="vSplit" onclick="setView('split')" data-i18n="view_split">Split</button>
       <button class="vt" id="vMap" onclick="setView('map')" data-i18n="view_map">Map</button>
@@ -372,6 +383,7 @@ nav{height:64px;background:var(--white);border-bottom:1px solid var(--g200);disp
 // ══════════════════════════════════════
 const T = {
   en: {
+    tab_rent:'Rent', tab_sale:'Sale',
     search_label:'District / Address', search_ph:'Vake, Saburtalo, Isani...',
     type_label:'Type', type_any:'Any', type_rent:'Rent', type_sale:'Sale', type_comm:'Commercial',
     price_label:'Price', price_any:'Any',
@@ -400,6 +412,7 @@ const T = {
     no_results_sub:'Try changing filters',
   },
   ru: {
+    tab_rent:'Аренда', tab_sale:'Продажа',
     search_label:'Район / Адрес', search_ph:'Ваке, Сабурало, Исани...',
     type_label:'Тип', type_any:'Любой', type_rent:'Аренда', type_sale:'Продажа', type_comm:'Коммерция',
     price_label:'Цена', price_any:'Любая',
@@ -428,6 +441,7 @@ const T = {
     no_results_sub:'Попробуйте изменить фильтры',
   },
   ka: {
+    tab_rent:'იჯარა', tab_sale:'გაყიდვა',
     search_label:'რაიონი / მისამართი', search_ph:'ვაკე, საბურთალო, ისანი...',
     type_label:'ტიპი', type_any:'ნებისმიერი', type_rent:'იჯარა', type_sale:'გაყიდვა', type_comm:'კომერცია',
     price_label:'ფასი', price_any:'ნებისმიერი',
@@ -483,6 +497,7 @@ function applyI18n() {
 // ══════════════════════════════════════
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyEaMDPEKLzJ4ZOii7p4QiY2WWpz917AKFPemGEbwoffLUYZ4v1TPw1XG5YdsJul721xQ/exec";
 const REFRESH_MS = 5 * 60 * 1000;
+var ACTIVE_TAB = "rent";
 
 // ══════════════════════════════════════
 //  COORDS
@@ -546,7 +561,8 @@ async function loadSheets() {
     return true;
   }
   try {
-    const data = await loadJSONP(APPS_SCRIPT_URL);
+    const url = APPS_SCRIPT_URL + '&channel=' + ACTIVE_TAB;
+    const data = await loadJSONP(url);
     const rows = data.listings || [];
     const bool = v => v==='TRUE'||v===true;
 
@@ -929,6 +945,15 @@ function scrollTop(){document.getElementById('lp').scrollTo({top:0,behavior:'smo
 // ══════════════════════════════════════
 //  INIT
 // ══════════════════════════════════════
+function setTab(tab) {
+  ACTIVE_TAB = tab;
+  document.getElementById('ctRent').classList.toggle('on', tab === 'rent');
+  document.getElementById('ctSale').classList.toggle('on', tab === 'sale');
+  ALL = []; shown = [];
+  render();
+  loadSheets().then(function(){ run(); });
+}
+
 window.addEventListener('load', async () => {
   // Set initial lang
   document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('on', b.textContent===LANG.toUpperCase()));
