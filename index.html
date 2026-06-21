@@ -543,6 +543,30 @@ button, a, .hcard, .vcard, .cat-btn, .bnav-item {
 .skel-vcard{display:flex;gap:12px;padding:14px 0;border-bottom:1px solid #f5f5f5}
 .skel-vphoto{width:100px;height:80px;border-radius:10px;flex-shrink:0}
 .skel-vbody{flex:1;display:flex;flex-direction:column;gap:8px;justify-content:center}
+
+.modal-share{position:absolute;top:10px;left:12px;width:30px;height:30px;
+  background:rgba(255,255,255,.9);border:none;border-radius:50%;
+  font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  color:var(--g700);z-index:5}
+.modal-share:active{transform:scale(.93)}
+
+/* Share sheet */
+.share-sheet-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:3000;align-items:flex-end}
+.share-sheet-bg.open{display:flex}
+.share-sheet{background:var(--white);border-radius:20px 20px 0 0;width:100%;padding:20px 16px 40px;animation:slideUp .3s cubic-bezier(.34,1.1,.64,1)}
+.ss-title{font-size:16px;font-weight:700;color:var(--g900);margin-bottom:4px}
+.ss-sub{font-size:12px;color:var(--g400);margin-bottom:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ss-btns{display:flex;flex-direction:column;gap:10px}
+.ss-btn{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:14px;
+  border:none;cursor:pointer;font-family:"Inter",sans-serif;font-size:14px;font-weight:600;
+  color:var(--white);text-decoration:none;touch-action:manipulation}
+.ss-btn:active{opacity:.85}
+.ss-wa{background:#25D366}
+.ss-tg{background:#0088cc}
+.ss-copy{background:var(--g100);color:var(--g900)}
+.ss-cancel{background:none;color:var(--red);font-size:14px;font-weight:600;
+  padding:14px;border:none;cursor:pointer;font-family:"Inter",sans-serif;margin-top:4px}
+.ss-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
 </style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.34.0/dist/tabler-icons.min.css">
 <link rel="preconnect" href="https://script.google.com">
@@ -832,6 +856,33 @@ button, a, .hcard, .vcard, .cat-btn, .bnav-item {
 </nav>
 
 <!-- MODAL -->
+<!-- SHARE SHEET -->
+<div class="share-sheet-bg" id="shareBg" onclick="closeShare(event)">
+  <div class="share-sheet">
+    <div class="ss-title" id="ssTitle">Share listing</div>
+    <div class="ss-sub" id="ssSub"></div>
+    <div class="ss-btns">
+      <a class="ss-btn ss-wa" id="ssWa" href="#" target="_blank">
+        <div class="ss-icon">📱</div>
+        WhatsApp David
+      </a>
+      <a class="ss-btn ss-tg" id="ssTg" href="#" target="_blank">
+        <div class="ss-icon">✈️</div>
+        Telegram David
+      </a>
+      <a class="ss-btn ss-tg" id="ssPost" href="#" target="_blank" style="background:var(--navy)">
+        <div class="ss-icon">📢</div>
+        Open in Telegram
+      </a>
+      <button class="ss-btn ss-copy" id="ssCopy" onclick="copyLink()">
+        <div class="ss-icon">🔗</div>
+        Copy link
+      </button>
+    </div>
+    <button class="ss-cancel" onclick="closeShare()">Cancel</button>
+  </div>
+</div>
+
 <div class="modal-bg" id="modalBg" onclick="bgClose(event)">
   <div class="modal" id="modal">
     <div id="modalContent"></div>
@@ -1322,6 +1373,11 @@ function openModal(id){
   var closeBtn = document.createElement("button");
   closeBtn.className = "modal-close"; closeBtn.textContent = "✕";
   closeBtn.onclick = closeModal; mc.appendChild(closeBtn);
+  var shareBtn = document.createElement("button");
+  shareBtn.className = "modal-share";
+  shareBtn.innerHTML = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>';
+  shareBtn.onclick = function(){ openShare(l); };
+  mc.appendChild(shareBtn);
   var amsHTML = ams.map(function(a){ return '<div class="am-item'+(a[2]?"":" no")+'">'+a[0]+" "+a[1]+"</div>"; }).join("");
   var tagsHTML = (l.type==="rent"?'<span class="mtag mt-rent">🔑 '+t("deal_rent")+"</span>":"")
     +(l.type==="sale"?'<span class="mtag mt-sale">🏷 '+t("deal_sale")+"</span>":"")
@@ -1644,6 +1700,35 @@ window.addEventListener("load",async function(){
   setInterval(refresh,REFRESH_MS);
   document.addEventListener("keydown",function(e){ if(e.key==="Escape") closeModal(); });
 });
+
+// ── SHARE ──
+var currentListing = null;
+function openShare(l){
+  currentListing = l;
+  var title = (l.title||l.district||"Listing") + " — " + fmtP(l) + fmtU(l);
+  var addr  = (l.address||"") + (l.district?", "+l.district:"");
+  var url   = l.tg_url || "https://t.me/rent_tbilisi_ge";
+  var msg   = encodeURIComponent(title + "\n" + addr + "\n" + url);
+  document.getElementById("ssTitle").textContent = title;
+  document.getElementById("ssSub").textContent   = addr;
+  document.getElementById("ssWa").href   = "https://wa.me/995599206716?text=" + msg;
+  document.getElementById("ssTg").href   = "https://t.me/David_Tibelashvili?text=" + msg;
+  document.getElementById("ssPost").href = url;
+  document.getElementById("shareBg").classList.add("open");
+}
+function closeShare(e){
+  if(!e || e.target===document.getElementById("shareBg")){
+    document.getElementById("shareBg").classList.remove("open");
+  }
+}
+function copyLink(){
+  var l = currentListing;
+  var text = (l.title||l.district||"Listing") + " — " + fmtP(l) + fmtU(l) + "\n" + (l.tg_url||"");
+  navigator.clipboard.writeText(text).then(function(){
+    document.getElementById("ssCopy").querySelector("div").textContent = "✅";
+    setTimeout(function(){ document.getElementById("ssCopy").querySelector("div").textContent = "🔗"; }, 2000);
+  });
+}
 </script>
 </body>
 </html
