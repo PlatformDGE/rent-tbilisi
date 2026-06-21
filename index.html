@@ -565,8 +565,8 @@ button, a, .hcard, .vcard, .cat-btn, .bnav-item {
     </div>
   </div>
 
-    <!-- DESKTOP TABS (Rent/Sale) - hidden on mobile via CSS -->
-  <div class="desktop-tabs" id="desktopTabs">
+    <!-- DESKTOP TABS (Rent/Sale) - desktop only -->
+  <div class="desktop-tabs" id="desktopTabs" style="display:none">
     <button class="dt on" id="dt-rent" onclick="setNav('rent')">
       <svg viewBox="0 0 24 24"><path d="M3 12l9-9 9 9"/><path d="M5 10v9a1 1 0 001 1h4v-4h4v4h4a1 1 0 001-1v-9"/></svg>
       <span data-i18n="nav_rent">Rent</span>
@@ -1628,6 +1628,11 @@ async function refresh(){
 //  INIT
 // ════════════════════════════════
 window.addEventListener("load",async function(){
+  // Show desktop tabs only on desktop
+  if(window.innerWidth>=768){
+    var dt=document.getElementById("desktopTabs");
+    if(dt) dt.style.display="flex";
+  }
   document.querySelectorAll(".lb").forEach(function(b){ b.classList.toggle("on",b.textContent===LANG.toUpperCase()); });
   applyI18n();
   // Desktop: init map immediately
