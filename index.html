@@ -470,6 +470,23 @@ button, a, .hcard, .vcard, .cat-btn, .bnav-item {
   cursor:pointer;font-family:"Inter",sans-serif;text-align:left;
   padding:4px 0;touch-action:manipulation;
 }
+
+/* ── SKELETON LOADING ── */
+@keyframes shimmer{0%{background-position:-400px 0}100%{background-position:400px 0}}
+.skeleton{background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:800px 100%;animation:shimmer 1.4s infinite linear;border-radius:8px}
+.skel-wrap{padding:0 16px;margin-bottom:24px}
+.skel-title{height:22px;width:140px;margin-bottom:16px}
+.skel-hscroll{display:flex;gap:14px;overflow:hidden;margin:0 -16px;padding:0 16px}
+.skel-hcard{width:240px;flex-shrink:0}
+.skel-hphoto{width:240px;height:180px;border-radius:14px;margin-bottom:10px}
+.skel-line{height:14px;border-radius:6px;margin-bottom:7px}
+.skel-line.w80{width:80%}
+.skel-line.w60{width:60%}
+.skel-line.w40{width:40%}
+.skel-vlist{display:flex;flex-direction:column;gap:0}
+.skel-vcard{display:flex;gap:12px;padding:14px 0;border-bottom:1px solid #f5f5f5}
+.skel-vphoto{width:100px;height:80px;border-radius:10px;flex-shrink:0}
+.skel-vbody{flex:1;display:flex;flex-direction:column;gap:8px;justify-content:center}
 </style>
 </head>
 <body>
@@ -645,8 +662,47 @@ button, a, .hcard, .vcard, .cat-btn, .bnav-item {
 
 <!-- CONTENT -->
 <div class="content" id="content">
+
+  <!-- SKELETON (shown while loading) -->
+  <div id="skeleton" style="margin-top:16px">
+    <div class="skel-wrap">
+      <div class="skeleton skel-title"></div>
+      <div class="skel-hscroll">
+        <div class="skel-hcard">
+          <div class="skeleton skel-hphoto"></div>
+          <div class="skeleton skel-line w80"></div>
+          <div class="skeleton skel-line w60"></div>
+          <div class="skeleton skel-line w40"></div>
+        </div>
+        <div class="skel-hcard">
+          <div class="skeleton skel-hphoto"></div>
+          <div class="skeleton skel-line w80"></div>
+          <div class="skeleton skel-line w60"></div>
+          <div class="skeleton skel-line w40"></div>
+        </div>
+        <div class="skel-hcard">
+          <div class="skeleton skel-hphoto"></div>
+          <div class="skeleton skel-line w80"></div>
+          <div class="skeleton skel-line w60"></div>
+          <div class="skeleton skel-line w40"></div>
+        </div>
+      </div>
+    </div>
+    <div class="skel-wrap">
+      <div class="skeleton skel-title" style="width:120px"></div>
+      <div class="skel-vlist">
+        <div class="skel-vcard"><div class="skeleton skel-vphoto"></div><div class="skel-vbody"><div class="skeleton skel-line w80"></div><div class="skeleton skel-line w60"></div><div class="skeleton skel-line w40"></div></div></div>
+        <div class="skel-vcard"><div class="skeleton skel-vphoto"></div><div class="skel-vbody"><div class="skeleton skel-line w80"></div><div class="skeleton skel-line w60"></div><div class="skeleton skel-line w40"></div></div></div>
+        <div class="skel-vcard"><div class="skeleton skel-vphoto"></div><div class="skel-vbody"><div class="skeleton skel-line w80"></div><div class="skeleton skel-line w60"></div><div class="skeleton skel-line w40"></div></div></div>
+        <div class="skel-vcard"><div class="skeleton skel-vphoto"></div><div class="skel-vbody"><div class="skeleton skel-line w80"></div><div class="skeleton skel-line w60"></div><div class="skeleton skel-line w40"></div></div></div>
+        <div class="skel-vcard"><div class="skeleton skel-vphoto"></div><div class="skel-vbody"><div class="skeleton skel-line w80"></div><div class="skeleton skel-line w60"></div><div class="skeleton skel-line w40"></div></div></div>
+      </div>
+    </div>
+  </div>
+
+
   <!-- NEW (horizontal) -->
-  <div class="section" id="secNew" style="margin-top:16px">
+  <div class="section" id="secNew" style="margin-top:16px;display:none">
     <div class="section-header">
       <div class="section-title" data-i18n="sec_new">Just Added</div>
       <button class="section-all" onclick="showAll()" data-i18n="see_all">See all →</button>
@@ -655,7 +711,7 @@ button, a, .hcard, .vcard, .cat-btn, .bnav-item {
   </div>
 
   <!-- ALL LISTINGS (vertical) -->
-  <div class="section">
+  <div class="section" id="secAll" style="display:none">
     <div class="section-header">
       <div class="section-title" id="allTitle" data-i18n="sec_all">All listings</div>
       <div style="font-size:12px;color:var(--g400)" id="listCount">—</div>
@@ -880,9 +936,18 @@ async function loadSheets(){
       obj._emoji=EM[i%EM.length];
       return obj;
     }).filter(function(l){ return l.price&&parseFloat(l.price)>0; });
+    // Hide skeleton, show content
+    var sk = document.getElementById("skeleton");
+    if(sk) sk.style.display = "none";
+    var sn = document.getElementById("secNew");
+    if(sn) sn.style.display = "";
+    var sa = document.getElementById("secAll");
+    if(sa) sa.style.display = "";
     return true;
   } catch(e){
     console.error("Load error:",e);
+    var sk = document.getElementById("skeleton");
+    if(sk) sk.style.display = "none";
     document.getElementById("errBanner").style.display="block";
     return false;
   }
