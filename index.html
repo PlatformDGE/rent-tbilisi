@@ -385,16 +385,72 @@ button, a, .hcard, .vcard, .cat-btn, .bnav-item {
 @media(min-width:768px){
   :root{--bnav:0px}
   body{overflow:hidden;flex-direction:row}
-  .bnav{display:none}
-  .topnav{width:380px;min-width:380px;height:100%;border-right:1px solid var(--g200);
-    border-bottom:none;overflow-y:auto;display:flex;flex-direction:column}
+
+  /* Hide mobile bottom nav */
+  .bnav{display:none!important}
+  .mobile-map-btn{display:none!important}
+
+  /* Sidebar */
+  .topnav{
+    width:440px;min-width:440px;height:100%;
+    border-right:1px solid var(--g200);border-bottom:none;
+    overflow-y:auto;display:flex;flex-direction:column;flex-shrink:0;
+  }
   .topnav::-webkit-scrollbar{display:none}
-  .content{flex:1;border-right:none}
+
+  /* Rent/Sale tabs in sidebar */
+  .desktop-tabs{
+    display:flex;gap:0;border-bottom:1px solid var(--g200);flex-shrink:0;
+  }
+  .dt{
+    flex:1;padding:12px 0;text-align:center;
+    font-size:13px;font-weight:700;color:var(--g400);
+    cursor:pointer;border:none;background:none;
+    font-family:"Inter",sans-serif;border-bottom:2px solid transparent;
+    transition:all .15s;display:flex;align-items:center;justify-content:center;gap:6px;
+  }
+  .dt svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .dt.on{color:var(--navy);border-bottom-color:var(--navy)}
+  .dt:hover:not(.on){color:var(--g700)}
+
+  /* Content area */
+  .content{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:0}
+
+  /* 2-column grid for vertical cards on desktop */
+  .vlist{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--g100)}
+  .vcard{background:var(--white);flex-direction:column;padding:0;gap:0;border-bottom:none}
+  .vcard-photo{width:100%;height:160px;border-radius:0;flex-shrink:0}
+  .vcard-photo img{width:100%;height:100%;object-fit:cover}
+  .vcard-body{padding:10px 12px 12px;flex:1}
+  .vcard-fav{position:absolute;top:10px;right:10px;width:28px;height:28px;
+    background:rgba(255,255,255,.85);border-radius:50%;backdrop-filter:blur(4px)}
+  .vcard{position:relative}
+
+  /* Horizontal cards bigger */
+  .hcard{width:220px}
+  .hcard-photo{width:220px;height:165px}
+
+  /* Map fullscreen */
   .map-screen{position:relative;display:flex!important;flex:1;padding-bottom:0;z-index:auto}
   .map-screen .map-header{display:none}
   #map{flex:1}
-  .hcard{width:200px}
-  .hcard-photo{width:200px;height:150px}
+
+  /* Fav screen */
+  .fav-screen{position:relative;display:none;flex:1;padding-bottom:0}
+  .fav-screen.open{display:flex}
+
+  /* Filter panel inline on desktop */
+  .filter-panel{box-shadow:none;border:none;border-bottom:1px solid var(--g200);border-radius:0;margin-top:0;padding:12px 16px}
+  .filter-panel.open{display:flex}
+
+  /* Stats bar */
+  .desktop-stats{
+    display:flex;gap:20px;padding:10px 16px;
+    border-bottom:1px solid var(--g200);
+    background:var(--g50);flex-shrink:0;
+  }
+  .ds{font-size:11px;color:var(--g400)}
+  .ds strong{color:var(--g900);font-weight:700}
 }
 
 
@@ -505,7 +561,19 @@ button, a, .hcard, .vcard, .cat-btn, .bnav-item {
     </div>
   </div>
 
-    <!-- SEARCH PILL -->
+    <!-- DESKTOP TABS (Rent/Sale) - hidden on mobile via CSS -->
+  <div class="desktop-tabs" id="desktopTabs">
+    <button class="dt on" id="dt-rent" onclick="setNav('rent')">
+      <svg viewBox="0 0 24 24"><path d="M3 12l9-9 9 9"/><path d="M5 10v9a1 1 0 001 1h4v-4h4v4h4a1 1 0 001-1v-9"/></svg>
+      <span data-i18n="nav_rent">Rent</span>
+    </button>
+    <button class="dt" id="dt-sale" onclick="setNav('sale')">
+      <svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7" stroke-width="2.5"/></svg>
+      <span data-i18n="nav_sale">Sale</span>
+    </button>
+  </div>
+
+  <!-- SEARCH PILL -->
   <div class="search-pill" onclick="toggleSearch()">
     <div class="search-icon">🔍</div>
     <div class="search-pill-texts">
@@ -1369,8 +1437,14 @@ function updateMapPins(){
 function setNav(tab){
   // Update bottom nav
   ["rent","sale","map","fav"].forEach(function(n){
-    document.getElementById("bn-"+n).classList.toggle("on",n===tab);
+    var bn=document.getElementById("bn-"+n);
+    if(bn) bn.classList.toggle("on",n===tab);
   });
+  // Desktop tabs
+  var dtr=document.getElementById("dt-rent");
+  var dts=document.getElementById("dt-sale");
+  if(dtr) dtr.classList.toggle("on", tab==="rent");
+  if(dts) dts.classList.toggle("on", tab==="sale");
 
   // Hide all screens
   document.getElementById("mapScreen").classList.remove("open");
