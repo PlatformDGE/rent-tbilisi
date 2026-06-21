@@ -1015,8 +1015,7 @@ async function loadSheets(){
     if(sn) sn.style.display = "";
     var sa = document.getElementById("secAll");
     if(sa) sa.style.display = "";
-    // Save to localStorage cache
-    try{ localStorage.setItem("rit_cache_" + ACTIVE_TAB, JSON.stringify(ALL)); } catch(e){}
+
     return true;
   } catch(e){
     console.error("Load error:",e);
@@ -1485,37 +1484,14 @@ function setNav(tab){
     ACTIVE_TAB=tab;
     ALL=[];shown=[];
 
-    // Try show cached data instantly
-    var ck = "rit_cache_" + tab;
-    var cv = localStorage.getItem(ck);
-    if(cv){
-      try{
-        ALL = JSON.parse(cv);
-        run();
-        var sk=document.getElementById("skeleton");
-        var sn=document.getElementById("secNew");
-        var sa=document.getElementById("secAll");
-        if(sk) sk.style.display="none";
-        if(sn) sn.style.display="";
-        if(sa) sa.style.display="";
-      } catch(e){
-        var sk=document.getElementById("skeleton");
-        if(sk) sk.style.display="";
-      }
-    } else {
-      var sk=document.getElementById("skeleton");
-      var sn=document.getElementById("secNew");
-      var sa=document.getElementById("secAll");
-      if(sk) sk.style.display="";
-      if(sn) sn.style.display="none";
-      if(sa) sa.style.display="none";
-    }
-    // Refresh in background
-    var prevLen = ALL.length;
-    loadSheets().then(function(){
-      run();
-      if(cv && ALL.length > prevLen) showToast("+" + (ALL.length-prevLen) + " new listings");
-    });
+    // Show skeleton while loading
+    var sk=document.getElementById("skeleton");
+    var sn=document.getElementById("secNew");
+    var sa=document.getElementById("secAll");
+    if(sk) sk.style.display="";
+    if(sn) sn.style.display="none";
+    if(sa) sa.style.display="none";
+    loadSheets().then(function(){ run(); });
   }
 }
 
@@ -1657,31 +1633,9 @@ window.addEventListener("load",async function(){
   // Desktop: init map immediately
   if(window.innerWidth>=768){ initMap(); }
 
-  // Show cached data instantly
-  var cacheKey = "rit_cache_" + ACTIVE_TAB;
-  var cached = localStorage.getItem(cacheKey);
-  if(cached){
-    try{
-      var cachedData = JSON.parse(cached);
-      ALL = cachedData;
-      run();
-      document.getElementById("skeleton").style.display = "none";
-      document.getElementById("secNew").style.display = "";
-      document.getElementById("secAll").style.display = "";
-    } catch(e){}
-  }
-
-  // Load fresh data in background
-  loadSheets().then(function(){
-    var prevCount = ALL.length;
-    run();
-    // Show toast if new listings
-    if(cached && ALL.length > prevCount){
-      showToast("+" + (ALL.length - prevCount) + " new listings");
-    }
-    // Save to cache
-    try{ localStorage.setItem(cacheKey, JSON.stringify(ALL)); } catch(e){}
-  });
+  // Load fresh data
+  await loadSheets();
+  run();
   setInterval(refresh,REFRESH_MS);
   document.addEventListener("keydown",function(e){ if(e.key==="Escape") closeModal(); });
 });
