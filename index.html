@@ -873,7 +873,7 @@ function ago(d){
   return ~~(s/86400)+"d ago";
 }
 function fmtP(l){ return l.type==="sale"?"$"+parseInt(l.price).toLocaleString():"$"+parseInt(l.price); }
-function fmtU(l){ return l.type==="sale"?"":"/mo"; }
+function fmtU(l){ return (l.type==="sale"||String(l.id||"").includes("sale_in_tbilisi"))?"":"/mo"; }
 function ini(n){ return String(n||"?").slice(0,2).toUpperCase(); }
 function today(d){ return d&&new Date(d).toDateString()===new Date().toDateString(); }
 function pImg(l){
