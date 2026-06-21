@@ -5,8 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Rent in Tbilisi</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" media="print" onload="this.media='all'">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
@@ -546,6 +545,9 @@ button, a, .hcard, .vcard, .cat-btn, .bnav-item {
 .skel-vbody{flex:1;display:flex;flex-direction:column;gap:8px;justify-content:center}
 </style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.34.0/dist/tabler-icons.min.css">
+<link rel="preconnect" href="https://script.google.com">
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="preconnect" href="https://unpkg.com">
 </head>
 <body>
 
@@ -1013,6 +1015,8 @@ async function loadSheets(){
     if(sn) sn.style.display = "";
     var sa = document.getElementById("secAll");
     if(sa) sa.style.display = "";
+    // Save to localStorage cache
+    try{ localStorage.setItem("rit_cache_" + ACTIVE_TAB, JSON.stringify(ALL)); } catch(e){}
     return true;
   } catch(e){
     console.error("Load error:",e);
@@ -1399,8 +1403,17 @@ function updGallery(){
 //  MAP
 // ════════════════════════════════
 var mapInited=false;
+function loadLeaflet(cb){
+  if(window.L){ cb(); return; }
+  var s=document.createElement("script");
+  s.src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
+  s.onload=cb;
+  document.head.appendChild(s);
+}
+
 function initMap(){
   if(mapInited) return;
+  if(!window.L){ loadLeaflet(function(){ initMap(); }); return; }
   map=L.map("map",{center:[41.714,44.800],zoom:13});
   L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
     {attribution:"© OpenStreetMap © CARTO",maxZoom:19}).addTo(map);
@@ -1471,14 +1484,38 @@ function setNav(tab){
   if(tab!==ACTIVE_TAB){
     ACTIVE_TAB=tab;
     ALL=[];shown=[];
-    // Show skeleton while loading
-    var sk=document.getElementById("skeleton");
-    var sn=document.getElementById("secNew");
-    var sa=document.getElementById("secAll");
-    if(sk) sk.style.display="";
-    if(sn) sn.style.display="none";
-    if(sa) sa.style.display="none";
-    loadSheets().then(function(){ run(); });
+
+    // Try show cached data instantly
+    var ck = "rit_cache_" + tab;
+    var cv = localStorage.getItem(ck);
+    if(cv){
+      try{
+        ALL = JSON.parse(cv);
+        run();
+        var sk=document.getElementById("skeleton");
+        var sn=document.getElementById("secNew");
+        var sa=document.getElementById("secAll");
+        if(sk) sk.style.display="none";
+        if(sn) sn.style.display="";
+        if(sa) sa.style.display="";
+      } catch(e){
+        var sk=document.getElementById("skeleton");
+        if(sk) sk.style.display="";
+      }
+    } else {
+      var sk=document.getElementById("skeleton");
+      var sn=document.getElementById("secNew");
+      var sa=document.getElementById("secAll");
+      if(sk) sk.style.display="";
+      if(sn) sn.style.display="none";
+      if(sa) sa.style.display="none";
+    }
+    // Refresh in background
+    var prevLen = ALL.length;
+    loadSheets().then(function(){
+      run();
+      if(cv && ALL.length > prevLen) showToast("+" + (ALL.length-prevLen) + " new listings");
+    });
   }
 }
 
@@ -1619,8 +1656,32 @@ window.addEventListener("load",async function(){
   applyI18n();
   // Desktop: init map immediately
   if(window.innerWidth>=768){ initMap(); }
-  await loadSheets();
-  run();
+
+  // Show cached data instantly
+  var cacheKey = "rit_cache_" + ACTIVE_TAB;
+  var cached = localStorage.getItem(cacheKey);
+  if(cached){
+    try{
+      var cachedData = JSON.parse(cached);
+      ALL = cachedData;
+      run();
+      document.getElementById("skeleton").style.display = "none";
+      document.getElementById("secNew").style.display = "";
+      document.getElementById("secAll").style.display = "";
+    } catch(e){}
+  }
+
+  // Load fresh data in background
+  loadSheets().then(function(){
+    var prevCount = ALL.length;
+    run();
+    // Show toast if new listings
+    if(cached && ALL.length > prevCount){
+      showToast("+" + (ALL.length - prevCount) + " new listings");
+    }
+    // Save to cache
+    try{ localStorage.setItem(cacheKey, JSON.stringify(ALL)); } catch(e){}
+  });
   setInterval(refresh,REFRESH_MS);
   document.addEventListener("keydown",function(e){ if(e.key==="Escape") closeModal(); });
 });
