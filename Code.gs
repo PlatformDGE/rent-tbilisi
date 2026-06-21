@@ -281,11 +281,11 @@ function parsePost(post, channelName) {
     is_exclusive: (text.includes('#Exclusive') || text.toLowerCase().includes('exclusive listing')) ? 'TRUE' : 'FALSE',
   };
 
-  // Тип — учитываем канал
-  if (text.includes('#Commercial'))                              l.type = 'commercial';
-  else if (text.includes('#Sale') && !text.includes('#Rent'))    l.type = 'sale';
-  else if (channelName === 'sale_in_tbilisi' && !text.includes('#Rent')) l.type = 'sale';
-  else                                                           l.type = 'rent';
+  // Тип — канал sale_in_tbilisi всегда sale
+  if (text.includes('#Commercial'))          l.type = 'commercial';
+  else if (channelName === 'sale_in_tbilisi') l.type = 'sale';
+  else if (text.includes('#Sale'))            l.type = 'sale';
+  else                                        l.type = 'rent';
 
   // Комнаты
   var roomMap = {'#Studio':0,'#1Bed':1,'#2Bed':2,'#3Bed':3,'#4Bed':4,'#5Bed':5};
