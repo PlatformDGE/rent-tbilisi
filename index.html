@@ -1391,7 +1391,7 @@ function openModal(id){
   var body = document.createElement("div");
   body.className = "modal-body";
   body.innerHTML = '<div class="modal-title">'+(l.title||"")+"</div>"
-    +'<div class="modal-addr">📍 '+(l.address||"")+", "+(l.district||"")+(l.metro?" · 🚇 "+l.metro:"")+"</div>"
+    +(l.address?'<div class="modal-addr">📍 '+l.address+(l.district?", "+l.district:"")+(l.metro?" · 🚇 "+l.metro:"")+"</div>":"")
     +'<div class="modal-price-row"><div>'
     +'<div class="modal-price">'+fmtP(l)+' <span>'+fmtU(l)+"</span></div>"
     +(l.deposit?'<div class="modal-nocomm">'+t("deposit")+" $"+l.deposit+"</div>":"")
