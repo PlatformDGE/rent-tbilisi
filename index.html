@@ -1081,7 +1081,12 @@ function render(){
   }
 
   // Fav nav icon
-  document.getElementById("bn-fav").querySelector(".bnav-icon").textContent=favs.size>0?"❤️":"🤍";
+  // Update fav icon fill when saved
+  var favBtn = document.getElementById("bn-fav");
+  if(favBtn){
+    var favSvg = favBtn.querySelector("svg path");
+    if(favSvg) favSvg.style.fill = favs.size>0 ? "currentColor" : "none";
+  }
 }
 
 function hcard(l){
