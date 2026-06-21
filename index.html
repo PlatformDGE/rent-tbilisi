@@ -1394,7 +1394,14 @@ function setNav(tab){
   activeNav=tab;
   if(tab!==ACTIVE_TAB){
     ACTIVE_TAB=tab;
-    ALL=[];shown=[];render();
+    ALL=[];shown=[];
+    // Show skeleton while loading
+    var sk=document.getElementById("skeleton");
+    var sn=document.getElementById("secNew");
+    var sa=document.getElementById("secAll");
+    if(sk) sk.style.display="";
+    if(sn) sn.style.display="none";
+    if(sa) sa.style.display="none";
     loadSheets().then(function(){ run(); });
   }
 }
