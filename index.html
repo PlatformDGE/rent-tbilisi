@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Rent in Tbilisi</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
@@ -102,17 +103,16 @@ body{font-family:"Inter",sans-serif;background:var(--white);color:var(--g700);di
 }
 .cat-scroll::-webkit-scrollbar{display:none}
 .cat-btn{
-  display:flex;flex-direction:column;align-items:center;gap:4px;
-  padding:8px 14px;
-  font-size:10px;font-weight:600;color:var(--g400);
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:6px 12px;border-radius:8px;
+  font-size:11px;font-weight:600;color:var(--g400);
   cursor:pointer;white-space:nowrap;flex-shrink:0;
-  border-bottom:2px solid transparent;transition:all .2s;
+  border-bottom:2px solid transparent;transition:all .15s;
   background:none;border-top:none;border-left:none;border-right:none;
-  font-family:"Inter",sans-serif;touch-action:manipulation;
+  font-family:"Inter",sans-serif;
 }
-.cat-btn i{font-size:22px;line-height:1;transition:color .2s}
-.cat-btn.on{color:var(--navy);border-bottom-color:var(--navy)}
-.cat-btn:hover:not(.on){color:var(--g700)}
+.cat-btn .cat-icon{font-size:20px}
+.cat-btn.on{color:var(--g900);border-bottom-color:var(--g900)}
 
 /* LANG */
 .topnav-row1{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
@@ -385,72 +385,16 @@ button, a, .hcard, .vcard, .cat-btn, .bnav-item {
 @media(min-width:768px){
   :root{--bnav:0px}
   body{overflow:hidden;flex-direction:row}
-
-  /* Hide mobile bottom nav */
-  .bnav{display:none!important}
-  .mobile-map-btn{display:none!important}
-
-  /* Sidebar */
-  .topnav{
-    width:440px;min-width:440px;height:100%;
-    border-right:1px solid var(--g200);border-bottom:none;
-    overflow-y:auto;display:flex;flex-direction:column;flex-shrink:0;
-  }
+  .bnav{display:none}
+  .topnav{width:380px;min-width:380px;height:100%;border-right:1px solid var(--g200);
+    border-bottom:none;overflow-y:auto;display:flex;flex-direction:column}
   .topnav::-webkit-scrollbar{display:none}
-
-  /* Rent/Sale tabs in sidebar */
-  .desktop-tabs{
-    display:flex;gap:0;border-bottom:1px solid var(--g200);flex-shrink:0;
-  }
-  .dt{
-    flex:1;padding:12px 0;text-align:center;
-    font-size:13px;font-weight:700;color:var(--g400);
-    cursor:pointer;border:none;background:none;
-    font-family:"Inter",sans-serif;border-bottom:2px solid transparent;
-    transition:all .15s;display:flex;align-items:center;justify-content:center;gap:6px;
-  }
-  .dt svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-  .dt.on{color:var(--navy);border-bottom-color:var(--navy)}
-  .dt:hover:not(.on){color:var(--g700)}
-
-  /* Content area */
-  .content{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:0}
-
-  /* 2-column grid for vertical cards on desktop */
-  .vlist{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--g100)}
-  .vcard{background:var(--white);flex-direction:column;padding:0;gap:0;border-bottom:none}
-  .vcard-photo{width:100%;height:160px;border-radius:0;flex-shrink:0}
-  .vcard-photo img{width:100%;height:100%;object-fit:cover}
-  .vcard-body{padding:10px 12px 12px;flex:1}
-  .vcard-fav{position:absolute;top:10px;right:10px;width:28px;height:28px;
-    background:rgba(255,255,255,.85);border-radius:50%;backdrop-filter:blur(4px)}
-  .vcard{position:relative}
-
-  /* Horizontal cards bigger */
-  .hcard{width:220px}
-  .hcard-photo{width:220px;height:165px}
-
-  /* Map fullscreen */
+  .content{flex:1;border-right:none}
   .map-screen{position:relative;display:flex!important;flex:1;padding-bottom:0;z-index:auto}
   .map-screen .map-header{display:none}
   #map{flex:1}
-
-  /* Fav screen */
-  .fav-screen{position:relative;display:none;flex:1;padding-bottom:0}
-  .fav-screen.open{display:flex}
-
-  /* Filter panel inline on desktop */
-  .filter-panel{box-shadow:none;border:none;border-bottom:1px solid var(--g200);border-radius:0;margin-top:0;padding:12px 16px}
-  .filter-panel.open{display:flex}
-
-  /* Stats bar */
-  .desktop-stats{
-    display:flex;gap:20px;padding:10px 16px;
-    border-bottom:1px solid var(--g200);
-    background:var(--g50);flex-shrink:0;
-  }
-  .ds{font-size:11px;color:var(--g400)}
-  .ds strong{color:var(--g900);font-weight:700}
+  .hcard{width:200px}
+  .hcard-photo{width:200px;height:150px}
 }
 
 
@@ -526,55 +470,7 @@ button, a, .hcard, .vcard, .cat-btn, .bnav-item {
   cursor:pointer;font-family:"Inter",sans-serif;text-align:left;
   padding:4px 0;touch-action:manipulation;
 }
-
-/* ── SKELETON LOADING ── */
-@keyframes shimmer{0%{background-position:-400px 0}100%{background-position:400px 0}}
-.skeleton{background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:800px 100%;animation:shimmer 1.4s infinite linear;border-radius:8px}
-.skel-wrap{padding:0 16px;margin-bottom:24px}
-.skel-title{height:22px;width:140px;margin-bottom:16px}
-.skel-hscroll{display:flex;gap:14px;overflow:hidden;margin:0 -16px;padding:0 16px}
-.skel-hcard{width:240px;flex-shrink:0}
-.skel-hphoto{width:240px;height:180px;border-radius:14px;margin-bottom:10px}
-.skel-line{height:14px;border-radius:6px;margin-bottom:7px}
-.skel-line.w80{width:80%}
-.skel-line.w60{width:60%}
-.skel-line.w40{width:40%}
-.skel-vlist{display:flex;flex-direction:column;gap:0}
-.skel-vcard{display:flex;gap:12px;padding:14px 0;border-bottom:1px solid #f5f5f5}
-.skel-vphoto{width:100px;height:80px;border-radius:10px;flex-shrink:0}
-.skel-vbody{flex:1;display:flex;flex-direction:column;gap:8px;justify-content:center}
-
-.modal-share{
-  display:flex;align-items:center;gap:8px;
-  background:var(--g100);border:none;border-radius:12px;
-  padding:11px 16px;font-size:13px;font-weight:700;
-  color:var(--g900);cursor:pointer;font-family:"Inter",sans-serif;
-  touch-action:manipulation;width:100%;margin-top:10px;
-}
-.modal-share:active{opacity:.8}
-
-/* Share sheet */
-.share-sheet-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:3000;align-items:flex-end}
-.share-sheet-bg.open{display:flex}
-.share-sheet{background:var(--white);border-radius:20px 20px 0 0;width:100%;padding:20px 16px 40px;animation:slideUp .3s cubic-bezier(.34,1.1,.64,1)}
-.ss-title{font-size:16px;font-weight:700;color:var(--g900);margin-bottom:4px}
-.ss-sub{font-size:12px;color:var(--g400);margin-bottom:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ss-btns{display:flex;flex-direction:column;gap:10px}
-.ss-btn{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:14px;
-  border:none;cursor:pointer;font-family:"Inter",sans-serif;font-size:14px;font-weight:600;
-  color:var(--white);text-decoration:none;touch-action:manipulation}
-.ss-btn:active{opacity:.85}
-.ss-wa{background:#25D366}
-.ss-tg{background:#0088cc}
-.ss-copy{background:var(--g100);color:var(--g900)}
-.ss-cancel{background:none;color:var(--red);font-size:14px;font-weight:600;
-  padding:14px;border:none;cursor:pointer;font-family:"Inter",sans-serif;margin-top:4px}
-.ss-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
 </style>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.34.0/dist/tabler-icons.min.css">
-<link rel="preconnect" href="https://script.google.com">
-<link rel="preconnect" href="https://cdn.jsdelivr.net">
-<link rel="preconnect" href="https://unpkg.com">
 </head>
 <body>
 
@@ -592,19 +488,7 @@ button, a, .hcard, .vcard, .cat-btn, .bnav-item {
     </div>
   </div>
 
-    <!-- DESKTOP TABS (Rent/Sale) - desktop only -->
-  <div class="desktop-tabs" id="desktopTabs" style="display:none">
-    <button class="dt on" id="dt-rent" onclick="setNav('rent')">
-      <svg viewBox="0 0 24 24"><path d="M3 12l9-9 9 9"/><path d="M5 10v9a1 1 0 001 1h4v-4h4v4h4a1 1 0 001-1v-9"/></svg>
-      <span data-i18n="nav_rent">Rent</span>
-    </button>
-    <button class="dt" id="dt-sale" onclick="setNav('sale')">
-      <svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7" stroke-width="2.5"/></svg>
-      <span data-i18n="nav_sale">Sale</span>
-    </button>
-  </div>
-
-  <!-- SEARCH PILL -->
+    <!-- SEARCH PILL -->
   <div class="search-pill" onclick="toggleSearch()">
     <div class="search-icon">🔍</div>
     <div class="search-pill-texts">
@@ -724,31 +608,31 @@ button, a, .hcard, .vcard, .cat-btn, .bnav-item {
   <!-- CATEGORIES -->
   <div class="cat-scroll" id="catScroll">
     <button class="cat-btn on" data-cat="" onclick="setCat(this,'')">
-      <i class="ti ti-home" aria-hidden="true"></i>
+      <span class="cat-icon">🏠</span>
       <span data-i18n="cat_all">All</span>
     </button>
     <button class="cat-btn" data-cat="1" onclick="setCat(this,'1')">
-      <i class="ti ti-sofa" aria-hidden="true"></i>
-      <span data-i18n="cat_1">Studio/1br</span>
+      <span class="cat-icon">🛋️</span>
+      <span data-i18n="cat_1">Studio/1</span>
     </button>
     <button class="cat-btn" data-cat="2" onclick="setCat(this,'2')">
-      <i class="ti ti-door" aria-hidden="true"></i>
+      <span class="cat-icon">🚪</span>
       <span data-i18n="cat_2">2 br.</span>
     </button>
     <button class="cat-btn" data-cat="3" onclick="setCat(this,'3')">
-      <i class="ti ti-building" aria-hidden="true"></i>
+      <span class="cat-icon">🏡</span>
       <span data-i18n="cat_3">3 br.</span>
     </button>
     <button class="cat-btn" data-cat="new" onclick="setCat(this,'new')">
-      <i class="ti ti-building-skyscraper" aria-hidden="true"></i>
+      <span class="cat-icon">✨</span>
       <span data-i18n="cat_new">New bld</span>
     </button>
     <button class="cat-btn" data-cat="excl" onclick="setCat(this,'excl')">
-      <i class="ti ti-star" aria-hidden="true"></i>
+      <span class="cat-icon">⭐</span>
       <span data-i18n="cat_excl">Exclusive</span>
     </button>
     <button class="cat-btn" data-cat="comm" onclick="setCat(this,'comm')">
-      <i class="ti ti-briefcase" aria-hidden="true"></i>
+      <span class="cat-icon">🏢</span>
       <span data-i18n="cat_comm">Commercial</span>
     </button>
   </div>
@@ -761,47 +645,8 @@ button, a, .hcard, .vcard, .cat-btn, .bnav-item {
 
 <!-- CONTENT -->
 <div class="content" id="content">
-
-  <!-- SKELETON (shown while loading) -->
-  <div id="skeleton" style="margin-top:16px">
-    <div class="skel-wrap">
-      <div class="skeleton skel-title"></div>
-      <div class="skel-hscroll">
-        <div class="skel-hcard">
-          <div class="skeleton skel-hphoto"></div>
-          <div class="skeleton skel-line w80"></div>
-          <div class="skeleton skel-line w60"></div>
-          <div class="skeleton skel-line w40"></div>
-        </div>
-        <div class="skel-hcard">
-          <div class="skeleton skel-hphoto"></div>
-          <div class="skeleton skel-line w80"></div>
-          <div class="skeleton skel-line w60"></div>
-          <div class="skeleton skel-line w40"></div>
-        </div>
-        <div class="skel-hcard">
-          <div class="skeleton skel-hphoto"></div>
-          <div class="skeleton skel-line w80"></div>
-          <div class="skeleton skel-line w60"></div>
-          <div class="skeleton skel-line w40"></div>
-        </div>
-      </div>
-    </div>
-    <div class="skel-wrap">
-      <div class="skeleton skel-title" style="width:120px"></div>
-      <div class="skel-vlist">
-        <div class="skel-vcard"><div class="skeleton skel-vphoto"></div><div class="skel-vbody"><div class="skeleton skel-line w80"></div><div class="skeleton skel-line w60"></div><div class="skeleton skel-line w40"></div></div></div>
-        <div class="skel-vcard"><div class="skeleton skel-vphoto"></div><div class="skel-vbody"><div class="skeleton skel-line w80"></div><div class="skeleton skel-line w60"></div><div class="skeleton skel-line w40"></div></div></div>
-        <div class="skel-vcard"><div class="skeleton skel-vphoto"></div><div class="skel-vbody"><div class="skeleton skel-line w80"></div><div class="skeleton skel-line w60"></div><div class="skeleton skel-line w40"></div></div></div>
-        <div class="skel-vcard"><div class="skeleton skel-vphoto"></div><div class="skel-vbody"><div class="skeleton skel-line w80"></div><div class="skeleton skel-line w60"></div><div class="skeleton skel-line w40"></div></div></div>
-        <div class="skel-vcard"><div class="skeleton skel-vphoto"></div><div class="skel-vbody"><div class="skeleton skel-line w80"></div><div class="skeleton skel-line w60"></div><div class="skeleton skel-line w40"></div></div></div>
-      </div>
-    </div>
-  </div>
-
-
   <!-- NEW (horizontal) -->
-  <div class="section" id="secNew" style="margin-top:16px;display:none">
+  <div class="section" id="secNew" style="margin-top:16px">
     <div class="section-header">
       <div class="section-title" data-i18n="sec_new">Just Added</div>
       <button class="section-all" onclick="showAll()" data-i18n="see_all">See all →</button>
@@ -810,7 +655,7 @@ button, a, .hcard, .vcard, .cat-btn, .bnav-item {
   </div>
 
   <!-- ALL LISTINGS (vertical) -->
-  <div class="section" id="secAll" style="display:none">
+  <div class="section">
     <div class="section-header">
       <div class="section-title" id="allTitle" data-i18n="sec_all">All listings</div>
       <div style="font-size:12px;color:var(--g400)" id="listCount">—</div>
@@ -859,33 +704,6 @@ button, a, .hcard, .vcard, .cat-btn, .bnav-item {
 </nav>
 
 <!-- MODAL -->
-<!-- SHARE SHEET -->
-<div class="share-sheet-bg" id="shareBg" onclick="closeShare(event)">
-  <div class="share-sheet">
-    <div class="ss-title" id="ssTitle">Share listing</div>
-    <div class="ss-sub" id="ssSub"></div>
-    <div class="ss-btns">
-      <a class="ss-btn ss-tg" id="ssTg" href="#" target="_blank">
-        <div class="ss-icon">✈️</div>
-        Telegram
-      </a>
-      <a class="ss-btn ss-wa" id="ssWa" href="#" target="_blank">
-        <div class="ss-icon">📱</div>
-        WhatsApp
-      </a>
-      <a class="ss-btn ss-tg" id="ssPost" href="#" target="_blank" style="background:var(--navy)">
-        <div class="ss-icon">📢</div>
-        Open in Telegram
-      </a>
-      <button class="ss-btn ss-copy" id="ssCopy" onclick="copyLink()">
-        <div class="ss-icon">🔗</div>
-        Copy link
-      </button>
-    </div>
-    <button class="ss-cancel" onclick="closeShare()">Cancel</button>
-  </div>
-</div>
-
 <div class="modal-bg" id="modalBg" onclick="bgClose(event)">
   <div class="modal" id="modal">
     <div id="modalContent"></div>
@@ -999,7 +817,7 @@ function ago(d){
   return ~~(s/86400)+"d ago";
 }
 function fmtP(l){ return l.type==="sale"?"$"+parseInt(l.price).toLocaleString():"$"+parseInt(l.price); }
-function fmtU(l){ return (l.type==="sale"||String(l.id||"").includes("sale_in_tbilisi"))?"":"/mo"; }
+function fmtU(l){ return l.type==="sale"?"":"/mo"; }
 function ini(n){ return String(n||"?").slice(0,2).toUpperCase(); }
 function today(d){ return d&&new Date(d).toDateString()===new Date().toDateString(); }
 function pImg(l){
@@ -1062,23 +880,9 @@ async function loadSheets(){
       obj._emoji=EM[i%EM.length];
       return obj;
     }).filter(function(l){ return l.price&&parseFloat(l.price)>0; });
-    // Hide skeleton, show content
-    var sk = document.getElementById("skeleton");
-    if(sk) sk.style.display = "none";
-    var sn = document.getElementById("secNew");
-    if(sn) sn.style.display = "";
-    var sa = document.getElementById("secAll");
-    if(sa) sa.style.display = "";
-
     return true;
   } catch(e){
     console.error("Load error:",e);
-    var sk = document.getElementById("skeleton");
-    if(sk) sk.style.display = "none";
-    var sn = document.getElementById("secNew");
-    if(sn) sn.style.display = "";
-    var sa = document.getElementById("secAll");
-    if(sa) sa.style.display = "";
     document.getElementById("errBanner").style.display="block";
     return false;
   }
@@ -1380,7 +1184,6 @@ function openModal(id){
   var closeBtn = document.createElement("button");
   closeBtn.className = "modal-close"; closeBtn.textContent = "✕";
   closeBtn.onclick = closeModal; mc.appendChild(closeBtn);
-
   var amsHTML = ams.map(function(a){ return '<div class="am-item'+(a[2]?"":" no")+'">'+a[0]+" "+a[1]+"</div>"; }).join("");
   var tagsHTML = (l.type==="rent"?'<span class="mtag mt-rent">🔑 '+t("deal_rent")+"</span>":"")
     +(l.type==="sale"?'<span class="mtag mt-sale">🏷 '+t("deal_sale")+"</span>":"")
@@ -1395,7 +1198,7 @@ function openModal(id){
   var body = document.createElement("div");
   body.className = "modal-body";
   body.innerHTML = '<div class="modal-title">'+(l.title||"")+"</div>"
-    +(l.address?'<div class="modal-addr">📍 '+l.address+(l.district?", "+l.district:"")+(l.metro?" · 🚇 "+l.metro:"")+"</div>":"")
+    +'<div class="modal-addr">📍 '+(l.address||"")+", "+(l.district||"")+(l.metro?" · 🚇 "+l.metro:"")+"</div>"
     +'<div class="modal-price-row"><div>'
     +'<div class="modal-price">'+fmtP(l)+' <span>'+fmtU(l)+"</span></div>"
     +(l.deposit?'<div class="modal-nocomm">'+t("deposit")+" $"+l.deposit+"</div>":"")
@@ -1413,14 +1216,6 @@ function openModal(id){
     +'<a class="mcta mc-green" href="tel:+995599206716">'+PH_ICO+" "+t("btn_call")+"</a>"
     +'<a class="mcta mc-navy" href="'+(l.tg_url||"https://t.me/rent_tbilisi_ge")+'" target="_blank">📢</a>'
     +"</div>";
-
-  // Share button at bottom
-  var shareBtn = document.createElement("button");
-  shareBtn.className = "modal-share";
-  shareBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Share listing';
-  shareBtn.onclick = function(){ openShare(l); };
-  body.appendChild(shareBtn);
-
   mc.appendChild(body);
 
   document.getElementById("modalBg").classList.add("open");
@@ -1469,17 +1264,8 @@ function updGallery(){
 //  MAP
 // ════════════════════════════════
 var mapInited=false;
-function loadLeaflet(cb){
-  if(window.L){ cb(); return; }
-  var s=document.createElement("script");
-  s.src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
-  s.onload=cb;
-  document.head.appendChild(s);
-}
-
 function initMap(){
   if(mapInited) return;
-  if(!window.L){ loadLeaflet(function(){ initMap(); }); return; }
   map=L.map("map",{center:[41.714,44.800],zoom:13});
   L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
     {attribution:"© OpenStreetMap © CARTO",maxZoom:19}).addTo(map);
@@ -1494,11 +1280,9 @@ function updateMapPins(){
     if(!l._lat||!l._lng) return;
     const icon=L.divIcon({html:'<div class="pm">'+fmtP(l)+"</div>",className:"",iconAnchor:[28,14]});
     const m=L.marker([l._lat,l._lng],{icon:icon}).addTo(map);
-    // Get first real photo (skip video: prefix)
-    var _allPh=(l._photos||[]).concat(l.photo?[l.photo]:[]);
-    var ph=_allPh.find(function(u){ return u&&!String(u).startsWith("video:")&&String(u).startsWith("http"); })||"";
-    const phH=ph
-      ?'<img src="'+ph+'" referrerpolicy="no-referrer" crossorigin="anonymous" style="width:100%;height:100%;object-fit:cover" onerror="this.parentNode.innerHTML='<div class=ep>'+(l._emoji||'🏠')+'</div>'">'
+    const ph=(l._photos&&l._photos[0])||l.photo||"";
+    const phH=ph&&ph.startsWith("http")
+      ?'<img src="'+ph+'" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover">'
       :'<div class="ep">'+(l._emoji||"🏠")+"</div>";
     m.bindPopup(
       '<div class="pu-photo">'+phH+"</div>"
@@ -1520,14 +1304,8 @@ function updateMapPins(){
 function setNav(tab){
   // Update bottom nav
   ["rent","sale","map","fav"].forEach(function(n){
-    var bn=document.getElementById("bn-"+n);
-    if(bn) bn.classList.toggle("on",n===tab);
+    document.getElementById("bn-"+n).classList.toggle("on",n===tab);
   });
-  // Desktop tabs
-  var dtr=document.getElementById("dt-rent");
-  var dts=document.getElementById("dt-sale");
-  if(dtr) dtr.classList.toggle("on", tab==="rent");
-  if(dts) dts.classList.toggle("on", tab==="sale");
 
   // Hide all screens
   document.getElementById("mapScreen").classList.remove("open");
@@ -1551,15 +1329,7 @@ function setNav(tab){
   activeNav=tab;
   if(tab!==ACTIVE_TAB){
     ACTIVE_TAB=tab;
-    ALL=[];shown=[];
-
-    // Show skeleton while loading
-    var sk=document.getElementById("skeleton");
-    var sn=document.getElementById("secNew");
-    var sa=document.getElementById("secAll");
-    if(sk) sk.style.display="";
-    if(sn) sn.style.display="none";
-    if(sa) sa.style.display="none";
+    ALL=[];shown=[];render();
     loadSheets().then(function(){ run(); });
   }
 }
@@ -1697,52 +1467,15 @@ async function refresh(){
 //  INIT
 // ════════════════════════════════
 window.addEventListener("load",async function(){
-  // Show desktop tabs only on desktop
-  if(window.innerWidth>=768){
-    var dt=document.getElementById("desktopTabs");
-    if(dt) dt.style.display="flex";
-  }
   document.querySelectorAll(".lb").forEach(function(b){ b.classList.toggle("on",b.textContent===LANG.toUpperCase()); });
   applyI18n();
   // Desktop: init map immediately
   if(window.innerWidth>=768){ initMap(); }
-
-  // Load fresh data
   await loadSheets();
   run();
   setInterval(refresh,REFRESH_MS);
   document.addEventListener("keydown",function(e){ if(e.key==="Escape") closeModal(); });
 });
-
-// ── SHARE ──
-var currentListing = null;
-function openShare(l){
-  currentListing = l;
-  var title = (l.title||l.district||"Listing") + " — " + fmtP(l) + fmtU(l);
-  var addr  = (l.address||"") + (l.district?", "+l.district:"");
-  var url   = l.tg_url || "https://t.me/rent_tbilisi_ge";
-  var msg   = encodeURIComponent(title + "\n" + addr + "\n" + url);
-  document.getElementById("ssTitle").textContent = title;
-  document.getElementById("ssSub").textContent   = addr;
-  document.getElementById("ssWa").href   = "https://wa.me/995599206716?text=" + msg;
-  document.getElementById("ssTg").href   = "https://t.me/David_Tibelashvili?text=" + msg;
-  document.getElementById("ssPost").href = url;
-  document.getElementById("shareBg").classList.add("open");
-}
-function closeShare(e){
-  if(!e || e.target===document.getElementById("shareBg")){
-    document.getElementById("shareBg").classList.remove("open");
-  }
-}
-function copyLink(){
-  var l = currentListing;
-  var text = (l.title||l.district||"Listing") + " — " + fmtP(l) + fmtU(l) + "\n" + (l.tg_url||"");
-  navigator.clipboard.writeText(text).then(function(){
-    document.getElementById("ssCopy").querySelector("div").textContent = "✅";
-    setTimeout(function(){ document.getElementById("ssCopy").querySelector("div").textContent = "🔗"; }, 2000);
-  });
-}
 </script>
 </body>
-</html
-  .desktop-tabs{display:none!important}>
+</html>
