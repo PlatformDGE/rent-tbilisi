@@ -1075,6 +1075,10 @@ async function loadSheets(){
     console.error("Load error:",e);
     var sk = document.getElementById("skeleton");
     if(sk) sk.style.display = "none";
+    var sn = document.getElementById("secNew");
+    if(sn) sn.style.display = "";
+    var sa = document.getElementById("secAll");
+    if(sa) sa.style.display = "";
     document.getElementById("errBanner").style.display="block";
     return false;
   }
