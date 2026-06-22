@@ -1338,7 +1338,7 @@ function updateMapPins(){
     var _ph=(l._photos||[]).concat(l.photo?[l.photo]:[]);
     var ph=_ph.find(function(u){ return u&&String(u).startsWith("http")&&!String(u).startsWith("video:"); })||"";
     const phH=ph
-      ?'<img src="'+ph+'" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover" onerror="this.parentNode.innerHTML='<div class=ep>🏠</div>'">'
+      ?'<img src="'+ph+'" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover">'
       :'<div class="ep">'+(l._emoji||"🏠")+"</div>";
     m.bindPopup(
       '<div class="pu-photo">'+phH+"</div>"
