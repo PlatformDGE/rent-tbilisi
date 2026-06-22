@@ -116,6 +116,23 @@ function parseChannel() {
         if (listing) {
           listing.id     = uniqueId;
           listing.tg_url = 'https://t.me/' + channelName + '/' + post.id;
+          // Сохраняем первое фото в Drive пока ссылка свежая
+          if (listing.photo && String(listing.photo).startsWith('http')) {
+            var driveUrl = savePhoto(listing.photo, uniqueId + '_0');
+            if (driveUrl) listing.photo = driveUrl;
+          }
+          // Сохраняем все фото
+          if (listing.photos) {
+            try {
+              var allPh = JSON.parse(listing.photos);
+              var drivePh = allPh.map(function(u, idx) {
+                if (!u || String(u).startsWith('video:')) return u;
+                var saved = savePhoto(u, uniqueId + '_' + idx);
+                return saved || u;
+              });
+              listing.photos = JSON.stringify(drivePh);
+            } catch(e) {}
+          }
           newRows.push(listing);
           Logger.log('✓ [' + post.id + '] ' + listing.district + ' ' + listing.type + ' $' + listing.price);
         } else {
