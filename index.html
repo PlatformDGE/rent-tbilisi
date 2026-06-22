@@ -103,16 +103,17 @@ body{font-family:"Inter",sans-serif;background:var(--white);color:var(--g700);di
 }
 .cat-scroll::-webkit-scrollbar{display:none}
 .cat-btn{
-  display:flex;flex-direction:column;align-items:center;gap:3px;
-  padding:6px 12px;border-radius:8px;
-  font-size:11px;font-weight:600;color:var(--g400);
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  padding:8px 14px;
+  font-size:10px;font-weight:600;color:var(--g400);
   cursor:pointer;white-space:nowrap;flex-shrink:0;
-  border-bottom:2px solid transparent;transition:all .15s;
+  border-bottom:2px solid transparent;transition:all .2s;
   background:none;border-top:none;border-left:none;border-right:none;
-  font-family:"Inter",sans-serif;
+  font-family:"Inter",sans-serif;touch-action:manipulation;
 }
-.cat-btn .cat-icon{font-size:20px}
-.cat-btn.on{color:var(--g900);border-bottom-color:var(--g900)}
+.cat-btn i{font-size:22px;line-height:1;transition:color .2s}
+.cat-btn.on{color:var(--navy);border-bottom-color:var(--navy)}
+.cat-btn:hover:not(.on){color:var(--g700)}
 
 /* LANG */
 .topnav-row1{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
@@ -471,6 +472,7 @@ button, a, .hcard, .vcard, .cat-btn, .bnav-item {
   padding:4px 0;touch-action:manipulation;
 }
 </style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.34.0/dist/tabler-icons.min.css">
 </head>
 <body>
 
@@ -608,31 +610,31 @@ button, a, .hcard, .vcard, .cat-btn, .bnav-item {
   <!-- CATEGORIES -->
   <div class="cat-scroll" id="catScroll">
     <button class="cat-btn on" data-cat="" onclick="setCat(this,'')">
-      <span class="cat-icon">🏠</span>
+      <i class="ti ti-home" aria-hidden="true"></i>
       <span data-i18n="cat_all">All</span>
     </button>
     <button class="cat-btn" data-cat="1" onclick="setCat(this,'1')">
-      <span class="cat-icon">🛋️</span>
-      <span data-i18n="cat_1">Studio/1</span>
+      <i class="ti ti-sofa" aria-hidden="true"></i>
+      <span data-i18n="cat_1">Studio/1br</span>
     </button>
     <button class="cat-btn" data-cat="2" onclick="setCat(this,'2')">
-      <span class="cat-icon">🚪</span>
+      <i class="ti ti-door" aria-hidden="true"></i>
       <span data-i18n="cat_2">2 br.</span>
     </button>
     <button class="cat-btn" data-cat="3" onclick="setCat(this,'3')">
-      <span class="cat-icon">🏡</span>
+      <i class="ti ti-building" aria-hidden="true"></i>
       <span data-i18n="cat_3">3 br.</span>
     </button>
     <button class="cat-btn" data-cat="new" onclick="setCat(this,'new')">
-      <span class="cat-icon">✨</span>
+      <i class="ti ti-building-skyscraper" aria-hidden="true"></i>
       <span data-i18n="cat_new">New bld</span>
     </button>
     <button class="cat-btn" data-cat="excl" onclick="setCat(this,'excl')">
-      <span class="cat-icon">⭐</span>
+      <i class="ti ti-star" aria-hidden="true"></i>
       <span data-i18n="cat_excl">Exclusive</span>
     </button>
     <button class="cat-btn" data-cat="comm" onclick="setCat(this,'comm')">
-      <span class="cat-icon">🏢</span>
+      <i class="ti ti-briefcase" aria-hidden="true"></i>
       <span data-i18n="cat_comm">Commercial</span>
     </button>
   </div>
