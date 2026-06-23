@@ -914,8 +914,9 @@ async function loadSheets(){
       if(obj.photos&&String(obj.photos).startsWith("[")){
         try{ obj._photos=JSON.parse(obj.photos); }catch(e){ obj._photos=[]; }
       } else { obj._photos=[]; }
+      // Не добавляем photo в _photos если оно уже есть в массиве
       const mp=String(obj.photo||"").replace("video:","");
-      if(mp.startsWith("http")&&!obj._photos.some(function(p){ return String(p).replace("video:","")===mp; })){
+      if(mp.startsWith("http")&&obj._photos.length===0){
         obj._photos.unshift(obj.photo);
       }
       if(obj.lat&&obj.lng&&parseFloat(obj.lat)>0){
