@@ -899,7 +899,8 @@ function loadJSONP(url){
 async function loadSheets(){
   if(!APPS_SCRIPT_URL||APPS_SCRIPT_URL.includes("ВСТАВЬ")) return true;
   try{
-    const data=await loadJSONP(APPS_SCRIPT_URL+"?channel="+ACTIVE_TAB);
+    var _ch=ACTIVE_TAB==="sale"?"sale":"rent";
+    const data=await fetch("https://rentintbilisi.ge/data_"+_ch+".json?t="+Date.now()).then(function(r){return r.json();});
     const rows=data.listings||[];
     const bool=function(v){ return v==="TRUE"||v===true; };
     ALL=rows.map(function(obj,i){
