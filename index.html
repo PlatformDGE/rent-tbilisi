@@ -938,6 +938,12 @@ async function loadSheets(){
     return true;
   } catch(e){
     console.error("Load error:",e);
+    // Auto-retry up to 2 times on timeout
+    if(String(e).includes("timeout") && (loadSheets._retries||0) < 2){
+      loadSheets._retries = (loadSheets._retries||0) + 1;
+      return loadSheets();
+    }
+    loadSheets._retries = 0;
     document.getElementById("errBanner").style.display="block";
     return false;
   }
