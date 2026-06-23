@@ -1212,7 +1212,7 @@ function openModal(id){
     ["🛗",t("am_lift"),am.elevator],["🫧",t("am_wash"),am.washing_machine],
     ["🅿️",t("am_park"),am.parking],["♨️",t("am_micro"),am.microwave],
   ];
-  let photos=l._photos&&l._photos.length?l._photos.slice(0,10):(l.photo&&l.photo.startsWith("http")?[l.photo]:[]);
+  let photos=l._photos&&l._photos.length?l._photos.filter(function(u,i,a){return a.indexOf(u)===i;}).slice(0,10):(l.photo&&l.photo.startsWith("http")?[l.photo]:[]);
 
   const buildGallery=function(photos){
     if(!photos.length) return '<div class="gallery"><div class="gallery-slide ep-slide">'+(l._emoji||"🏠")+"</div></div>";
