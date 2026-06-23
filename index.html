@@ -914,9 +914,15 @@ async function loadSheets(){
       if(obj.photos&&String(obj.photos).startsWith("[")){
         try{ obj._photos=JSON.parse(obj.photos); }catch(e){ obj._photos=[]; }
       } else { obj._photos=[]; }
-      // Если _photos пустой — берём photo
-      if(obj._photos.length===0&&obj.photo&&String(obj.photo).startsWith("http")){
-        obj._photos=[obj.photo];
+      // Если _photos пустой — берём photo как единственный элемент
+      // НЕ добавляем photo если _photos уже заполнен
+      if(obj._photos.length===0){
+        if(obj.photo&&String(obj.photo).startsWith("http")) obj._photos=[obj.photo];
+      } else {
+        // Заменяем первый элемент на R2 фото если оно есть
+        if(obj.photo&&String(obj.photo).startsWith("http")&&obj.photo.includes("r2.dev")){
+          obj._photos[0]=obj.photo;
+        }
       }
       if(obj.lat&&obj.lng&&parseFloat(obj.lat)>0){
         obj._lat=parseFloat(obj.lat); obj._lng=parseFloat(obj.lng);
