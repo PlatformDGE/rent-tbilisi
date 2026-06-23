@@ -914,9 +914,14 @@ async function loadSheets(){
       if(obj.photos&&String(obj.photos).startsWith("[")){
         try{ obj._photos=JSON.parse(obj.photos); }catch(e){ obj._photos=[]; }
       } else { obj._photos=[]; }
-      // Не добавляем photo в _photos если оно уже есть в массиве
+      // Собираем галерею: сначала photo, потом _photos без дублей
       const mp=String(obj.photo||"").replace("video:","");
-      if(mp.startsWith("http")&&obj._photos.length===0){
+      if(mp.startsWith("http")){
+        // Убираем из _photos все что совпадает с photo (по имени файла)
+        var mpName=mp.split('/').pop();
+        obj._photos=obj._photos.filter(function(u){
+          return String(u).split('/').pop()!==mpName;
+        });
         obj._photos.unshift(obj.photo);
       }
       if(obj.lat&&obj.lng&&parseFloat(obj.lat)>0){
