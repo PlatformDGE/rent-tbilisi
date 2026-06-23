@@ -52,7 +52,7 @@ function savePhoto(url, msgId) {
     );
     if (response.getResponseCode() === 200) {
       var result = JSON.parse(response.getContentText());
-      if (result.url) return 'https://rentintbilisi.ge' + result.url;
+      if (result.url) return result.url;
     }
   } catch(e) {
     Logger.log('savePhoto error: ' + e);
