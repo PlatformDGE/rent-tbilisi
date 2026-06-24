@@ -946,11 +946,7 @@ async function loadSheets(){
       // НЕ добавляем photo если _photos уже заполнен
       if(obj._photos.length===0){
         if(obj.photo&&String(obj.photo).startsWith("http")) obj._photos=[obj.photo];
-      } else {
-        // Заменяем первый элемент на R2 фото если оно есть
-        if(obj.photo&&String(obj.photo).startsWith("http")&&obj.photo.includes("r2.dev")){
-          obj._photos[0]=obj.photo;
-        }
+      // Не трогаем _photos если он уже заполнен из таблицы
       }
       if(obj.lat&&obj.lng&&parseFloat(obj.lat)>0){
         obj._lat=parseFloat(obj.lat); obj._lng=parseFloat(obj.lng);
