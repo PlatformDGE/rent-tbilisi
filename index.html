@@ -940,7 +940,7 @@ async function loadSheets(){
       obj.is_exclusive=bool(obj.is_exclusive);
       obj.is_new=bool(obj.is_new);
       if(obj.photos&&String(obj.photos).startsWith("[")){
-        try{ obj._photos=JSON.parse(obj.photos); }catch(e){ obj._photos=[]; }
+        try{ var _raw=JSON.parse(obj.photos); var _seen={}; obj._photos=_raw.filter(function(u){ var k=String(u).replace('video:','').split('/').pop(); return _seen[k]?false:(_seen[k]=true); }); }catch(e){ obj._photos=[]; }
       } else { obj._photos=[]; }
       // Если _photos пустой — берём photo как единственный элемент
       // НЕ добавляем photo если _photos уже заполнен
