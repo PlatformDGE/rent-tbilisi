@@ -837,6 +837,7 @@ const T = {
     deal_rent:"ქირავდება",deal_sale:"იყიდება",deal_comm:"კომერცია",tag_excl:"⭐ ექსკლუზიური",tag_nocomm:"✅ 0% საკომ.",tag_new:"🆕 ახალი",
     sec_params:"პარამეტრები",sec_ams:"კეთილმოწყობა",
     lbl_area:"ფართი",lbl_floor:"სართული",lbl_rooms:"ოთახი",lbl_heat:"გათბობა",lbl_bld:"შენობა",lbl_added:"დამატება",
+    heat_central:"ცენტრალური",heat_gas:"გაზი",heat_electric:"ელექტრო",
     am_wifi:"WiFi",am_stove:"ღუმელი",am_cond:"კონდ.",am_balc:"აივანი",am_tv:"ტელ.",am_dish:"ჭურჭლის მრ.",
     am_lift:"ლიფტი",am_wash:"სარეცხი",am_park:"პარკინგი",am_micro:"მიკროტ.",
     btn_tg:"Telegram",btn_call:"დარეკვა",btn_ch:"არხი",btn_details:"დეტალები",
@@ -887,6 +888,12 @@ var catFilter="", roomFilter="";
 // ════════════════════════════════
 function ago(d){
   const s=(Date.now()-d)/1e3;
+  if(LANG==="ka"){
+    if(s<60)return t("just_now");
+    if(s<3600)return ~~(s/60)+" წთ წინ";
+    if(s<86400)return ~~(s/3600)+" სთ წინ";
+    return ~~(s/86400)+" დ წინ";
+  }
   if(s<60)return t("just_now");
   if(s<3600)return ~~(s/60)+"m ago";
   if(s<86400)return ~~(s/3600)+"h ago";
@@ -1186,7 +1193,7 @@ function hcard(l){
     +'<button class="hcard-fav">'+(fv?"❤️":"🤍")+"</button>"
     +'</div><div class="hcard-body">'
     +'<div class="hcard-loc">'+(l.district||"")+(l.metro?" · "+l.metro:"")+"</div>"
-    +'<div class="hcard-sub">'+(l.title||"")+"</div>"
+    +'<div class="hcard-sub">'+(LANG==="ka"&&l.title?l.title.replace("Studio","სტუდიო").replace("1-bed","1-ოთ.").replace("2-bed","2-ოთ.").replace("3-bed","3-ოთ.").replace("4-bed","4-ოთ.").replace("New building","ახალი").replace("Old building","ძველი"):l.title||"")+"</div>"
     +'<div class="hcard-price">'+fmtP(l)+' <span>'+fmtU(l)+"</span></div>"
     +"</div>";
   el.querySelector(".hcard-fav").onclick=function(e){ e.stopPropagation(); fav(e,l.id); };
@@ -1201,7 +1208,7 @@ function vcard(l){
   el.innerHTML='<div class="vcard-photo">'+pImg(l)+"</div>"
     +'<div class="vcard-body">'
     +'<div class="vcard-loc">'+(l.district||"")+"</div>"
-    +'<div class="vcard-sub">'+(l.title||"")+"</div>"
+    +'<div class="vcard-sub">'+(LANG==="ka"&&l.title?l.title.replace("Studio","სტუდიო").replace("1-bed","1-ოთ.").replace("2-bed","2-ოთ.").replace("3-bed","3-ოთ.").replace("4-bed","4-ოთ.").replace("New building","ახალი").replace("Old building","ძველი"):l.title||"")+"</div>"
     +'<div class="vcard-specs">'
     +(l.sqm?'<span class="vspec">'+l.sqm+' m²</span>':"")
     +(l.floor&&l.floors?'<span class="vspec">'+l.floor+"/"+l.floors+"</span>":"")
@@ -1282,7 +1289,7 @@ function openModal(id){
     +'<div class="param-item"><div class="param-lbl">'+t("lbl_added")+'</div><div class="param-val">'+ago(l._posted)+'</div></div>';
   var body = document.createElement("div");
   body.className = "modal-body";
-  body.innerHTML = '<div class="modal-title">'+(l.title||"")+"</div>"
+  body.innerHTML = '<div class="modal-title">'+(LANG==="ka"&&l.title?l.title.replace("Studio","სტუდიო").replace("1-bed","1-ოთ.").replace("2-bed","2-ოთ.").replace("3-bed","3-ოთ.").replace("4-bed","4-ოთ.").replace("New building","ახალი").replace("Old building","ძველი"):l.title||"")+"</div>"
     +'<div class="modal-addr">📍 '+(l.address||"")+", "+(l.district||"")+(l.metro?" · 🚇 "+l.metro:"")+"</div>"
     +'<div class="modal-price-row"><div>'
     +'<div class="modal-price">'+fmtP(l)+' <span>'+fmtU(l)+"</span></div>"
