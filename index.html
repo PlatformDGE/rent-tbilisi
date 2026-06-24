@@ -614,9 +614,6 @@ button, a, .hcard, .vcard, .cat-btn, .bnav-item {
         <i class="ti ti-currency-dollar" aria-hidden="true"></i>
         <select class="f-sel f-sel-hidden" id="sPrice" onchange="run();updatePillSub();updateFBtns()">
           <option value="" data-i18n="any_price">Price</option>
-          <option value="0-300">$0–300</option><option value="300-500">$300–500</option>
-          <option value="500-700">$500–700</option><option value="700-900">$700–900</option>
-          <option value="900-1200">$900–1200</option><option value="1200-99999">$1200+</option>
         </select>
         <span class="f-btn-label" id="fLblPrice" data-i18n="any_price">Price</span>
         <i class="ti ti-chevron-down f-chevron" aria-hidden="true"></i>
@@ -633,10 +630,7 @@ button, a, .hcard, .vcard, .cat-btn, .bnav-item {
         <i class="ti ti-chevron-down f-chevron" aria-hidden="true"></i>
       </div>
     </div>
-    <button class="f-more" id="fMoreBtn" onclick="toggleMore()">
-      <i class="ti ti-adjustments-horizontal" aria-hidden="true"></i>
-      <span data-i18n="more_filters">More filters</span> <span id="fMoreArrow">▾</span>
-    </button>
+
   </div>
 
 <!-- CATEGORIES -->
@@ -1406,6 +1400,7 @@ function updateMapPins(){
 //  NAVIGATION
 // ════════════════════════════════
 function setNav(tab){
+  updatePriceOptions();
   // Update bottom nav
   ["rent","sale","map","fav"].forEach(function(n){
     document.getElementById("bn-"+n).classList.toggle("on",n===tab);
@@ -1571,6 +1566,7 @@ async function refresh(){
 //  INIT
 // ════════════════════════════════
 window.addEventListener("load",async function(){
+  updatePriceOptions();
   document.querySelectorAll(".lb").forEach(function(b){ b.classList.toggle("on",b.textContent===LANG.toUpperCase()); });
   applyI18n();
   // Desktop: init map immediately
@@ -1647,6 +1643,37 @@ function updateFBtns(){
   var ml=document.getElementById('fLblMetro'); if(ml){ ml.textContent=lbl(mEl,''); ml.className='f-btn-label'+(mv?' active':''); }
   var pl=document.getElementById('fLblPrice'); if(pl){ pl.textContent=lbl(pEl,'any_price'); pl.className='f-btn-label'+(pv?' active':''); }
   var rl=document.getElementById('fLblRooms'); if(rl){ rl.textContent=lbl(rEl,'any_rooms'); rl.className='f-btn-label'+(rv?' active':''); }
+}
+
+function updatePriceOptions(){
+  var sel = document.getElementById('sPrice');
+  if(!sel) return;
+  var cur = sel.value;
+  sel.innerHTML = '<option value="">'+t('any_price')+'</option>';
+  var opts;
+  if(ACTIVE_TAB==='sale'){
+    opts = [
+      ['0-30000','$0–30k'],['30000-50000','$30k–50k'],['50000-70000','$50k–70k'],
+      ['70000-90000','$70k–90k'],['90000-120000','$90k–120k'],['120000-150000','$120k–150k'],
+      ['150000-180000','$150k–180k'],['180000-210000','$180k–210k'],['210000-240000','$210k–240k'],
+      ['240000-270000','$240k–270k'],['270000-300000','$270k–300k'],['300000-330000','$300k–330k'],
+      ['330000-360000','$330k–360k'],['360000-390000','$360k–390k'],['390000-420000','$390k–420k'],
+      ['420000-450000','$420k–450k'],['450000-480000','$450k–480k'],['480000-510000','$480k–510k'],
+      ['510000-600000','$510k–600k'],['600000-700000','$600k–700k'],['700000-800000','$700k–800k'],
+      ['800000-900000','$800k–900k'],['900000-1000000','$900k–1M'],['1000000-99999999','$1M+']
+    ];
+  } else {
+    opts = [
+      ['0-300','$0–300'],['300-500','$300–500'],['500-700','$500–700'],
+      ['700-900','$700–900'],['900-1200','$900–1,200'],['1200-99999999','$1,200+']
+    ];
+  }
+  opts.forEach(function(o){
+    var el=document.createElement('option');
+    el.value=o[0]; el.textContent=o[1];
+    if(o[0]===cur) el.selected=true;
+    sel.appendChild(el);
+  });
 }
 </script>
 </body>
