@@ -845,10 +845,18 @@ const T = {
     of:"/",no_results:"ვერაფერი მოიძებნა",no_results_sub:"სცადეთ ფილტრების შეცვლა",
     listings:"განცხადება",just_now:"ახლახან",fav_empty:"შენახული განცხადება არ არის",
     fav_empty_sub:"დააჭირეთ ♡ განცხადებაზე",
+    dist_vake:"ვაკე",dist_saburtalo:"საბურთალო",dist_didube:"დიდუბე",
+    dist_isani:"ისანი",dist_gldani:"გლდანი",dist_nadzaladevi:"ნაძალადევი",
+    dist_mtatsminda:"მთაწმინდა",dist_chugureti:"ჩუღურეთი",dist_vera:"ვერა",
+    dist_tsereteli:"წერეთელი",dist_rustaveli:"რუსთაველი",dist_dighomi:"დიღომი",
+    dist_digomi:"დიღომი",dist_marjanishvili:"მარჯანიშვილი",dist_krtsanisi:"კრწანისი",
+    dist_avlabari:"ავლაბარი",dist_ortachala:"ორთაჭალა",dist_varketili:"ვარკეთილი",
+    dist_samgori:"სამგორი",dist_temqa:"თემქა",dist_lilo:"ლილო",
   }
 };
 var LANG = localStorage.getItem("rit_lang") || "en"; if(LANG==="ru") LANG="en";
 function t(k){ return (T[LANG]&&T[LANG][k]) || T.en[k] || k; }
+function tDist(d){ if(!d) return ""; if(LANG!=="ka") return d; return t("dist_"+d.toLowerCase()) || d; }
 function setLang(l){
   if(l==='ru') l='en';
   LANG=l; localStorage.setItem("rit_lang",l);
@@ -1193,7 +1201,7 @@ function hcard(l){
     +'<button class="hcard-fav">'+(fv?"❤️":"🤍")+"</button>"
     +'</div><div class="hcard-body">'
     +'<div class="hcard-loc">'+(l.district||"")+(l.metro?" · "+l.metro:"")+"</div>"
-    +'<div class="hcard-sub">'+(LANG==="ka"&&l.title?l.title.replace("Studio","სტუდიო").replace("1-bed","1-ოთ.").replace("2-bed","2-ოთ.").replace("3-bed","3-ოთ.").replace("4-bed","4-ოთ.").replace("New building","ახალი").replace("Old building","ძველი"):l.title||"")+"</div>"
+    +'<div class="hcard-sub">'+(LANG==="ka"&&l.title?l.title.replace("Studio","სტუდიო").replace("1-bed","1-ოთ.").replace("2-bed","2-ოთ.").replace("3-bed","3-ოთ.").replace("4-bed","4-ოთ.").replace("New building","ახალი").replace("Old building","ძველი").replace(l.district||"",tDist(l.district)):l.title||"")+"</div>"
     +'<div class="hcard-price">'+fmtP(l)+' <span>'+fmtU(l)+"</span></div>"
     +"</div>";
   el.querySelector(".hcard-fav").onclick=function(e){ e.stopPropagation(); fav(e,l.id); };
@@ -1208,7 +1216,7 @@ function vcard(l){
   el.innerHTML='<div class="vcard-photo">'+pImg(l)+"</div>"
     +'<div class="vcard-body">'
     +'<div class="vcard-loc">'+(l.district||"")+"</div>"
-    +'<div class="vcard-sub">'+(LANG==="ka"&&l.title?l.title.replace("Studio","სტუდიო").replace("1-bed","1-ოთ.").replace("2-bed","2-ოთ.").replace("3-bed","3-ოთ.").replace("4-bed","4-ოთ.").replace("New building","ახალი").replace("Old building","ძველი"):l.title||"")+"</div>"
+    +'<div class="vcard-sub">'+(LANG==="ka"&&l.title?l.title.replace("Studio","სტუდიო").replace("1-bed","1-ოთ.").replace("2-bed","2-ოთ.").replace("3-bed","3-ოთ.").replace("4-bed","4-ოთ.").replace("New building","ახალი").replace("Old building","ძველი").replace(l.district||"",tDist(l.district)):l.title||"")+"</div>"
     +'<div class="vcard-specs">'
     +(l.sqm?'<span class="vspec">'+l.sqm+' m²</span>':"")
     +(l.floor&&l.floors?'<span class="vspec">'+l.floor+"/"+l.floors+"</span>":"")
@@ -1289,7 +1297,7 @@ function openModal(id){
     +'<div class="param-item"><div class="param-lbl">'+t("lbl_added")+'</div><div class="param-val">'+ago(l._posted)+'</div></div>';
   var body = document.createElement("div");
   body.className = "modal-body";
-  body.innerHTML = '<div class="modal-title">'+(LANG==="ka"&&l.title?l.title.replace("Studio","სტუდიო").replace("1-bed","1-ოთ.").replace("2-bed","2-ოთ.").replace("3-bed","3-ოთ.").replace("4-bed","4-ოთ.").replace("New building","ახალი").replace("Old building","ძველი"):l.title||"")+"</div>"
+  body.innerHTML = '<div class="modal-title">'+(LANG==="ka"&&l.title?l.title.replace("Studio","სტუდიო").replace("1-bed","1-ოთ.").replace("2-bed","2-ოთ.").replace("3-bed","3-ოთ.").replace("4-bed","4-ოთ.").replace("New building","ახალი").replace("Old building","ძველი").replace(l.district||"",tDist(l.district)):l.title||"")+"</div>"
     +'<div class="modal-addr">📍 '+(l.address||"")+", "+(l.district||"")+(l.metro?" · 🚇 "+l.metro:"")+"</div>"
     +'<div class="modal-price-row"><div>'
     +'<div class="modal-price">'+fmtP(l)+' <span>'+fmtU(l)+"</span></div>"
