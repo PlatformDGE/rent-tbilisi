@@ -6,7 +6,34 @@
 <title>Rent in Tbilisi</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+// TRANSLATE
+var _translateCache = {};
+async function translateToKa(text) {
+  if (!text || LANG !== "ka") return text;
+  if (_translateCache[text]) return _translateCache[text];
+  try {
+    var resp = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({
+        model: "claude-sonnet-4-6",
+        max_tokens: 500,
+        messages: [{
+          role: "user",
+          content: "Translate this real estate listing to Georgian. Return ONLY the translation: " + text
+        }]
+      })
+    });
+    var data = await resp.json();
+    var t = data.content && data.content[0] ? data.content[0].text.trim() : text;
+    _translateCache[text] = t;
+    return t;
+  } catch(e) { return text; }
+}
+
+
+</script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
@@ -1283,6 +1310,22 @@ function openModal(id){
   shareBtn.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Share listing';
   shareBtn.onclick=function(){ openShare(l); };
   body.appendChild(shareBtn);
+
+  // Translate button (KA mode only)
+  if(LANG === "ka") {
+    var tBtn = document.createElement("button");
+    tBtn.className = "modal-share";
+    tBtn.style.cssText = "background:var(--g50);color:var(--navy);border:1px solid var(--g200)";
+    tBtn.innerHTML = "&#x1F1EC;&#x1F1EA; &nbsp;";
+    tBtn.onclick = async function() {
+      tBtn.textContent = "...";
+      var titleEl = body.querySelector(".modal-title");
+      if(titleEl) titleEl.textContent = await translateToKa(titleEl.textContent);
+      tBtn.textContent = "OK";
+      tBtn.disabled = true;
+    };
+    body.appendChild(tBtn);
+  }
   mc.appendChild(body);
 
   document.getElementById("modalBg").classList.add("open");
@@ -1570,6 +1613,31 @@ function copyLink(){
     document.getElementById("ssCopy").querySelector("div").textContent="✅";
     setTimeout(function(){ document.getElementById("ssCopy").querySelector("div").textContent="🔗"; },2000);
   });
+}
+
+// TRANSLATE
+var _translateCache = {};
+async function translateToKa(text) {
+  if (!text || LANG !== "ka") return text;
+  if (_translateCache[text]) return _translateCache[text];
+  try {
+    var resp = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({
+        model: "claude-sonnet-4-6",
+        max_tokens: 500,
+        messages: [{
+          role: "user",
+          content: "Translate this real estate listing to Georgian. Return ONLY the translation: " + text
+        }]
+      })
+    });
+    var data = await resp.json();
+    var t = data.content && data.content[0] ? data.content[0].text.trim() : text;
+    _translateCache[text] = t;
+    return t;
+  } catch(e) { return text; }
 }
 </script>
 </body>
