@@ -452,6 +452,9 @@ button, a, .hcard, .vcard, .cat-btn, .bnav-item {
 }
 .filter-panel.open{display:flex}
 .f-row{display:flex;gap:8px}
+.f-sel-wrap{position:relative;display:flex;align-items:center;flex:1}
+.f-sel-wrap .f-sel{padding-left:32px!important}
+.f-sel-icon{position:absolute;left:10px;pointer-events:none;color:var(--g400);z-index:1}
 .f-sel{
   flex:1;padding:9px 12px;border:1.5px solid var(--g200);
   border-radius:10px;font-size:13px;font-weight:500;
@@ -554,8 +557,10 @@ button, a, .hcard, .vcard, .cat-btn, .bnav-item {
   <!-- FILTER PANEL (slides down) -->
   <div class="filter-panel" id="filterPanel">
     <div class="f-row">
+      <div class="f-sel-wrap">
+        <svg class="f-sel-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
       <select class="f-sel" id="sDist" onchange="run();updatePillSub()">
-        <option value=""><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> <span data-i18n="any_dist">District</span></option>
+        <option value="" data-i18n="any_dist">District</option>
         <option value="Vera">Vera</option><option value="Mtatsminda">Mtatsminda</option>
         <option value="Vake">Vake</option><option value="Sololaki">Sololaki</option>
         <option value="Saburtalo">Saburtalo</option><option value="Chugureti">Chugureti</option>
@@ -568,6 +573,9 @@ button, a, .hcard, .vcard, .cat-btn, .bnav-item {
         <option value="Temqa">Temqa</option><option value="Kukia">Kukia</option>
         <option value="Abanotubani">Abanotubani</option><option value="Vashlijvari">Vashlijvari</option>
       </select>
+      </div>
+      <div class="f-sel-wrap">
+        <svg class="f-sel-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="4"/><path d="M12 6l3 10-3-4-3 4z"/></svg>
       <select class="f-sel" id="sMetro" onchange="run();updatePillSub()">
         <option value=""><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="4"/><path d="M12 6l3 10-3-4-3 4z"/></svg> <span>Metro</span></option>
         <option value="LibertySquare">Liberty Square</option>
@@ -599,6 +607,10 @@ button, a, .hcard, .vcard, .cat-btn, .bnav-item {
         <option value="900-1200">$900–1200</option>
         <option value="1200-99999">$1200+</option>
       </select>
+      </select>
+      </div>
+      <div class="f-sel-wrap">
+        <svg class="f-sel-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11V8a1 1 0 011-1h16a1 1 0 011 1v3"/><path d="M2 11h2a2 2 0 012 2v2h12v-2a2 2 0 012-2h2"/><path d="M4 15v3m16-3v3"/></svg>
       <select class="f-sel" id="sRooms" onchange="run();updatePillSub()">
         <option value="">🛋 Rooms</option>
         <option value="0">Studio</option>
@@ -1324,21 +1336,7 @@ function openModal(id){
   shareBtn.onclick=function(){ openShare(l); };
   body.appendChild(shareBtn);
 
-  // Translate button (KA mode only)
-  if(LANG === "ka") {
-    var tBtn = document.createElement("button");
-    tBtn.className = "modal-share";
-    tBtn.style.cssText = "background:var(--g50);color:var(--navy);border:1px solid var(--g200)";
-    tBtn.innerHTML = "&#x1F1EC;&#x1F1EA; &nbsp;";
-    tBtn.onclick = async function() {
-      tBtn.textContent = "...";
-      var titleEl = body.querySelector(".modal-title");
-      if(titleEl) titleEl.textContent = await translateToKa(titleEl.textContent);
-      tBtn.textContent = "OK";
-      tBtn.disabled = true;
-    };
-    body.appendChild(tBtn);
-  }
+
   mc.appendChild(body);
 
   // Auto-translate title on KA
