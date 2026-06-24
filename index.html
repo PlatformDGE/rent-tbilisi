@@ -526,7 +526,25 @@ button, a, .hcard, .vcard, .cat-btn, .bnav-item {
 .ss-cancel{background:none;color:var(--red);font-size:14px;font-weight:600;
   padding:14px;border:none;cursor:pointer;font-family:"Inter",sans-serif;margin-top:4px}
 .ss-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+
+.f-btn{
+  flex:1;display:flex;align-items:center;gap:8px;
+  padding:10px 12px;border:0.5px solid var(--g200);
+  border-radius:var(--border-radius-md,10px);
+  background:var(--white);cursor:pointer;position:relative;
+  font-family:"Inter",sans-serif;min-width:0;
+}
+.f-btn i.ti{font-size:18px;color:var(--g400);flex-shrink:0}
+.f-btn-label{font-size:13px;color:var(--g700);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.f-btn-label.active{color:var(--navy);font-weight:600}
+.f-chevron{font-size:14px;color:var(--g300);flex-shrink:0}
+.f-sel-hidden{
+  position:absolute;inset:0;opacity:0;cursor:pointer;
+  width:100%;height:100%;z-index:2;
+}
+
 </style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.34.0/dist/tabler-icons.min.css">
 </head>
 <body>
 
@@ -557,120 +575,71 @@ button, a, .hcard, .vcard, .cat-btn, .bnav-item {
   <!-- FILTER PANEL (slides down) -->
   <div class="filter-panel" id="filterPanel">
     <div class="f-row">
-      <div class="f-sel-wrap">
-        <svg class="f-sel-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-      <select class="f-sel" id="sDist" onchange="run();updatePillSub()">
-        <option value="" data-i18n="any_dist">District</option>
-        <option value="Vera">Vera</option><option value="Mtatsminda">Mtatsminda</option>
-        <option value="Vake">Vake</option><option value="Sololaki">Sololaki</option>
-        <option value="Saburtalo">Saburtalo</option><option value="Chugureti">Chugureti</option>
-        <option value="Nutsubidze">Nutsubidze</option><option value="Didube">Didube</option>
-        <option value="Nadzaladevi">Nadzaladevi</option><option value="Gldani">Gldani</option>
-        <option value="Avlabari">Avlabari</option><option value="Isani">Isani</option>
-        <option value="Samgori">Samgori</option><option value="Varketili">Varketili</option>
-        <option value="Digomi">Digomi</option><option value="Ortachala">Ortachala</option>
-        <option value="Krtsanisi">Krtsanisi</option><option value="Bagebi">Bagebi</option>
-        <option value="Temqa">Temqa</option><option value="Kukia">Kukia</option>
-        <option value="Abanotubani">Abanotubani</option><option value="Vashlijvari">Vashlijvari</option>
-      </select>
+      <div class="f-btn" onclick="document.getElementById('sDist').focus()">
+        <i class="ti ti-map-pin" aria-hidden="true"></i>
+        <select class="f-sel f-sel-hidden" id="sDist" onchange="run();updatePillSub();updateFBtns()">
+          <option value="" data-i18n="any_dist">District</option>
+          <option value="Vera">Vera</option><option value="Mtatsminda">Mtatsminda</option>
+          <option value="Vake">Vake</option><option value="Sololaki">Sololaki</option>
+          <option value="Saburtalo">Saburtalo</option><option value="Chugureti">Chugureti</option>
+          <option value="Nutsubidze">Nutsubidze</option><option value="Didube">Didube</option>
+          <option value="Nadzaladevi">Nadzaladevi</option><option value="Isani">Isani</option>
+          <option value="Avlabari">Avlabari</option><option value="Ortachala">Ortachala</option>
+          <option value="Gldani">Gldani</option><option value="Varketili">Varketili</option>
+          <option value="Samgori">Samgori</option><option value="Dighomi">Dighomi</option>
+          <option value="Mtatsminda">Mtatsminda</option>
+        </select>
+        <span class="f-btn-label" id="fLblDist" data-i18n="any_dist">District</span>
+        <i class="ti ti-chevron-down f-chevron" aria-hidden="true"></i>
       </div>
-      <div class="f-sel-wrap">
-        <svg class="f-sel-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="4"/><path d="M12 6l3 10-3-4-3 4z"/></svg>
-      <select class="f-sel" id="sMetro" onchange="run();updatePillSub()">
-        <option value=""><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="4"/><path d="M12 6l3 10-3-4-3 4z"/></svg> <span>Metro</span></option>
-        <option value="LibertySquare">Liberty Square</option>
-        <option value="Rustaveli">Rustaveli</option>
-        <option value="Marjanishvili">Marjanishvili</option>
-        <option value="Tsereteli">Tsereteli</option>
-        <option value="Gotsiridze">Gotsiridze</option>
-        <option value="Nadzaladevi">Nadzaladevi</option>
-        <option value="Didube">Didube</option>
-        <option value="Guramishvili">Guramishvili</option>
-        <option value="Sarajishvili">Sarajishvili</option>
-        <option value="AhmeteliTheatre">Ahmeteli Theatre</option>
-        <option value="VazhaPshavela">Vazha-Pshavela</option>
-        <option value="Delisi">Delisi</option>
-        <option value="MCUniversity">MC University</option>
-        <option value="AvlabariMetro">Avlabari</option>
-        <option value="IsaniMetro">Isani</option>
-        <option value="SamgoriMetro">Samgori</option>
-        <option value="Varketili">Varketili</option>
-      </select>
+      <div class="f-btn" onclick="document.getElementById('sMetro').focus()">
+        <i class="ti ti-train" aria-hidden="true"></i>
+        <select class="f-sel f-sel-hidden" id="sMetro" onchange="run();updatePillSub();updateFBtns()">
+          <option value="">Metro</option>
+          <option value="RustavelMetro">Rustaveli</option><option value="LibertSquareMetro">Liberty Sq</option>
+          <option value="VazhaPshavelaMetro">VazhaPshavela</option><option value="IsaniMetro">Isani</option>
+          <option value="SamgoriMetro">Samgori</option><option value="Varketili">Varketili</option>
+          <option value="AhmeteliTheatre">Akhmeti Theatre</option><option value="TCUniversity">TC University</option>
+          <option value="STUniversity">ST University</option><option value="MCUniversity">MC University</option>
+          <option value="GldaniMetro">Gldani</option><option value="Didube">Didube</option>
+          <option value="TseretliMetro">Tsereteli</option><option value="MarjanishviliMetro">Marjanishvili</option>
+          <option value="AvlabariMetro">Avlabari</option>
+        </select>
+        <span class="f-btn-label" id="fLblMetro">Metro</span>
+        <i class="ti ti-chevron-down f-chevron" aria-hidden="true"></i>
+      </div>
     </div>
     <div class="f-row">
-      <select class="f-sel" id="sPrice" onchange="run();updatePillSub()">
-        <option value=""><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v12M9 9h4.5a1.5 1.5 0 010 3h-3a1.5 1.5 0 000 3H15"/></svg> <span data-i18n="any_price">Price</span></option>
-        <option value="0-300">to $300</option>
-        <option value="300-500">$300–500</option>
-        <option value="500-700">$500–700</option>
-        <option value="700-900">$700–900</option>
-        <option value="900-1200">$900–1200</option>
-        <option value="1200-99999">$1200+</option>
-      </select>
-      </select>
+      <div class="f-btn" onclick="document.getElementById('sPrice').focus()">
+        <i class="ti ti-currency-dollar" aria-hidden="true"></i>
+        <select class="f-sel f-sel-hidden" id="sPrice" onchange="run();updatePillSub();updateFBtns()">
+          <option value="" data-i18n="any_price">Price</option>
+          <option value="0-300">$0–300</option><option value="300-500">$300–500</option>
+          <option value="500-700">$500–700</option><option value="700-900">$700–900</option>
+          <option value="900-1200">$900–1200</option><option value="1200-99999">$1200+</option>
+        </select>
+        <span class="f-btn-label" id="fLblPrice" data-i18n="any_price">Price</span>
+        <i class="ti ti-chevron-down f-chevron" aria-hidden="true"></i>
       </div>
-      <div class="f-sel-wrap">
-        <svg class="f-sel-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11V8a1 1 0 011-1h16a1 1 0 011 1v3"/><path d="M2 11h2a2 2 0 012 2v2h12v-2a2 2 0 012-2h2"/><path d="M4 15v3m16-3v3"/></svg>
-      <select class="f-sel" id="sRooms" onchange="run();updatePillSub()">
-        <option value="">🛋 Rooms</option>
-        <option value="0">Studio</option>
-        <option value="1">1 bed</option>
-        <option value="2">2 bed</option>
-        <option value="3">3 bed</option>
-        <option value="4">4+ bed</option>
-      </select>
+      <div class="f-btn" onclick="document.getElementById('sRooms').focus()">
+        <i class="ti ti-door" aria-hidden="true"></i>
+        <select class="f-sel f-sel-hidden" id="sRooms" onchange="run();updatePillSub();updateFBtns()">
+          <option value="" data-i18n="any_rooms">Rooms</option>
+          <option value="0" data-i18n="studio">Studio</option>
+          <option value="1">1 br</option><option value="2">2 br</option>
+          <option value="3">3 br</option><option value="4">4+ br</option>
+        </select>
+        <span class="f-btn-label" id="fLblRooms" data-i18n="any_rooms">Rooms</span>
+        <i class="ti ti-chevron-down f-chevron" aria-hidden="true"></i>
+      </div>
     </div>
-    <!-- Advanced -->
-    <button class="adv-toggle" id="advToggle" onclick="toggleAdv()">
-      ⚙️ <span id="advLabel">More filters</span> <span id="advArrow">▾</span>
+    <button class="f-more" id="fMoreBtn" onclick="toggleMore()">
+      <i class="ti ti-adjustments-horizontal" aria-hidden="true"></i>
+      <span data-i18n="more_filters">More filters</span> <span id="fMoreArrow">▾</span>
     </button>
-    <div class="adv-filters" id="advFilters">
-      <div class="adv-group">
-        <div class="adv-title">🏢 Building</div>
-        <div class="adv-pills" id="fBuild">
-          <button class="ap on" data-val="" onclick="setAdv(this,'fBuild','')">Any</button>
-          <button class="ap" data-val="New" onclick="setAdv(this,'fBuild','New')">New</button>
-          <button class="ap" data-val="Old" onclick="setAdv(this,'fBuild','Old')">Old</button>
-          <button class="ap" data-val="Soviet" onclick="setAdv(this,'fBuild','Soviet')">Soviet</button>
-        </div>
-      </div>
-      <div class="adv-group">
-        <div class="adv-title">✅ Amenities</div>
-        <div class="adv-pills" id="fAmenities">
-          <button class="ap" data-val="wifi" onclick="toggleAm(this,'wifi')">📶 WiFi</button>
-          <button class="ap" data-val="balcony" onclick="toggleAm(this,'balcony')">🏗 Balcony</button>
-          <button class="ap" data-val="conditioner" onclick="toggleAm(this,'conditioner')">🌡 A/C</button>
-          <button class="ap" data-val="elevator" onclick="toggleAm(this,'elevator')">🛗 Elevator</button>
-          <button class="ap" data-val="parking" onclick="toggleAm(this,'parking')">🅿️ Parking</button>
-          <button class="ap" data-val="dishwasher" onclick="toggleAm(this,'dishwasher')">🍽 Dishwasher</button>
-          <button class="ap" data-val="tv" onclick="toggleAm(this,'tv')">📺 TV</button>
-          <button class="ap" data-val="washing_machine" onclick="toggleAm(this,'washing_machine')">🫧 Washer</button>
-          <button class="ap" data-val="microwave" onclick="toggleAm(this,'microwave')">♨️ Microwave</button>
-          <button class="ap" data-val="stove" onclick="toggleAm(this,'stove')">🍳 Stove</button>
-        </div>
-      </div>
-      <div class="adv-group">
-        <div class="adv-title">🐾 Pets</div>
-        <div class="adv-pills" id="fPets">
-          <button class="ap on" data-val="" onclick="setAdv(this,'fPets','')">Any</button>
-          <button class="ap" data-val="yes" onclick="setAdv(this,'fPets','yes')">✅ Allowed</button>
-          <button class="ap" data-val="no" onclick="setAdv(this,'fPets','no')">🚫 No</button>
-        </div>
-      </div>
-      <div class="adv-group">
-        <div class="adv-title">⏱ Term</div>
-        <div class="adv-pills" id="fTerm">
-          <button class="ap on" data-val="" onclick="setAdv(this,'fTerm','')">Any</button>
-          <button class="ap" data-val="1Month" onclick="setAdv(this,'fTerm','1Month')">1 mo</button>
-          <button class="ap" data-val="6Month" onclick="setAdv(this,'fTerm','6Month')">6 mo</button>
-          <button class="ap" data-val="12Month" onclick="setAdv(this,'fTerm','12Month')">12 mo</button>
-        </div>
-      </div>
-      <button class="adv-reset" onclick="resetAdv()">Reset all</button>
-    </div>
   </div>
 
-  <!-- CATEGORIES -->
+<!-- CATEGORIES -->
   <div class="cat-scroll" id="catScroll">
     <button class="cat-btn on" data-cat="" onclick="setCat(this,'')">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l9-9 9 9"/><path d="M5 10v9a1 1 0 001 1h4v-4h4v4h4a1 1 0 001-1v-9"/></svg>
@@ -1662,6 +1631,22 @@ async function translateToKa(text) {
     _translateCache[text] = t;
     return t;
   } catch(e) { return text; }
+}
+
+function updateFBtns(){
+  var dv=document.getElementById('sDist').value;
+  var mv=document.getElementById('sMetro').value;
+  var pv=document.getElementById('sPrice').value;
+  var rv=document.getElementById('sRooms').value;
+  var dEl=document.getElementById('sDist');
+  var mEl=document.getElementById('sMetro');
+  var pEl=document.getElementById('sPrice');
+  var rEl=document.getElementById('sRooms');
+  var lbl=function(sel,def){ return sel.value?sel.options[sel.selectedIndex].text:t(def)||def; };
+  var dl=document.getElementById('fLblDist'); if(dl){ dl.textContent=lbl(dEl,'any_dist'); dl.className='f-btn-label'+(dv?' active':''); }
+  var ml=document.getElementById('fLblMetro'); if(ml){ ml.textContent=lbl(mEl,''); ml.className='f-btn-label'+(mv?' active':''); }
+  var pl=document.getElementById('fLblPrice'); if(pl){ pl.textContent=lbl(pEl,'any_price'); pl.className='f-btn-label'+(pv?' active':''); }
+  var rl=document.getElementById('fLblRooms'); if(rl){ rl.textContent=lbl(rEl,'any_rooms'); rl.className='f-btn-label'+(rv?' active':''); }
 }
 </script>
 </body>
