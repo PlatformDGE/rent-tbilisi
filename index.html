@@ -1328,6 +1328,19 @@ function openModal(id){
   }
   mc.appendChild(body);
 
+  // Auto-translate title on KA
+  if(LANG === "ka") {
+    var titleEl = body.querySelector(".modal-title");
+    if(titleEl && titleEl.textContent) {
+      var origText = titleEl.textContent;
+      titleEl.style.opacity = "0.5";
+      translateToKa(origText).then(function(translated) {
+        titleEl.textContent = translated;
+        titleEl.style.opacity = "1";
+      });
+    }
+  }
+
   document.getElementById("modalBg").classList.add("open");
   setTimeout(initGallery,50);
 }
