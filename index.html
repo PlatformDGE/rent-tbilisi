@@ -555,7 +555,7 @@ button, a, .hcard, .vcard, .cat-btn, .bnav-item {
   <div class="filter-panel" id="filterPanel">
     <div class="f-row">
       <select class="f-sel" id="sDist" onchange="run();updatePillSub()">
-        <option value="">📍 District</option>
+        <option value=""><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> <span data-i18n="any_dist">District</span></option>
         <option value="Vera">Vera</option><option value="Mtatsminda">Mtatsminda</option>
         <option value="Vake">Vake</option><option value="Sololaki">Sololaki</option>
         <option value="Saburtalo">Saburtalo</option><option value="Chugureti">Chugureti</option>
@@ -569,7 +569,7 @@ button, a, .hcard, .vcard, .cat-btn, .bnav-item {
         <option value="Abanotubani">Abanotubani</option><option value="Vashlijvari">Vashlijvari</option>
       </select>
       <select class="f-sel" id="sMetro" onchange="run();updatePillSub()">
-        <option value="">🚇 Metro</option>
+        <option value=""><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="4"/><path d="M12 6l3 10-3-4-3 4z"/></svg> <span>Metro</span></option>
         <option value="LibertySquare">Liberty Square</option>
         <option value="Rustaveli">Rustaveli</option>
         <option value="Marjanishvili">Marjanishvili</option>
@@ -591,7 +591,7 @@ button, a, .hcard, .vcard, .cat-btn, .bnav-item {
     </div>
     <div class="f-row">
       <select class="f-sel" id="sPrice" onchange="run();updatePillSub()">
-        <option value="">💰 Price</option>
+        <option value=""><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v12M9 9h4.5a1.5 1.5 0 010 3h-3a1.5 1.5 0 000 3H15"/></svg> <span data-i18n="any_price">Price</span></option>
         <option value="0-300">to $300</option>
         <option value="300-500">$300–500</option>
         <option value="500-700">$500–700</option>
@@ -822,12 +822,13 @@ const T = {
     of:"of",no_results:"Nothing found",no_results_sub:"Try adjusting filters",
     listings:"listings",just_now:"just now",fav_empty:"No saved listings yet",
     fav_empty_sub:"Tap ♡ on any listing to save it",
+    more_filters:"More filters",
   },
   ka:{
     search_where:"სად ეძებთ?",search_sub:"ნებისმიერი რაიონი · ნებისმიერი ფასი",
     ph_addr:"#Vake #2Bed #Price500to700...",any_price:"ნებისმიერი ფასი",any_build:"ნებისმიერი შენობა",
     new_build:"ახალი აშენება",old_build:"ძველი ფონდი",soviet_build:"საბჭოური",
-    any_dist:"ნებისმიერი რაიონი",any_rooms:"ნებისმიერი",studio:"სტუდიო",apply:"გამოყენება",
+    any_dist:"რაიონი",any_rooms:"ნებისმიერი",studio:"სტუდიო",apply:"გამოყენება",
     cat_all:"ყველა",cat_1:"სტუდიო/1",cat_2:"2 ოთ.",cat_3:"3 ოთ.",cat_new:"ახალი",cat_excl:"ექსკლუზ.",cat_comm:"კომერცია",
     sec_new:"ახლახან დაემატა",see_all:"ყველა →",sec_all:"ყველა განცხადება",
     map_title:"რუკა",fav_title:"შენახული",
@@ -845,6 +846,7 @@ const T = {
     of:"/",no_results:"ვერაფერი მოიძებნა",no_results_sub:"სცადეთ ფილტრების შეცვლა",
     listings:"განცხადება",just_now:"ახლახან",fav_empty:"შენახული განცხადება არ არის",
     fav_empty_sub:"დააჭირეთ ♡ განცხადებაზე",
+    more_filters:"მეტი ფილტრი",
     dist_vake:"ვაკე",dist_saburtalo:"საბურთალო",dist_didube:"დიდუბე",
     dist_isani:"ისანი",dist_gldani:"გლდანი",dist_nadzaladevi:"ნაძალადევი",
     dist_mtatsminda:"მთაწმინდა",dist_chugureti:"ჩუღურეთი",dist_vera:"ვერა",
