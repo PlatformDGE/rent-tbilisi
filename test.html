@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Опросник по объекту | Platform 90/10</title>
+<style>
+  :root{
+    --navy:#1d3560;
+    --navy-dark:#132444;
+    --gold:#c9a54e;
+    --paper:#f7f6f3;
+    --ink:#1a1a1a;
+    --muted:#6b7280;
+    --line:#e3e1db;
+    --danger:#b3452f;
+    --ok:#2f7a4f;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Arial,sans-serif;
+    line-height:1.45;
+  }
+  .topbar{
+    background:linear-gradient(135deg,var(--navy) 0%,var(--navy-dark) 100%);
+    color:#fff;
+    padding:20px 20px 24px;
+    position:relative;
+    overflow:hidden;
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:12px;
+  }
+  .topbar::after{
+    content:"";
+    position:absolute;
+    right:-30px; top:-30px;
+    width:140px; height:140px;
+    border:2px solid rgba(201,165,78,0.25);
+    transform:rotate(45deg);
+  }
+  .topbar .cross{
+    display:inline-block;
+    width:14px;height:14px;
+    position:relative;
+    margin-bottom:10px;
+  }
+  .topbar .cross::before,.topbar .cross::after{
+    content:"";
+    position:absolute;
+    background:var(--gold);
+  }
+  .topbar .cross::before{width:14px;height:3px;top:5.5px;left:0;}
+  .topbar .cross::after{width:3px;height:14px;left:5.5px;top:0;}
+  .topbar h1{margin:0;font-size:18.5px;font-weight:700;}
+  .topbar p{margin:4px 0 0;font-size:12px;color:rgba(255,255,255,0.72);}
+  .topbar .titleblock{position:relative;z-index:1;}
+
+  .langswitch{
+    position:relative;z-index:1;
+    display:flex;
+    background:rgba(255,255,255,0.12);
+    border-radius:20px;
+    padding:3px;
+    flex-shrink:0;
+    margin-top:2px;
+  }
+  .langswitch button{
+    border:none;
+    background:transparent;
+    color:rgba(255,255,255,0.7);
+    font-size:12.5px;
+    font-weight:600;
+    padding:6px 12px;
+    border-radius:16px;
+    cursor:pointer;
+  }
+  .langswitch button.active{
+    background:var(--gold);
+    color:var(--navy-dark);
+  }
+
+  .wrap{max-width:640px;margin:0 auto;padding:16px 16px 90px;}
+
+  .card{
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:14px 16px 4px;
+    margin-top:12px;
+  }
+  .card h2{
+    font-size:14px;
+    margin:0 0 10px;
+    color:var(--navy-dark);
+    font-weight:700;
+  }
+  .card .section-hint{
+    font-size:11.5px;
+    color:var(--muted);
+    margin:-6px 0 10px;
+  }
+  .field{margin-bottom:12px;}
+  .field label{
+    display:block;
+    font-size:12px;
+    color:var(--muted);
+    margin-bottom:4px;
+  }
+  input[type=text],input[type=tel],input[type=number],textarea,select{
+    width:100%;
+    padding:10px 11px;
+    border:1px solid var(--line);
+    border-radius:7px;
+    font-size:14.5px;
+    font-family:inherit;
+    background:var(--paper);
+    color:var(--ink);
+  }
+  textarea{resize:vertical;min-height:46px;}
+  input:focus,textarea:focus,select:focus{
+    outline:none;
+    border-color:var(--navy);
+    background:#fff;
+  }
+
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+  @media (max-width:420px){.row2,.row3{grid-template-columns:1fr;}}
+
+  .pills{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:4px;}
+  .pill{
+    padding:8px 13px;
+    border:1px solid var(--line);
+    border-radius:20px;
+    font-size:13px;
+    cursor:pointer;
+    user-select:none;
+    background:#fff;
+    color:var(--ink);
+  }
+  .pill.active{background:var(--navy);border-color:var(--navy);color:#fff;}
+
+  .conditional{display:none;margin-top:8px;padding-top:10px;border-top:1px dashed var(--line);}
+  .conditional.show{display:block;}
+
+  .footer-bar{
+    position:fixed;bottom:0;left:0;right:0;
+    background:#fff;border-top:1px solid var(--line);
+    padding:12px 16px;
+    box-shadow:0 -4px 14px rgba(0,0,0,0.06);
+  }
+  .btn{
+    width:100%;padding:13px;border-radius:8px;border:none;
+    font-size:14.5px;font-weight:600;cursor:pointer;
+    background:var(--navy);color:#fff;
+  }
+  .btn:disabled{background:#9aa5b8;}
+
+  .status{text-align:center;font-size:12.5px;padding:6px 16px 0;color:var(--muted);min-height:18px;}
+  .status.err{color:var(--danger);}
+
+  .success-screen{display:none;text-align:center;padding:60px 20px;}
+  .success-screen.show{display:block;}
+  .success-screen .check{
+    width:56px;height:56px;border-radius:50%;background:var(--ok);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 16px;
+  }
+  .success-screen h2{margin:0 0 6px;font-size:17px;}
+  .success-screen p{color:var(--muted);font-size:13.5px;margin:0 0 22px;}
+  .success-screen button{
+    background:var(--navy);color:#fff;border:none;padding:11px 22px;border-radius:8px;font-size:14px;cursor:pointer;
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="titleblock">
+    <span class="cross"></span>
+    <h1 data-i18n="title"></h1>
+    <p data-i18n="subtitle"></p>
+  </div>
+  <div class="langswitch">
+    <button id="btnRu" onclick="setLang('ru')">RU</button>
+    <button id="btnKa" onclick="setLang('ka')">KA</button>
+  </div>
+</div>
+
+<div class="wrap" id="formWrap">
+
+  <!-- Основные данные -->
+  <div class="card">
+    <h2 data-i18n="h_main"></h2>
+
+    <div class="field">
+      <label data-i18n="l_address"></label>
+      <input type="text" id="address">
+    </div>
+
+    <div class="field">
+      <label data-i18n="l_cadastral"></label>
+      <input type="text" id="cadastralCode" placeholder="01.10.09.008.033">
+    </div>
+
+    <div class="row3">
+      <div class="field">
+        <label data-i18n="l_area"></label>
+        <input type="number" id="area" placeholder="м²">
+      </div>
+      <div class="field">
+        <label data-i18n="l_rooms"></label>
+        <select id="roomsSelect" onchange="toggleManual('roomsSelect','roomsManual')"></select>
+        <input type="number" id="roomsManual" class="conditional" placeholder="—">
+      </div>
+      <div class="field">
+        <label data-i18n="l_bedrooms"></label>
+        <select id="bedroomsSelect" onchange="toggleManual('bedroomsSelect','bedroomsManual')"></select>
+        <input type="number" id="bedroomsManual" class="conditional" placeholder="—">
+      </div>
+    </div>
+
+    <div class="row2">
+      <div class="field">
+        <label data-i18n="l_floor"></label>
+        <select id="floorSelect" onchange="toggleManual('floorSelect','floorManual')"></select>
+        <input type="number" id="floorManual" class="conditional" placeholder="—">
+      </div>
+      <div class="field">
+        <label data-i18n="l_totalFloors"></label>
+        <select id="totalFloorsSelect" onchange="toggleManual('totalFloorsSelect','totalFloorsManual')"></select>
+        <input type="number" id="totalFloorsManual" class="conditional" placeholder="—">
+      </div>
+    </div>
+
+    <div class="field">
+      <label data-i18n="l_condition"></label>
+      <div class="pills" data-group="condition">
+        <div class="pill" data-value="black_frame" data-i18n="opt_condBlack"></div>
+        <div class="pill" data-value="white_frame" data-i18n="opt_condWhite"></div>
+        <div class="pill" data-value="euro" data-i18n="opt_condEuro"></div>
+        <div class="pill" data-value="livable" data-i18n="opt_condLivable"></div>
+        <div class="pill" data-value="needs_repair" data-i18n="opt_condRepair"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Оснащение -->
+  <div class="card">
+    <h2 data-i18n="h_equipment"></h2>
+
+    <div class="field">
+      <label data-i18n="l_furniture"></label>
+      <div class="pills" data-group="furniture">
+        <div class="pill" data-value="yes" data-i18n="opt_yes"></div>
+        <div class="pill" data-value="no" data-i18n="opt_no"></div>
+        <div class="pill" data-value="partial" data-i18n="opt_partial"></div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label data-i18n="l_balcony"></label>
+      <div class="pills" data-group="balcony">
+        <div class="pill" data-value="yes" data-i18n="opt_yes"></div>
+        <div class="pill" data-value="no" data-i18n="opt_no"></div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label data-i18n="l_elevator"></label>
+      <div class="pills" data-group="elevator">
+        <div class="pill" data-value="yes" data-i18n="opt_yes"></div>
+        <div class="pill" data-value="no" data-i18n="opt_no"></div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label data-i18n="l_parking"></label>
+      <div class="pills" data-group="parking">
+        <div class="pill" data-value="no" data-i18n="opt_no"></div>
+        <div class="pill" data-value="yard" data-i18n="opt_parkYard"></div>
+        <div class="pill" data-value="garage" data-i18n="opt_parkGarage"></div>
+        <div class="pill" data-value="underground" data-i18n="opt_parkUnderground"></div>
+        <div class="pill" data-value="other" data-i18n="opt_other"></div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label data-i18n="l_view"></label>
+      <div class="pills" data-group="view" data-multi="true">
+        <div class="pill" data-value="street" data-i18n="opt_viewStreet"></div>
+        <div class="pill" data-value="yard" data-i18n="opt_viewYard"></div>
+        <div class="pill" data-value="mountains" data-i18n="opt_viewMountains"></div>
+        <div class="pill" data-value="building" data-i18n="opt_viewBuilding"></div>
+        <div class="pill" data-value="open" data-i18n="opt_viewOpen"></div>
+        <div class="pill" data-value="dense" data-i18n="opt_viewDense"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Цена и юридический статус -->
+  <div class="card">
+    <h2 data-i18n="h_legal"></h2>
+
+    <div class="field">
+      <label data-i18n="l_price"></label>
+      <input type="text" id="price" placeholder="$">
+    </div>
+
+    <div class="field">
+      <label data-i18n="l_owners"></label>
+      <div class="pills" data-group="owners">
+        <div class="pill" data-value="one" data-i18n="opt_ownerOne"></div>
+        <div class="pill" data-value="several" data-i18n="opt_ownerSeveral"></div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label data-i18n="l_mortgage"></label>
+      <div class="pills" data-group="mortgage">
+        <div class="pill" data-value="yes" data-i18n="opt_yes"></div>
+        <div class="pill" data-value="no" data-i18n="opt_no"></div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label data-i18n="l_docs"></label>
+      <div class="pills" data-group="docs">
+        <div class="pill" data-value="yes" data-i18n="opt_yes"></div>
+        <div class="pill" data-value="no" data-i18n="opt_no"></div>
+      </div>
+    </div>
+    <div class="field">
+      <label data-i18n="l_docsComment"></label>
+      <textarea id="docsComment"></textarea>
+    </div>
+  </div>
+
+  <!-- Строительная компания -->
+  <div class="card">
+    <h2 data-i18n="h_construction"></h2>
+
+    <div class="field">
+      <label data-i18n="l_devCompany"></label>
+      <input type="text" id="devCompany">
+    </div>
+
+    <div class="row2">
+      <div class="field">
+        <label data-i18n="l_buildYear"></label>
+        <select id="buildYearSelect" onchange="toggleManual('buildYearSelect','buildYearManual')"></select>
+        <input type="number" id="buildYearManual" class="conditional" placeholder="напр. 1978">
+      </div>
+      <div class="field">
+        <label data-i18n="l_mayorStatus"></label>
+        <div class="pills" data-group="mayorStatus">
+          <div class="pill" data-value="delivered" data-i18n="opt_mayorDelivered"></div>
+          <div class="pill" data-value="not_delivered" data-i18n="opt_mayorNotDelivered"></div>
+          <div class="pill" data-value="legalizing" data-i18n="opt_mayorLegalizing"></div>
+          <div class="pill" data-value="unauthorized" data-i18n="opt_mayorUnauthorized"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label data-i18n="l_project"></label>
+      <input type="text" id="project">
+    </div>
+
+    <div class="field">
+      <label data-i18n="l_partitionMaterial"></label>
+      <input type="text" id="partitionMaterial">
+    </div>
+  </div>
+
+  <div style="height:10px;"></div>
+</div>
+
+<div class="success-screen" id="successScreen">
+  <div class="check">✓</div>
+  <h2 data-i18n="s_sent"></h2>
+  <p data-i18n="s_added"></p>
+  <button onclick="resetForm()" data-i18n="s_another"></button>
+</div>
+
+<div class="footer-bar" id="footerBar">
+  <button class="btn" id="submitBtn" onclick="submitForm()" data-i18n="btn_submit"></button>
+</div>
+<div class="status" id="statusMsg"></div>
+
+<script>
+  // ==== НАСТРОЙКА: вставьте сюда URL вашего Google Apps Script Web App ====
+  const GAS_URL = "PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE";
+  // ==========================================================================
+
+  const I18N = {
+    ru: {
+      title: "Опросник по объекту",
+      subtitle: "Platform 90/10",
+      h_main: "Основные данные",
+      l_address: "Адрес",
+      l_cadastral: "Кадастровый код",
+      l_area: "Площадь",
+      l_rooms: "Комнаты",
+      l_bedrooms: "Спальни",
+      l_floor: "Этаж",
+      l_totalFloors: "Всего этажей",
+      l_condition: "Состояние",
+      h_equipment: "Оснащение",
+      l_furniture: "Мебель / техника",
+      l_balcony: "Балкон / терраса",
+      l_elevator: "Лифт",
+      l_parking: "Парковка",
+      l_view: "Вид",
+      h_legal: "Цена и статус",
+      l_price: "Цена",
+      l_owners: "Собственники",
+      l_mortgage: "Ипотека / арест",
+      l_docs: "Документы в порядке",
+      l_docsComment: "Комментарий к документам",
+      h_construction: "Строительная компания",
+      l_devCompany: "Строительная компания",
+      l_buildYear: "Год постройки",
+      l_mayorStatus: "Статус в мэрии",
+      l_project: "Проект",
+      l_partitionMaterial: "Материал перегородок (новые корпуса)",
+      opt_yes: "Да",
+      opt_no: "Нет",
+      opt_partial: "Частично",
+      opt_other: "Другое",
+      opt_parkYard: "Двор со шлагбаумом",
+      opt_parkGarage: "Гараж",
+      opt_parkUnderground: "Подземный",
+      opt_viewStreet: "Улица",
+      opt_viewYard: "Двор",
+      opt_viewMountains: "Горы",
+      opt_viewBuilding: "Впритык здание",
+      opt_viewOpen: "Открытое пространство",
+      opt_viewDense: "Плотная застройка",
+      opt_ownerOne: "Один",
+      opt_ownerSeveral: "Несколько",
+      opt_condBlack: "Черновая (без отделки)",
+      opt_condWhite: "Белый каркас",
+      opt_condEuro: "Евроремонт",
+      opt_condLivable: "Жилое состояние",
+      opt_condRepair: "Требует ремонта",
+      opt_mayorDelivered: "Сдан (в эксплуатации)",
+      opt_mayorNotDelivered: "Не сдан",
+      opt_mayorLegalizing: "В процессе легализации",
+      opt_mayorUnauthorized: "Самострой / без разрешения",
+      opt_selectPlaceholder: "Выбрать",
+      btn_submit: "Отправить в таблицу",
+      s_sent: "Данные отправлены",
+      s_added: "Запись добавлена в таблицу",
+      s_another: "Заполнить ещё один объект",
+      err_address: "Укажите адрес",
+      err_cadastral: "Укажите кадастровый код",
+      err_send: "Ошибка отправки. Проверьте соединение и повторите.",
+      err_notconfigured: "GAS_URL не настроен — см. инструкцию в коде",
+      sending: "Отправка..."
+    },
+    ka: {
+      title: "კითხვარი ობიექტზე",
+      subtitle: "Platform 90/10",
+      h_main: "ძირითადი მონაცემები",
+      l_address: "მისამართი",
+      l_cadastral: "საკადასტრო კოდი",
+      l_area: "ფართი",
+      l_rooms: "ოთახები",
+      l_bedrooms: "საძინებლები",
+      l_floor: "სართული",
+      l_totalFloors: "სულ სართული",
+      l_condition: "მდგომარეობა",
+      h_equipment: "აღჭურვილობა",
+      l_furniture: "ავეჯი / ტექნიკა",
+      l_balcony: "აივანი / ტერასა",
+      l_elevator: "ლიფტი",
+      l_parking: "პარკინგი",
+      l_view: "ხედი",
+      h_legal: "ფასი და სტატუსი",
+      l_price: "ფასი",
+      l_owners: "მესაკუთრეები",
+      l_mortgage: "იპოთეკა / ყადაღა",
+      l_docs: "დოკუმენტები წესრიგშია",
+      l_docsComment: "კომენტარი დოკუმენტებზე",
+      h_construction: "სამშენებლო კომპანია",
+      l_devCompany: "სამშენებლო კომპანია",
+      l_buildYear: "აშენების წელი",
+      l_mayorStatus: "სტატუსი მერიაში",
+      l_project: "პროექტი",
+      l_partitionMaterial: "ტიხრების მასალა (ახალი კორპუსები)",
+      opt_yes: "კი",
+      opt_no: "არა",
+      opt_partial: "ნაწილობრივ",
+      opt_other: "სხვა",
+      opt_parkYard: "ეზო შლაგბაუმით",
+      opt_parkGarage: "ავტოფარეხი",
+      opt_parkUnderground: "მიწისქვეშა",
+      opt_viewStreet: "ქუჩა",
+      opt_viewYard: "ეზო",
+      opt_viewMountains: "მთები",
+      opt_viewBuilding: "პირდაპირ შენობა",
+      opt_viewOpen: "გაშლილი სივრცე",
+      opt_viewDense: "მჭიდრო დასახლება",
+      opt_ownerOne: "ერთი",
+      opt_ownerSeveral: "რამდენიმე",
+      opt_condBlack: "შავი კარკასი",
+      opt_condWhite: "თეთრი კარკასი",
+      opt_condEuro: "ევრორემონტი",
+      opt_condLivable: "საცხოვრებელ მდგომარეობაში",
+      opt_condRepair: "სარემონტოა",
+      opt_mayorDelivered: "ჩაბარებულია (ექსპლუატაციაში)",
+      opt_mayorNotDelivered: "არ არის ჩაბარებული",
+      opt_mayorLegalizing: "ლეგალიზაციის პროცესშია",
+      opt_mayorUnauthorized: "თვითნებური მშენებლობა",
+      opt_selectPlaceholder: "აირჩიეთ",
+      btn_submit: "ცხრილში გაგზავნა",
+      s_sent: "მონაცემები გაიგზავნა",
+      s_added: "ჩანაწერი დაემატა ცხრილს",
+      s_another: "კიდევ ერთი ობიექტის შევსება",
+      err_address: "მიუთითეთ მისამართი",
+      err_cadastral: "მიუთითეთ საკადასტრო კოდი",
+      err_send: "გაგზავნის შეცდომა. შეამოწმეთ კავშირი და სცადეთ თავიდან.",
+      err_notconfigured: "GAS_URL არ არის მითითებული — იხილეთ ინსტრუქცია კოდში",
+      sending: "იგზავნება..."
+    }
+  };
+
+  let currentLang = 'ru';
+
+  function applyI18n(){
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if (I18N[currentLang][key] !== undefined){
+        el.textContent = I18N[currentLang][key];
+      }
+    });
+    document.getElementById('btnRu').classList.toggle('active', currentLang === 'ru');
+    document.getElementById('btnKa').classList.toggle('active', currentLang === 'ka');
+    document.documentElement.lang = currentLang;
+  }
+
+  function setLang(lang){
+    currentLang = lang;
+    applyI18n();
+  }
+
+  function populateNumberSelect(id, min, max, desc){
+    const sel = document.getElementById(id);
+    const placeholder = document.createElement('option');
+    placeholder.value = '';
+    placeholder.setAttribute('data-i18n','opt_selectPlaceholder');
+    sel.appendChild(placeholder);
+    const range = [];
+    for (let i = min; i <= max; i++) range.push(i);
+    if (desc) range.reverse();
+    range.forEach(n => {
+      const o = document.createElement('option');
+      o.value = n; o.textContent = n;
+      sel.appendChild(o);
+    });
+    const other = document.createElement('option');
+    other.value = 'other';
+    other.setAttribute('data-i18n','opt_other');
+    sel.appendChild(other);
+  }
+
+  function toggleManual(selectId, manualId){
+    const sel = document.getElementById(selectId);
+    const manual = document.getElementById(manualId);
+    const isOther = sel.value === 'other';
+    manual.classList.toggle('show', isOther);
+    if (isOther) manual.focus();
+  }
+
+  function selectOrManualValue(selectId, manualId){
+    const sel = document.getElementById(selectId);
+    if (sel.value === 'other') return document.getElementById(manualId).value;
+    return sel.value;
+  }
+
+  const CURRENT_YEAR = new Date().getFullYear();
+  populateNumberSelect('roomsSelect', 1, 15, false);
+  populateNumberSelect('bedroomsSelect', 1, 10, false);
+  populateNumberSelect('floorSelect', 1, 25, false);
+  populateNumberSelect('totalFloorsSelect', 1, 25, false);
+  populateNumberSelect('buildYearSelect', 1920, CURRENT_YEAR, true);
+
+  applyI18n();
+
+  const state = {
+    furniture: null, balcony: null, elevator: null, parking: null,
+    view: [], owners: null, mortgage: null, docs: null,
+    condition: null, mayorStatus: null
+  };
+
+  document.querySelectorAll('.pills').forEach(group => {
+    const key = group.dataset.group;
+    const multi = group.dataset.multi === "true";
+    group.querySelectorAll('.pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        const val = pill.dataset.value;
+        if (multi) {
+          if (!Array.isArray(state[key])) state[key] = [];
+          const idx = state[key].indexOf(val);
+          if (idx > -1) { state[key].splice(idx,1); pill.classList.remove('active'); }
+          else { state[key].push(val); pill.classList.add('active'); }
+        } else {
+          state[key] = val;
+          group.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+          pill.classList.add('active');
+        }
+      });
+    });
+  });
+
+  function collectPayload(){
+    return {
+      address: document.getElementById('address').value,
+      cadastralCode: document.getElementById('cadastralCode').value,
+      area: document.getElementById('area').value,
+      rooms: selectOrManualValue('roomsSelect','roomsManual'),
+      bedrooms: selectOrManualValue('bedroomsSelect','bedroomsManual'),
+      floor: selectOrManualValue('floorSelect','floorManual'),
+      totalFloors: selectOrManualValue('totalFloorsSelect','totalFloorsManual'),
+      condition: state.condition || '',
+      furniture: state.furniture || '',
+      balcony: state.balcony || '',
+      elevator: state.elevator || '',
+      parking: state.parking || '',
+      view: (state.view || []).join(', '),
+      price: document.getElementById('price').value,
+      owners: state.owners || '',
+      mortgage: state.mortgage || '',
+      docs: state.docs || '',
+      docsComment: document.getElementById('docsComment').value,
+      devCompany: document.getElementById('devCompany').value,
+      buildYear: selectOrManualValue('buildYearSelect','buildYearManual'),
+      mayorStatus: state.mayorStatus || '',
+      project: document.getElementById('project').value,
+      partitionMaterial: document.getElementById('partitionMaterial').value
+    };
+  }
+
+  function validate(payload){
+    const t = I18N[currentLang];
+    if (!payload.address) return t.err_address;
+    if (!payload.cadastralCode) return t.err_cadastral;
+    return null;
+  }
+
+  async function submitForm(){
+    const payload = collectPayload();
+    const t = I18N[currentLang];
+    const err = validate(payload);
+    const statusEl = document.getElementById('statusMsg');
+    statusEl.className = 'status';
+
+    if (err){
+      statusEl.textContent = err;
+      statusEl.classList.add('err');
+      return;
+    }
+
+    if (GAS_URL.indexOf('PASTE_YOUR') === 0){
+      statusEl.textContent = t.err_notconfigured;
+      statusEl.classList.add('err');
+      return;
+    }
+
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.textContent = t.sending;
+    statusEl.textContent = '';
+
+    try {
+      await fetch(GAS_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: {'Content-Type':'text/plain;charset=utf-8'},
+        body: JSON.stringify(payload)
+      });
+      document.getElementById('formWrap').style.display = 'none';
+      document.getElementById('footerBar').style.display = 'none';
+      document.getElementById('successScreen').classList.add('show');
+    } catch(e){
+      statusEl.textContent = t.err_send;
+      statusEl.classList.add('err');
+    } finally {
+      btn.disabled = false;
+      applyI18n();
+    }
+  }
+
+  function resetForm(){
+    document.querySelectorAll('input[type=text], input[type=tel], input[type=number], textarea').forEach(el => el.value = '');
+    document.querySelectorAll('select').forEach(sel => sel.selectedIndex = 0);
+    document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('input.conditional').forEach(el => el.classList.remove('show'));
+    Object.keys(state).forEach(k => state[k] = Array.isArray(state[k]) ? [] : null);
+    document.getElementById('formWrap').style.display = 'block';
+    document.getElementById('footerBar').style.display = 'block';
+    document.getElementById('successScreen').classList.remove('show');
+  }
+</script>
+
+</body>
+</html>
