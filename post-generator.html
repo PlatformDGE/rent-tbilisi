@@ -1262,7 +1262,51 @@ async function applyWatermark(file) {
   });
 }
 
-// ── ОТДЕЛЬНЫЙ ДОПОЛНИТЕЛЬНЫЙ СЦЕНАРИЙ: exclusiveSocialMediaFlow ─────────────
+// ── Отдельный водяной знак для комплекта Instagram/Facebook (фото 2+) ──────
+// ВАЖНО: заказчик явно попросил НЕ использовать стандартный логотип проекта
+// (тот, что в applyWatermark() выше) — здесь отдельный, самостоятельный
+// ассет и отдельная функция, applyWatermark() не трогается и не переиспользуется.
+// Позиционирование — по центру фото ("просто по середине", без сложного
+// стандарта отступов), умеренный размер (~26% ширины фото), не на весь кадр.
+//
+// Про сам файл: пользователь трижды присылал изображение флага прямо в
+// сообщении чата (не как вложение), поэтому у меня нет доступа к его
+// исходным пикселям/прозрачности как к файлу. Ниже — точная реконструкция
+// того же герба (крест + 4 малых болнур-катскхурских креста, красный на
+// прозрачном фоне) как самостоятельный PNG-ассет. Если пришлёте настоящий
+// файл (вложением или ссылкой) — просто заменю base64 ниже на него.
+async function applyExclusiveSocialWatermark(file) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+      const wm = new Image();
+      wm.onload = () => {
+        // Умеренный размер по центру, с сохранением пропорций ассета.
+        const targetW = canvas.width * 0.26;
+        const targetH = targetW * (wm.height / wm.width);
+        const wx = (canvas.width - targetW) / 2;
+        const wy = (canvas.height - targetH) / 2;
+        ctx.drawImage(wm, wx, wy, targetW, targetH);
+        canvas.toBlob((blob) => {
+          URL.revokeObjectURL(url);
+          resolve(new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), { type: 'image/jpeg' }));
+        }, 'image/jpeg', 0.92);
+      };
+      wm.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Не удалось загрузить ассет водяного знака')); };
+      wm.src = 'data:image/png;base64,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';
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Не удалось загрузить фото')); };
+    img.src = url;
+  });
+}
+
+// ── Отдельный водяной знак для комплекта Instagram/Facebook (фото 2+) ──────
 // Ничего не меняет и не заменяет в существующей логике публикации
 // (БЛОК 1 / БЛОК 2 / Owner Info выше остаются полностью как были).
 // Архитектура ровно как в ТЗ:
@@ -1273,12 +1317,17 @@ async function applyWatermark(file) {
 // уже отдал агенту обычный ответ (см. вызов в конце publishPost).
 //
 // Комплект для Instagram/Facebook:
-//   фото[0]     → существующий генератор обложки (цена/район/площадь),
-//                 конфигурация НЕ дублируется — используются
-//                 window.CoverGenUI.collectPropertyDesignData() и
-//                 window.CoverGenCanvas.generateCoverImage() как есть.
-//   фото[1..N]  → существующий логотип-водяной знак applyWatermark()
-//                 (дизайн/прозрачность/позиция не меняются).
+//   фото[0]     → отдельный рендерер обложки БЕЗ обрезки/квадрата
+//                 (cover-generator-natural-size.js): холст = точный размер
+//                 исходного фото, координаты масштабируются по ширине,
+//                 Y — от нижнего края (см. письменный стандарт заказчика).
+//                 Конфигурация данных НЕ дублируется — используется
+//                 window.CoverGenUI.collectPropertyDesignData() как есть.
+//   фото[1..N]  → applyExclusiveSocialWatermark() — отдельный, самостоятельный
+//                 ассет (реконструированный герб, красный крест на прозрачном
+//                 фоне), по центру, БЕЗ переиспользования логотипа из
+//                 applyWatermark() (заказчик явно попросил не использовать
+//                 стандартный логотип проекта для этого сценария).
 // Ни оригиналы (photos[i].file), ни альбом БЛОКа 2 (watermarkedPhotos)
 // не перезаписываются — здесь собирается третий, отдельный массив.
 //
@@ -1335,12 +1384,15 @@ async function exclusiveSocialMediaFlow(photos) {
       const socialPhotos = [];
       for (let i = 0; i < photos.length; i++) {
         if (i === 0) {
-          // Существующий генератор обложки — дизайн/шрифты/цвета не меняются.
-          const coverResult = await window.CoverGenCanvas.generateCoverImage(propertyDesignData, {});
+          // Обложка БЕЗ обрезки/квадрата — исходные пропорции фото сохраняются.
+          if (!window.CoverGenNaturalSize) {
+            throw new Error('Модуль cover-generator-natural-size.js не загружен');
+          }
+          const coverResult = await window.CoverGenNaturalSize.generateExclusiveCoverOverlay(photos[0].file, propertyDesignData);
           socialPhotos.push(new File([coverResult.blob], 'social_cover.jpg', { type: 'image/jpeg' }));
         } else {
-          // Существующий логотип-водяной знак — без изменений.
-          socialPhotos.push(await applyWatermark(photos[i].file));
+          // Отдельный водяной знак для этого сценария (не логотип из applyWatermark).
+          socialPhotos.push(await applyExclusiveSocialWatermark(photos[i].file));
         }
       }
 
@@ -2973,6 +3025,262 @@ loadSheetNames(GID_RECRUITS, 'recruitTags', 'recruitsLoadStatus');
     fitMetaLine: fitMetaLine
   };
 })(typeof window !== 'undefined' ? window : this);
+
+</script>
+<script>
+/* === cover-generator-natural-size.js (встроено сборкой, источник — js/cover-generator-natural-size.js) === */
+/*
+ * cover-generator-natural-size.js
+ * ────────────────────────────────────────────────────────────────────────
+ * Отдельный рендерер обложки для эксклюзивных объектов (комплект
+ * Instagram/Facebook, фото №1). НЕ заменяет и не изменяет старый
+ * cover-generator-core.js/canvas.js (тот остаётся как есть, для другого,
+ * уже существующего кода, — не трогаем работающую логику).
+ *
+ * Требование заказчика, из-за которого нужен отдельный рендерер:
+ *   - исходную фотографию НЕЛЬЗЯ обрезать, приводить к квадрату 1080×1080
+ *     или растягивать — холст всегда равен точным исходным размерам фото;
+ *   - все координаты макета (эталон — квадрат 1080×1080 из присланного
+ *     стандарта) масштабируются пропорционально по ШИРИНЕ фото
+ *     (scale = photoWidth / 1080);
+ *   - Y-координаты привязаны к НИЖНЕМУ краю фото, а не к верхнему: весь
+ *     макет в эталоне находится в нижней части холста (685–886 из 1080),
+ *     поэтому при других пропорциях фото единственный физически осмысленный
+ *     вариант — считать позиции от низа, иначе на не-квадратных фото блок
+ *     съезжает за кадр (на высоких фото) или отрывается от низа
+ *     (на низких/широких).
+ *
+ * Про размеры шрифтов (важно):
+ *   Присланные величины 7.03pt / 21.89pt / 8.5pt / 6.17pt — это ТЕ ЖЕ
+ *   значения, что были прочитаны из PSD ранее в этом проекте и уже ОДНАЖДЫ
+ *   проверены попиксельно как заниженные при обычной конвертации ×96/72
+ *   (см. историю: цена 21.89pt при наивной конвертации даёт лишь ~29px,
+ *   а по факту в PSD текст занимает ~137.5px). Эмпирически подтверждённый
+ *   коэффициент между pt из PSD и px на холсте 1080 — не 96/72 (~1.33),
+ *   а ~6.28 (7.03·6.28≈44.17, 21.89·6.28≈137.5, 8.5·6.28≈53.4,
+ *   6.17·6.28≈38.75 — совпадает с уже откалиброванными по PSD значениями
+ *   с точностью до сотых). Используем уже проверенные px-значения напрямую,
+ *   а не Core.ptToPx() — иначе воспроизведётся тот самый баг "текст в
+ *   4–6 раз мельче, чем нужно", который уже был найден и исправлен раньше
+ *   в этом же проекте.
+ *
+ * Depends on: window.CoverGenCore, window.CoverGenCanvas (переиспользуем
+ * их готовые примитивы измерения/отрисовки текста — ничего не дублируем).
+ */
+(function (root) {
+  'use strict';
+  var Core = root.CoverGenCore;
+  var Canvas = root.CoverGenCanvas;
+  if (!Core || !Canvas) {
+    console.error('[ExclusiveCover] core/canvas модули не загружены — пропуск natural-size рендерера');
+    return;
+  }
+
+  var FONT_FAMILY = 'Montserrat';
+  var DESIGN_WIDTH = 1080;
+  var DESIGN_HEIGHT = 1080;
+
+  // Координаты и размеры — из письменного стандарта заказчика (эталон 1080×1080).
+  var LAYOUT = {
+    accent: { x: 192, right: 280, top: 685, bottom: 705 },
+    category: {
+      // bottom: 728, а не 742 из письменного стандарта — тот же -14px
+      // калибровочный сдвиг, что уже был найден и подтверждён ранее в
+      // этом проекте: при буквальных 742 символ "$" в Montserrat Black
+      // (цена, ниже) визуально залезает на строку категории (32px зазора
+      // не хватает из-за высокого начертания "$"). Подтверждено
+      // пользователем после показа визуальной проверки.
+      x: 192, maxRight: 691, top: 719, bottom: 728,
+      fontWeight: 600, fontSizePx: 44.17, tracking: 200, color: '#ffffff',
+      minTracking: 60, minFontScale: 0.85
+    },
+    price: {
+      x: 192, top: 774, bottom: 846,
+      fontWeight: 900, fontSizePx: 137.5, tracking: 10, color: '#ffffff',
+      minFontScale: 0.5
+    },
+    priceSuffix: {
+      gap: 3, top: 823, bottom: 846,
+      fontWeight: 500, fontSizePx: 53.38, tracking: 10, color: '#d8dce1'
+    },
+    meta: {
+      x: 192, maxRight: 629, top: 866, bottom: 886,
+      fontWeight: 500, fontSizePx: 38.75, tracking: 130, color: '#ffffff',
+      minTracking: 40
+    },
+    // "Синяя тень": левая половина фото (540 из 1080 = ровно половина),
+    // на всю высоту, горизонтальный фейд 80% → (на 70% ширины) 40% → 0%.
+    gradient: {
+      color: '#1d3560',
+      stops: [
+        { offset: 0,   alpha: 0.8 },
+        { offset: 0.7, alpha: 0.4 },
+        { offset: 1,   alpha: 0 }
+      ]
+    }
+  };
+
+  function hexToRgba(hex, alpha) {
+    var h = hex.replace('#', '');
+    if (h.length === 3) h = h.split('').map(function (c) { return c + c; }).join('');
+    var r = parseInt(h.substring(0, 2), 16);
+    var g = parseInt(h.substring(2, 4), 16);
+    var b = parseInt(h.substring(4, 6), 16);
+    return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
+  }
+
+  function loadNaturalImage(file) {
+    if (typeof createImageBitmap === 'function') {
+      return createImageBitmap(file, { imageOrientation: 'from-image' }).catch(function () {
+        return createImageBitmap(file);
+      });
+    }
+    return new Promise(function (resolve, reject) {
+      var url = URL.createObjectURL(file);
+      var img = new Image();
+      img.onload = function () { resolve(img); };
+      img.onerror = function () { URL.revokeObjectURL(url); reject(new Error('Не удалось загрузить фото')); };
+      img.src = url;
+      img._objectUrl = url;
+    });
+  }
+
+  function drawLeftGradient(ctx, photoW, photoH) {
+    var bandW = photoW / 2; // 540 из 1080 — ровно половина ширины эталона
+    var grad = ctx.createLinearGradient(0, 0, bandW, 0);
+    LAYOUT.gradient.stops.forEach(function (s) {
+      grad.addColorStop(s.offset, hexToRgba(LAYOUT.gradient.color, s.alpha));
+    });
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, bandW, photoH);
+  }
+
+  /**
+   * generateExclusiveCoverOverlay(imageFile, propertyDesignData)
+   *   → Promise<{blob, dataUrl, width, height}>
+   * Фото не обрезается и не растягивается — холст равен точным исходным
+   * размерам фото. Координаты масштабируются по ширине фото, Y — от низа.
+   */
+  function generateExclusiveCoverOverlay(imageFile, data) {
+    var validation = Core.validatePropertyDesignData(data);
+    if (!validation.ok) {
+      return Promise.reject(new Error(validation.errors.join('; ')));
+    }
+    return Canvas.loadCoverFonts().then(function () {
+      return loadNaturalImage(imageFile);
+    }).then(function (img) {
+      var photoW = img.width, photoH = img.height;
+      var scale = photoW / DESIGN_WIDTH;
+      function sx(v) { return v * scale; }
+      function sy(v) { return photoH - (DESIGN_HEIGHT - v) * scale; } // якорь от нижнего края
+      function slen(v) { return v * scale; }
+
+      var canvas = document.createElement('canvas');
+      canvas.width = photoW;
+      canvas.height = photoH;
+      var ctx = canvas.getContext('2d');
+
+      // 1. Фото — 1:1, без кропа/сжатия/растяжения.
+      ctx.drawImage(img, 0, 0, photoW, photoH);
+      if (img._objectUrl) URL.revokeObjectURL(img._objectUrl);
+      if (typeof img.close === 'function') img.close();
+
+      // 2. Синяя тень слева.
+      drawLeftGradient(ctx, photoW, photoH);
+
+      // 3. Акцентная линия (цвет зависит от типа объекта/сделки — переиспользуем Core.getAccentColor).
+      var accentColor = Core.getAccentColor(data.propertyType, data.transactionType);
+      ctx.fillStyle = accentColor;
+      ctx.fillRect(
+        sx(LAYOUT.accent.x), sy(LAYOUT.accent.top),
+        slen(LAYOUT.accent.right - LAYOUT.accent.x), slen(LAYOUT.accent.bottom - LAYOUT.accent.top)
+      );
+
+      // 4. Категория · Статус
+      var typeCfg = Core.PROPERTY_TYPES[data.propertyType];
+      var dealCfg = Core.TRANSACTION_TYPES[data.transactionType];
+      var categoryText = (typeCfg ? typeCfg.label : '') + ' · ' + (dealCfg ? dealCfg.label : '');
+      var cat = LAYOUT.category;
+      var catFontPx = slen(cat.fontSizePx);
+      var catTrackPx = Core.trackingToPx(cat.tracking, catFontPx);
+      ctx.font = cat.fontWeight + ' ' + catFontPx + 'px ' + FONT_FAMILY;
+      var catFit = Canvas.fitTextToWidth(ctx, categoryText, {
+        weight: cat.fontWeight, fontSizePx: catFontPx, trackingPx: catTrackPx,
+        minTrackingPx: Core.trackingToPx(cat.minTracking, catFontPx),
+        minFontScale: cat.minFontScale, maxWidthPx: slen(cat.maxRight - cat.x)
+      });
+      ctx.font = cat.fontWeight + ' ' + catFit.fontSizePx + 'px ' + FONT_FAMILY;
+      ctx.fillStyle = cat.color;
+      Canvas.drawTextByBottomBoundary(ctx, categoryText, sx(cat.x), sy(cat.bottom), catFit.trackingPx);
+
+      // 5. Цена (отсчёт по цифрам, не по символу валюты — metricsText='0123456789')
+      var priceLayout = LAYOUT.price;
+      var priceText = Core.formatPrice(data.price, data.currency);
+      var priceFontPx = slen(priceLayout.fontSizePx);
+      var safeRight = photoW - slen(40);
+      var priceFit = Core.computeAdjustedFontSize(
+        priceText, priceFontPx, safeRight - sx(priceLayout.x), priceLayout.minFontScale,
+        function (text, size) {
+          ctx.font = priceLayout.fontWeight + ' ' + size + 'px ' + FONT_FAMILY;
+          return Canvas.measureTextWithTracking(ctx, text, Core.trackingToPx(priceLayout.tracking, size));
+        }
+      );
+      ctx.font = priceLayout.fontWeight + ' ' + priceFit.fontSizePx + 'px ' + FONT_FAMILY;
+      ctx.fillStyle = priceLayout.color;
+      var priceDrawn = Canvas.drawTextByBottomBoundary(
+        ctx, priceText, sx(priceLayout.x), sy(priceLayout.bottom),
+        Core.trackingToPx(priceLayout.tracking, priceFit.fontSizePx), '0123456789'
+      );
+
+      // 6. /mo (только для аренды; metricsText='mo' — не считать по символу "/")
+      var suffix = Core.getPriceSuffix(data.transactionType);
+      if (suffix) {
+        var suffixLayout = LAYOUT.priceSuffix;
+        var suffixFontPx = slen(suffixLayout.fontSizePx);
+        ctx.font = suffixLayout.fontWeight + ' ' + suffixFontPx + 'px ' + FONT_FAMILY;
+        ctx.fillStyle = suffixLayout.color;
+        var suffixX = priceDrawn.end + slen(suffixLayout.gap);
+        Canvas.drawTextByBottomBoundary(
+          ctx, suffix, suffixX, sy(suffixLayout.bottom),
+          Core.trackingToPx(suffixLayout.tracking, suffixFontPx), 'mo'
+        );
+      }
+
+      // 7. Параметры объекта (район · площадь · спальни/комнаты/номера)
+      var metaParts = Core.buildPropertyMeta(data);
+      if (metaParts.length) {
+        var metaLayout = LAYOUT.meta;
+        var metaFontPx = slen(metaLayout.fontSizePx);
+        var metaTrackPx = Core.trackingToPx(metaLayout.tracking, metaFontPx);
+        ctx.font = metaLayout.fontWeight + ' ' + metaFontPx + 'px ' + FONT_FAMILY;
+        var metaFit = Canvas.fitMetaLine(ctx, metaParts, {
+          weight: metaLayout.fontWeight, fontSizePx: metaFontPx, trackingPx: metaTrackPx,
+          minTrackingPx: Core.trackingToPx(metaLayout.minTracking, metaFontPx),
+          maxWidthPx: slen(metaLayout.maxRight - metaLayout.x)
+        });
+        ctx.font = metaLayout.fontWeight + ' ' + metaFontPx + 'px ' + FONT_FAMILY;
+        ctx.fillStyle = metaLayout.color;
+        Canvas.drawTextByBottomBoundary(ctx, metaFit.text, sx(metaLayout.x), sy(metaLayout.bottom), metaFit.trackingPx);
+      }
+
+      return new Promise(function (resolve, reject) {
+        canvas.toBlob(function (blob) {
+          if (!blob) { reject(new Error('Не удалось экспортировать изображение')); return; }
+          resolve({
+            blob: blob,
+            dataUrl: canvas.toDataURL('image/jpeg', 0.93),
+            width: canvas.width,
+            height: canvas.height
+          });
+        }, 'image/jpeg', 0.93);
+      });
+    });
+  }
+
+  root.CoverGenNaturalSize = {
+    generateExclusiveCoverOverlay: generateExclusiveCoverOverlay
+  };
+})(window);
 
 </script>
 <script>
