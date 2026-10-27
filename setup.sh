@@ -1,4 +1,5 @@
 #!/bin/bash
+# Made with Claude (Anthropic) · © Homes in Georgia · Created by Irakli Kvirkvelia
 # ============================================================
 #  Rent in Tbilisi — Deploy Script
 #  Запускать на свежем Ubuntu 22.04 (DigitalOcean / VPS)
