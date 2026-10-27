@@ -1,3 +1,4 @@
+// Made with Claude (Anthropic) · © Homes in Georgia · Created by Irakli Kvirkvelia
 // ============================================================
 //  Rent in Tbilisi — Google Apps Script Parser
 //  Парсит @rent_tbilisi_ge → Google Sheets → JSON для сайта
